@@ -58,26 +58,37 @@ const Cover = memo((props: CoverProps) => {
         }
     }, []);
 
+    useEffect(() => {
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.target !== document.body) return;
+
+            switch (e.key) {
+                case ' ':
+                    switchPlayState();
+                    break;
+                case 'Enter':
+                    fullscreen(e);
+                    break;
+                case 'ArrowRight':
+                    if (videoRef.current) videoRef.current.currentTime += 5;
+                    break;
+                case 'ArrowLeft':
+                    if (videoRef.current) videoRef.current.currentTime -= 5;
+                    break;
+            }
+        };
+
+        document.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            document.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
+
     return (
         <div className="mika-video-player-cover" onPointerDown={(e) => {
             if (e.button === 0) switchPlayState();
-        }} ref={coverRef}
-             onKeyUp={e => {
-                 switch (e.key) {
-                     case ' ':
-                         switchPlayState();
-                         break;
-                     case 'Enter':
-                         fullscreen(e);
-                         break;
-                     case 'ArrowRight':
-                         if (videoRef.current) videoRef.current.currentTime += 5;
-                         break;
-                     case 'ArrowLeft':
-                         if (videoRef.current) videoRef.current.currentTime -= 5;
-                         break;
-                 }
-             }} tabIndex={0} {...rest}>
+        }} ref={coverRef} {...rest}>
             <ToolBar videoElement={videoRef} fullscreen={fullscreen}/>
         </div>
     );

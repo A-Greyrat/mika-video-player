@@ -1,4 +1,4 @@
-import React, {forwardRef, memo, useEffect, useImperativeHandle} from "react";
+import React, {forwardRef, memo, useCallback, useEffect, useImperativeHandle} from "react";
 import ProgressBar from "./ProgressBar.tsx";
 import './ToolBar.less';
 import PlayIcon from "../Icon/PlayIcon.tsx";
@@ -14,8 +14,13 @@ const FuncButton = memo((props: {
     onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void,
     className?: string
 }) => {
+    const onClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+        e.currentTarget.blur();
+        props.onClick?.(e);
+    }, [props.onClick]);
+
     return (
-        <button onClick={props.onClick} className={`mika-video-player-func-button ${props.className ?? ''}`}>
+        <button onClick={onClick} className={`mika-video-player-func-button ${props.className ?? ''}`}>
             {props.icon}
         </button>
     );
@@ -64,6 +69,7 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
     return (
         <div ref={toolbarRef} className="mika-video-player-toolbar" {...rest}
              onPointerDown={stopPropagation} onPointerMove={stopPropagation} onPointerUp={stopPropagation}>
+            <div className="mika-video-player-toolbar-mask"/>
             <ProgressBar videoElement={videoElement}/>
             <div className="mika-video-player-toolbar-function-container">
                 <div className="mika-video-player-toolbar-function-container-left-area">
@@ -71,6 +77,7 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
                         if (videoElement.current) {
                             if (videoElement.current.paused) videoElement.current.play().catch(undefined);
                             else videoElement.current.pause();
+                            setIsPlaying(!isPlaying);
                         }
                     }}/>
                     <Timer videoElement={videoElement.current}/>

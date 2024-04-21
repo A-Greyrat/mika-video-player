@@ -34,12 +34,12 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
             videoElement.current?.addEventListener('timeupdate', () => {
                 if (isSeeking.current) return;
                 const progress = videoElement.current!.currentTime / videoElement.current!.duration * 100;
-                barRef.current!.style.setProperty('--mika-video-progress', `${progress}%`)
+                barRef.current?.style.setProperty('--mika-video-progress', `${progress}%`)
 
                 const buffer = videoElement.current!.buffered;
                 const bufferEnd = buffer.length > 0 ? buffer.end(buffer.length - 1) : 0;
                 const bufferProgress = bufferEnd / videoElement.current!.duration * 100;
-                barRef.current!.style.setProperty('--mika-video-buffer-progress', `${bufferProgress}%`);
+                barRef.current?.style.setProperty('--mika-video-buffer-progress', `${bufferProgress}%`);
             });
         }
     }, [videoElement, barRef]);
