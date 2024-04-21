@@ -1,32 +1,26 @@
-import React, {forwardRef, memo, Ref, useCallback, useEffect, useImperativeHandle, useRef} from "react";
+import React, {forwardRef, memo, Ref, useEffect, useImperativeHandle, useRef} from "react";
 import defaultLoader from "./Loader/DefaultLoader";
 import './VideoPlayer.less';
-import ToolBar from "./ToolBar.tsx";
+import Cover from "./Cover/Cover.tsx";
 
 export interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
     loader?: (videoElement: HTMLVideoElement) => void;
 }
 
 const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideoElement>) => {
-    const {loader, controls, src, ...rest} = props;
+    const {
+        loader,
+        controls,
+        src,
+        width,
+        height,
+        style,
+        ...rest
+    } = props;
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => videoRef.current!);
-
-    const switchPlayState = useCallback(() => {
-        if (videoRef.current) {
-            if (videoRef.current.paused) videoRef.current.play().catch(undefined);
-            else videoRef.current.pause();
-        }
-    }, [videoRef]);
-
-    const fullscreen = useCallback(() => {
-        if (containerRef.current) {
-            if (document.fullscreenElement === containerRef.current) document.exitFullscreen().then(undefined);
-            else containerRef.current.requestFullscreen().catch(undefined);
-        }
-    }, [containerRef]);
 
     useEffect(() => {
         if (loader && videoRef.current) {
@@ -36,28 +30,13 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
         }
     }, [loader, src, videoRef]);
 
-    return (<div className="mika-video-player-wrapper" ref={containerRef}>
-        <video {...rest} ref={videoRef}/>
-        <div className="mika-video-player-cover" onPointerDown={switchPlayState}
-             onKeyUp={e => {
-                 switch (e.key) {
-                     case ' ':
-                         switchPlayState();
-                         break;
-                     case 'Enter':
-                         fullscreen();
-                         break;
-                     case 'ArrowRight':
-                         if (videoRef.current) videoRef.current.currentTime += 5;
-                         break;
-                     case 'ArrowLeft':
-                         if (videoRef.current) videoRef.current.currentTime -= 5;
-                         break;
-                 }
-             }} tabIndex={0}>
-            <ToolBar videoElement={videoRef} fullscreen={fullscreen} />
-        </div>
-
+    return (<div className="mika-video-player-wrapper" ref={containerRef} style={{
+        width: width ?? 'auto',
+        height: height ?? 'auto',
+        ...style
+    }}>
+        <video crossOrigin="anonymous" ref={videoRef} {...rest}/>
+        {controls && <Cover videoRef={videoRef} containerRef={containerRef}/>}
     </div>);
 }));
 

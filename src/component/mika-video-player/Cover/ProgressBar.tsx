@@ -13,10 +13,21 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
 
     useImperativeHandle(ref, () => barRef.current!);
 
+    const seekPosition = useCallback((e: React.PointerEvent<HTMLDivElement> | PointerEvent) => {
+        if (isSeeking.current && videoElement.current) {
+            let progress = (e.clientX - (barRef.current?.getBoundingClientRect().x ?? 0)) / barRef.current!.clientWidth;
+            progress = Math.min(1, Math.max(0, progress));
+            videoElement.current.currentTime = videoElement.current.duration * progress;
+            barRef.current!.style.setProperty('--mika-video-progress', `${progress * 100}%`);
+        }
+    }, [videoElement]);
+
     const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         e.stopPropagation();
         isSeeking.current = true;
-    }, []);
+        barRef.current!.style.setProperty('--mika-video-progressbar-thumb-visible', 'visible');
+        seekPosition(e);
+    }, [seekPosition]);
 
     useEffect(() => {
         if (videoElement && barRef.current) {
@@ -34,43 +45,32 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
     }, [videoElement, barRef]);
 
     useEffect(() => {
-        const handlePointerMove = (e: PointerEvent) => {
-            if (isSeeking.current && videoElement.current) {
-                let progress = (e.clientX - (barRef.current?.getBoundingClientRect().x ?? 0)) / barRef.current!.clientWidth;
-                progress = Math.min(1, Math.max(0, progress));
-                barRef.current!.style.setProperty('--mika-video-progress', `${progress * 100}%`);
-            }
-        };
-
         const handlePointerUp = (e: PointerEvent) => {
             if (!isSeeking.current) return;
-
+            seekPosition(e);
             isSeeking.current = false;
-            if (videoElement.current) {
-                let progress = (e.clientX - (barRef.current?.getBoundingClientRect().x ?? 0)) / barRef.current!.clientWidth;
-                progress = Math.min(1, Math.max(0, progress));
-                videoElement.current.currentTime = videoElement.current.duration * progress;
-            }
+            barRef.current!.style.setProperty('--mika-video-progressbar-thumb-visible', 'hidden');
         };
 
-        document.addEventListener('pointermove', handlePointerMove, {capture: true});
-
+        document.addEventListener('pointermove', seekPosition, {capture: true});
         document.addEventListener('pointerup', handlePointerUp, {capture: true});
 
         return () => {
-            document.removeEventListener('pointermove', handlePointerMove, {capture: true});
+            document.removeEventListener('pointermove', seekPosition, {capture: true});
             document.removeEventListener('pointerup', handlePointerUp, {capture: true});
         };
-    }, [videoElement]);
+    }, [seekPosition, videoElement]);
 
     return (
         <div className="mika-video-player-progress-bar-wrapper" ref={barRef}
              onPointerDown={handlePointerDown} {...rest}
         >
-            <div className="mika-video-player-progress-bar-background"/>
-            <div className="mika-video-player-progress-bar-buffer"/>
-            <div className="mika-video-player-progress-bar"/>
-            <div className="mika-video-player-progress-bar-indicator"/>
+            <div className="mika-video-player-progress-bar-container">
+                <div className="mika-video-player-progress-bar-background"/>
+                <div className="mika-video-player-progress-bar-buffer"/>
+                <div className="mika-video-player-progress-bar"/>
+            </div>
+            <div className="mika-video-player-progress-bar-thumb"/>
         </div>
     );
 }));

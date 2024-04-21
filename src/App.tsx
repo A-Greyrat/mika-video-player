@@ -1,5 +1,7 @@
 import './App.css'
-import React from "react";
+import React, {useState} from "react";
+
+import play from './component/mika-video-player/Icon/playIcon.json';
 import VideoPlayer from "./component/mika-video-player";
 
 // const c = 'https://b.erisu.moe/api/playurl/flv?bvid=BV1fK4y1s7Qf';
@@ -12,12 +14,22 @@ const App: React.FC = () => {
     //         setUrl(data.data.durl[0].url);
     //     });
     // }, []);
-
+    // 动画播放完成时的回调函数
 
     return (
-        <>
-            <VideoPlayer width={1000} controls autoPlay src={'/lagtrain.flv'}/>
-        </>
+        <div style={{
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+        }}>
+            <VideoPlayer width='600px' style={{
+                margin: "auto"
+            }} controls autoPlay src={'/lagtrain.flv'}/>
+
+
+        </div>
     )
 };
 
