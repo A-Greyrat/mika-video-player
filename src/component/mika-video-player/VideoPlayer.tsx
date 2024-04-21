@@ -55,7 +55,7 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
                          break;
                  }
              }} tabIndex={0}>
-            <ToolBar videoElement={videoRef}/>
+            <ToolBar videoElement={videoRef} fullscreen={fullscreen} />
         </div>
 
     </div>);
