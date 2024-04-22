@@ -17,6 +17,7 @@ const VolumeButton = memo((props: {
 
         const handleVolumeChange = () => {
             setIsMuted(videoElement.volume === 0 || videoElement.muted);
+            forceUpdate(value => value + 1);
         };
 
         videoElement.addEventListener('volumechange', handleVolumeChange);
