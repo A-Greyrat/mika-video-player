@@ -64,7 +64,7 @@ const Cover = memo((props: CoverProps) => {
 
     useEffect(() => {
         const handleKeydown = (e: KeyboardEvent) => {
-            if (e.target !== document.body) return;
+            if (e.target !== document.body && e.target !== coverRef.current) return;
 
             switch (e.key) {
                 case ' ':
