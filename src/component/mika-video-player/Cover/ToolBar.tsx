@@ -1,4 +1,4 @@
-import React, {forwardRef, memo, useEffect, useImperativeHandle} from "react";
+import React, {forwardRef, memo, useImperativeHandle} from "react";
 import ProgressBar from "./ProgressBar.tsx";
 
 import './ToolBar.less';
@@ -18,15 +18,7 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
     const toolbarRef = React.useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => toolbarRef.current!);
 
-    const [isPlaying, setIsPlaying] = React.useState(false);
     const stopPropagation = (e: React.PointerEvent<HTMLDivElement>) => e.stopPropagation();
-
-    useEffect(() => {
-        if (videoElement) {
-            videoElement.addEventListener('play', () => setIsPlaying(true));
-            videoElement.addEventListener('pause', () => setIsPlaying(false));
-        }
-    }, [videoElement]);
 
     return (
         <div ref={toolbarRef} className="mika-video-player-toolbar" {...rest}
@@ -35,7 +27,7 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
             <ProgressBar videoElement={videoElement}/>
             <div className="mika-video-player-toolbar-function-container">
                 <div className="mika-video-player-toolbar-function-container-left-area">
-                    <PlayButton videoElement={videoElement} isPlaying={isPlaying} setIsPlaying={setIsPlaying}/>
+                    <PlayButton videoElement={videoElement}/>
                     <ToolbarTimer videoElement={videoElement}/>
                 </div>
                 <div className="mika-video-player-toolbar-function-container-middle-area">

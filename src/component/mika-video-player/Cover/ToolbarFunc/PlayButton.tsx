@@ -1,14 +1,14 @@
-import {memo, useCallback} from "react";
+import React, {memo, useCallback, useEffect} from "react";
 import PlayIcon from "./Icon/PlayIcon.tsx";
 import FuncButton from "./FuncButton.tsx";
 import './PlayButton.less';
 
 const PlayButton = memo((props: {
     videoElement: HTMLVideoElement | null,
-    isPlaying: boolean,
-    setIsPlaying: (isPlaying: boolean) => void
 }) => {
-    const {videoElement, isPlaying, setIsPlaying} = props;
+    const {videoElement} = props;
+    const [isPlaying, setIsPlaying] = React.useState(false);
+
     const onClick = useCallback(() => {
         if (videoElement) {
             if (videoElement.paused) videoElement.play().catch(undefined);
@@ -17,6 +17,12 @@ const PlayButton = memo((props: {
         }
     }, [videoElement, isPlaying, setIsPlaying]);
 
+    useEffect(() => {
+        if (videoElement) {
+            videoElement.addEventListener('play', () => setIsPlaying(true));
+            videoElement.addEventListener('pause', () => setIsPlaying(false));
+        }
+    }, [videoElement]);
 
     return (<FuncButton icon={<PlayIcon isPlaying={isPlaying}/>}
                         onClick={onClick}

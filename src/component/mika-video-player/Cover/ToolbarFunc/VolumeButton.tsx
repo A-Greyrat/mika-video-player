@@ -1,4 +1,4 @@
-import {memo, useCallback, useState} from "react";
+import {memo, useCallback, useEffect, useState} from "react";
 import VolumeIcon from "./Icon/VolumeIcon.tsx";
 import FuncButton from "./FuncButton.tsx";
 import {Dropdown, Range} from "../../../mika-ui";
@@ -11,6 +11,20 @@ const VolumeButton = memo((props: {
     const [isMuted, setIsMuted] = useState(false);
     const [_, forceUpdate] = useState(0);
 
+    useEffect(() => {
+        const videoElement = props.videoElement;
+        if (!videoElement) return;
+
+        const handleVolumeChange = () => {
+            setIsMuted(videoElement.volume === 0 || videoElement.muted);
+        };
+
+        videoElement.addEventListener('volumechange', handleVolumeChange);
+        return () => {
+            videoElement.removeEventListener('volumechange', handleVolumeChange);
+        };
+    }, [props.videoElement]);
+
     const onClick = useCallback(() => {
         const videoElement = props.videoElement;
         if (!videoElement) return;
@@ -22,14 +36,11 @@ const VolumeButton = memo((props: {
     const onChange = useCallback((value: number) => {
         const videoElement = props.videoElement;
         if (!videoElement) return;
-        if (isMuted) {
-            videoElement.muted = false;
-            setIsMuted(false);
-        }
 
         forceUpdate(value => value + 1);
         videoElement.volume = value / 100;
-    }, [props.videoElement, isMuted]);
+        videoElement.muted = false;
+    }, [props.videoElement]);
 
     return (
         <Dropdown menu={(
