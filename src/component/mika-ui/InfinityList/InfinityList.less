@@ -1,0 +1,16 @@
+@import '../Config/theme.less';
+
+.mika-infinity-list-loading {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid var(--mika-primary-color);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: mika-infinity-list-loading-spin 2s linear infinite;
+  margin: 50px auto;
+}
+
+@keyframes mika-infinity-list-loading-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -1,0 +1,41 @@
+@import '../Config/theme.less';
+
+.mika-image-error,
+.mika-image-loading {
+  --width: auto;
+  --height: auto;
+
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.06) 75%);
+  background-size: 400% 100%;
+  position: relative;
+  overflow: hidden;
+
+  width: var(--width);
+  height: var(--height);
+
+  & > svg {
+    & > path {
+      fill: #ccc;
+    }
+
+    width: 33%;
+    height: 33%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes mika-image-loading-animation {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.mika-image-loading {
+  animation: mika-image-loading-animation 1.3s ease infinite;
+}

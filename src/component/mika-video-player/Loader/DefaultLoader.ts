@@ -4,8 +4,6 @@ const Loader = (video: HTMLVideoElement, src: string) => {
 
     video.src = src;
     video.load();
-    video.muted = true;
-    video.play().catch(undefined);
 }
 
 export default Loader;

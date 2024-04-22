@@ -1,0 +1,93 @@
+@import "../Config/theme.less";
+
+.mika-pagination-root {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-top: var(--mika-medium-margin);
+    gap: var(--mika-small-margin);
+}
+
+.mika-pagination-page-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--mika-small-margin);
+
+    & :where(.mika-button) {
+        transition: background-color 0s;
+        user-select: none;
+    }
+
+    & :where(.mika-button):disabled {
+        cursor: default !important;
+        opacity: 1 !important;
+        background-color: var(--mika-primary-color) !important;
+        color: var(--mika-primary-button-font-color) !important;
+    }
+}
+
+
+@keyframes mika-pagination-fade-in {
+    0% {
+        opacity: 0;
+        display: none;
+    }
+    100% {
+        opacity: 1;
+        display: block;
+    }
+}
+
+@keyframes mika-pagination-fade-out {
+    0% {
+        opacity: 1;
+        display: block;
+    }
+    100% {
+        opacity: 0;
+        display: none;
+    }
+}
+
+.mika-pagination-omit-btn {
+    color: var(--mika-font-color);
+    background-color: var(--mika-background-color);
+    font-size: var(--mika-medium-font-size);
+    border: unset;
+    cursor: pointer;
+    position: relative;
+    width: 20px;
+    padding: 0;
+    height: 30px;
+    display: flex;
+    user-select: none;
+
+    & > span {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: mika-pagination-fade-in 0.3s;
+    }
+
+    &:hover > span {
+        animation: mika-pagination-fade-out 0.3s;
+        display: none;
+        position: absolute;
+    }
+
+    & > svg {
+        display: none;
+        margin: auto;
+        width: var(--mika-small-font-size);
+        height: var(--mika-small-font-size);
+        animation: mika-pagination-fade-out 0.3s;
+    }
+
+    &:hover > svg {
+        display: block;
+        animation: mika-pagination-fade-in 0.3s;
+    }
+}

@@ -11,7 +11,8 @@ const PlayIcon = memo((props: {
         animationData: play,
         autoplay: false,
         loop: false,
-        style: props.style
+        style: props.style,
+        className: 'mika-video-player-play-icon'
     });
 
     useEffect(() => {
@@ -21,9 +22,13 @@ const PlayIcon = memo((props: {
         } else {
             lottieItem.playSegments([32, 54], true);
         }
+
+        const icon = document.querySelector('.mika-video-player-play-icon')?.querySelector('svg');
+        icon?.setAttribute('viewBox', '350 350 800 800');
     }, [props.isPlaying, lottieItem]);
 
     return lottieItem.View;
 });
 
+PlayIcon.displayName = 'PlayIcon';
 export default PlayIcon;

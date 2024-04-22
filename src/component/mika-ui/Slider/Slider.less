@@ -1,0 +1,49 @@
+@import "../Config/theme";
+
+.mika-slider-root {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  span {
+    font-size: 1rem;
+    color: var(--mika-emphasis-color);
+  }
+}
+
+.mika-slider[type="range"] {
+  --thumb-color: var(--mika-emphasis-color);
+  --track-color: var(--mika-primary-color);
+
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  width: 100%;
+  height: 4px;
+  border-radius: var(--mika-border-radius);
+  background-color: #777;
+  outline: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    background-color: var(--track-color);
+    border-radius: var(--mika-border-radius);
+    height: 4px;
+    width: 100%;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--thumb-color);
+    cursor: pointer;
+    margin-top: -3px;
+  }
+}

@@ -1,4 +1,4 @@
-import {forwardRef, memo, Ref} from "react";
+import React, {forwardRef, memo, Ref} from "react";
 import {DanmakuType} from "./Danmaku.ts";
 
 export interface DanmakuProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -11,4 +11,5 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
     return (<div {...rest} ref={ref}/>);
 }));
 
+Danmaku.displayName = 'Danmaku';
 export default Danmaku;

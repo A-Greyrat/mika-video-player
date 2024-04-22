@@ -2,6 +2,8 @@ import React, {memo, useCallback, useEffect} from "react";
 import ToolBar from "./ToolBar.tsx";
 import './Cover.less';
 
+const DEBUG_MODE = true;
+
 export interface CoverProps extends React.HTMLAttributes<HTMLDivElement> {
     videoRef: React.RefObject<HTMLVideoElement>;
     containerRef: React.RefObject<HTMLDivElement>;
@@ -29,6 +31,8 @@ const Cover = memo((props: CoverProps) => {
     useEffect(() => {
         const cover = coverRef.current;
         const remainingTime = 3000;
+
+        if (DEBUG_MODE) return;
 
         if (cover) {
             const hideCover = () => {
@@ -83,7 +87,7 @@ const Cover = memo((props: CoverProps) => {
         return () => {
             document.removeEventListener('keyup', handleKeyUp);
         };
-    }, []);
+    }, [fullscreen, switchPlayState, videoRef]);
 
     return (
         <div className="mika-video-player-cover" onPointerDown={(e) => {
@@ -94,4 +98,5 @@ const Cover = memo((props: CoverProps) => {
     );
 });
 
+Cover.displayName = 'Cover';
 export default Cover;

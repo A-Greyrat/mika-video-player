@@ -33,12 +33,14 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
         if (videoElement && barRef.current) {
             videoElement.current?.addEventListener('timeupdate', () => {
                 if (isSeeking.current) return;
-                const progress = videoElement.current!.currentTime / videoElement.current!.duration * 100;
+                let progress = videoElement.current!.currentTime / videoElement.current!.duration * 100;
+                progress = isNaN(progress) ? 0 : progress;
                 barRef.current?.style.setProperty('--mika-video-progress', `${progress}%`)
 
                 const buffer = videoElement.current!.buffered;
                 const bufferEnd = buffer.length > 0 ? buffer.end(buffer.length - 1) : 0;
-                const bufferProgress = bufferEnd / videoElement.current!.duration * 100;
+                let bufferProgress = bufferEnd / videoElement.current!.duration * 100;
+                bufferProgress = isNaN(bufferProgress) ? 0 : bufferProgress;
                 barRef.current?.style.setProperty('--mika-video-buffer-progress', `${bufferProgress}%`);
             });
         }
@@ -75,4 +77,5 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
     );
 }));
 
+ProgressBar.displayName = 'ProgressBar';
 export default ProgressBar;

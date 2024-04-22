@@ -40,4 +40,5 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
     </div>);
 }));
 
+VideoPlayer.displayName = 'VideoPlayer';
 export default VideoPlayer;

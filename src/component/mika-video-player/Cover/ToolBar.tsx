@@ -1,54 +1,16 @@
-import React, {forwardRef, memo, useCallback, useEffect, useImperativeHandle} from "react";
+import React, {forwardRef, memo, useEffect, useImperativeHandle} from "react";
 import ProgressBar from "./ProgressBar.tsx";
+
 import './ToolBar.less';
-import PlayIcon from "../Icon/PlayIcon.tsx";
-import FullScreenIcon from "../Icon/FullScreenIcon.tsx";
+import ToolbarTimer from "./ToolbarFunc/ToolbarTimer.tsx";
+import PlayButton from "./ToolbarFunc/PlayButton.tsx";
+import FullScreenButton from "./ToolbarFunc/FullScreenButton.tsx";
+import VolumeButton from "./ToolbarFunc/VolumeButton.tsx";
 
 export interface ToolBarProps extends React.HTMLAttributes<HTMLDivElement> {
     videoElement: React.RefObject<HTMLVideoElement>;
     fullscreen: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
-
-const FuncButton = memo((props: {
-    icon: React.ReactNode,
-    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void,
-    className?: string
-}) => {
-    const onClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-        e.currentTarget.blur();
-        props.onClick?.(e);
-    }, [props.onClick]);
-
-    return (
-        <button onClick={onClick} className={`mika-video-player-func-button ${props.className ?? ''}`}>
-            {props.icon}
-        </button>
-    );
-});
-
-const Timer = memo((props: { videoElement: HTMLVideoElement | null }) => {
-    const {videoElement} = props;
-    const [currentTime, setCurrentTime] = React.useState(0);
-    const [duration, setDuration] = React.useState(0);
-
-    useEffect(() => {
-        if (videoElement) {
-            const handleTimeUpdate = () => {
-                setCurrentTime(videoElement.currentTime);
-                setDuration(videoElement.duration);
-            };
-            videoElement.addEventListener('timeupdate', handleTimeUpdate);
-            return () => videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-        }
-    }, [videoElement]);
-
-    return (
-        <div className="mika-video-player-timer">
-            {duration < 3600 ? new Date(currentTime * 1000).toISOString().substring(14, 19) + ' / ' + new Date(duration * 1000).toISOString().substring(14, 19) :
-                new Date(currentTime * 1000).toISOString().substring(11, 19) + ' / ' + new Date(duration * 1000).toISOString().substring(11, 19)}
-        </div>
-    );
-});
 
 
 const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElement>) => {
@@ -73,23 +35,19 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
             <ProgressBar videoElement={videoElement}/>
             <div className="mika-video-player-toolbar-function-container">
                 <div className="mika-video-player-toolbar-function-container-left-area">
-                    <FuncButton icon={<PlayIcon isPlaying={isPlaying}/>} onClick={() => {
-                        if (videoElement.current) {
-                            if (videoElement.current.paused) videoElement.current.play().catch(undefined);
-                            else videoElement.current.pause();
-                            setIsPlaying(!isPlaying);
-                        }
-                    }}/>
-                    <Timer videoElement={videoElement.current}/>
+                    <PlayButton videoElement={videoElement} isPlaying={isPlaying} setIsPlaying={setIsPlaying}/>
+                    <ToolbarTimer videoElement={videoElement.current}/>
                 </div>
                 <div className="mika-video-player-toolbar-function-container-middle-area">
                 </div>
                 <div className="mika-video-player-toolbar-function-container-right-area">
-                    <FuncButton icon={<FullScreenIcon/>} onClick={fullscreen}/>
+                    <VolumeButton videoElement={videoElement}/>
+                    <FullScreenButton fullscreen={fullscreen}/>
                 </div>
             </div>
         </div>
     );
 }));
 
+ToolBar.displayName = 'ToolBar';
 export default ToolBar;

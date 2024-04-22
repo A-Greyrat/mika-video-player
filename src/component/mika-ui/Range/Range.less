@@ -1,0 +1,43 @@
+@import "../Config/theme";
+
+.mika-range {
+  --track-color: var(--mika-primary-color);
+  --thumb-color: white;
+
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  .mika-range-track-background,
+  .mika-range-track {
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+    border-radius: var(--mika-border-radius);
+  }
+
+  .mika-range-track-background {
+    left: 0;
+    bottom: 0;
+    background-color: lightgray;
+  }
+
+  .mika-range-track {
+    left: -50%;
+    bottom: -50%;
+    background-color: var(--track-color);
+  }
+
+  .mika-range-thumb {
+    position: absolute;
+    background-color: var(--thumb-color);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    touch-action: pan-x pan-y;
+    cursor: pointer;
+  }
+}

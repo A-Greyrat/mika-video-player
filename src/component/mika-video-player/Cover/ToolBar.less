@@ -28,48 +28,22 @@
     padding-bottom: 0;
     color: white;
 
-    > div {
+    .mika-video-player-toolbar-function-container-left-area,
+    .mika-video-player-toolbar-function-container-middle-area,
+    .mika-video-player-toolbar-function-container-right-area {
       display: flex;
       align-items: center;
+      width: fit-content;
+
+      gap: 15px;
     }
 
-    .mika-video-player-timer {
-      display: flex;
-      align-items: center;
-      font-size: 1.2em;
-      font-weight: 500;
-      color: var(--mika-video-player-primary-color);
-      margin-right: 10px;
+    .mika-video-player-toolbar-function-container-middle-area {
+      justify-content: center;
     }
 
-    .mika-video-player-func-button {
-      background: transparent;
-      display: flex;
-      align-items: center;
-      border: none;
-      cursor: pointer;
-      height: 80%;
-
-      transition: transform 0.3s;
-
-      &:hover {
-        transform: scale(1.1);
-      }
-
-      div {
-        height: 100%;
-        margin-left: -15px;
-      }
-
-      svg {
-        margin: auto;
-        height: 100%;
-
-        path {
-          fill: var(--mika-video-player-primary-color);
-        }
-      }
-
+    .mika-video-player-toolbar-function-container-right-area {
+      justify-content: flex-end;
     }
   }
 }

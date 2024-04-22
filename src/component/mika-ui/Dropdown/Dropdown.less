@@ -1,0 +1,55 @@
+@import "../Config/theme.less";
+
+.mika-dropdown-container {
+    position: relative;
+    height: fit-content;
+    width: fit-content;
+}
+
+.mika-dropdown {
+    --mika-dropdown-position-X: initial;
+
+    position: absolute;
+    left: 50%;
+    transform: translate3d(-50%, 0, 0);
+    display: none;
+    z-index: inherit;
+
+    animation: mika-dropdown-fade-out 0.2s ease-in-out;
+}
+
+@keyframes mika-dropdown-fade-in {
+    0% {
+        opacity: 0;
+        transform: translate3d(var(--mika-dropdown-position-X), calc(-1 * var(--mika-large-padding)), 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(var(--mika-dropdown-position-X), 0, 0);
+    }
+}
+
+@keyframes mika-dropdown-fade-out {
+    0% {
+        opacity: 1;
+        display: block;
+        transform: translate3d(var(--mika-dropdown-position-X), 0, 0);
+    }
+    100% {
+        opacity: 0;
+        display: none;
+        transform: translate3d(var(--mika-dropdown-position-X), calc(-1 * var(--mika-large-padding)), 0);
+    }
+}
+
+.mika-dropdown:has(+.mika-dropdown-trigger:hover),
+.mika-dropdown:has(+.mika-dropdown-trigger-click:focus-within),
+.mika-dropdown:has(+.mika-dropdown-trigger-click:focus),
+.mika-dropdown:hover {
+    display: block;
+    animation: mika-dropdown-fade-in 0.2s ease-in-out;
+}
+
+.mika-dropdown-trigger, .mika-dropdown-trigger-click:focus-visible {
+    outline: none;
+}

@@ -1,0 +1,144 @@
+@import "../Config/theme";
+
+.mika-carousel-list-root {
+    --mika-carousel-list-root-width: initial;
+    --mika-carousel-list-item-width: initial;
+    --mika-carousel-list-item-height: initial;
+    --mika-carousel-list-item-margin: initial;
+    --mika-carousel-list-item-animation-duration: initial;
+    --mika-carousel-list-item-fade-in-out: initial;
+
+    --mika-carousel-list-item-move: calc(var(--mika-carousel-list-item-width) + var(--mika-carousel-list-item-margin) * 2);
+}
+
+.mika-carousel-list-root {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: var(--mika-carousel-list-root-width);
+    height: var(--mika-carousel-list-item-height);
+}
+
+@keyframes mika-list-item-next {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(calc(var(--mika-carousel-list-item-move) * -1), 0, 0);
+    }
+}
+
+@keyframes mika-list-item-prev {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(var(--mika-carousel-list-item-move), 0, 0);
+    }
+}
+
+.mika-carousel-list-container {
+    display: flex;
+    height: var(--mika-carousel-list-item-height);
+    width: fit-content;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+
+    &::before {
+        content: '';
+        width: var(--mika-carousel-list-item-width);
+        height: var(--mika-carousel-list-item-height);
+        margin: 0 var(--mika-carousel-list-item-margin);
+        display: none;
+        box-sizing: border-box;
+    }
+
+    &.mika-carousel-list-container-next-transition::before {
+        display: block;
+    }
+
+    &.mika-carousel-list-container-next-transition {
+        animation: mika-list-item-next var(--mika-carousel-list-item-animation-duration) ease-in-out;
+    }
+
+    &.mika-carousel-list-container-prev-transition {
+        animation: mika-list-item-prev var(--mika-carousel-list-item-animation-duration) ease-in-out;
+    }
+}
+
+
+.mika-carousel-list-item {
+    width: var(--mika-carousel-list-item-width) !important;
+    height: var(--mika-carousel-list-item-height);
+    margin: 0 var(--mika-carousel-list-item-margin) !important;
+    position: relative;
+    box-sizing: border-box;
+    list-style-type: none;
+
+    & > div {
+        width: var(--mika-carousel-list-item-width);
+    }
+}
+
+.mika-carousel-list-btn {
+    background: transparent;
+    color: var(--mika-font-color);
+    border: none;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    -moz-user-select: none;
+    padding: 0;
+
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.mika-carousel-list-btn-left {
+    left: 0;
+}
+
+.mika-carousel-list-btn-right {
+    right: 0;
+}
+
+
+@keyframes mika-carousel-fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: var(--mika-carousel-list-item-fade-in-out);
+    }
+}
+
+.mika-carousel-list-item-fade-in {
+    animation: mika-carousel-fade-in calc(var(--mika-carousel-list-item-animation-duration) * var(--mika-carousel-list-item-fade-in-out)) cubic-bezier(0.47, 0, 0.745, 0.715);
+}
+
+.mika-carousel-list-item-fade-in-prev {
+    animation: mika-carousel-fade-in calc(var(--mika-carousel-list-item-animation-duration) * var(--mika-carousel-list-item-fade-in-out)) cubic-bezier(0.47, 0, 0.745, 0.715);
+    position: absolute;
+    left: calc(var(--mika-carousel-list-item-move) * -1);
+}
+
+@keyframes mika-carousel-fade-out {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.mika-carousel-list-item-fade-out {
+    animation: mika-carousel-fade-out calc(var(--mika-carousel-list-item-animation-duration) * var(--mika-carousel-list-item-fade-in-out)) cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+
+.mika-carousel-list-item-fade-out-next {
+    animation: mika-carousel-fade-out calc(var(--mika-carousel-list-item-animation-duration) * var(--mika-carousel-list-item-fade-in-out)) cubic-bezier(0.39, 0.575, 0.565, 1);
+    position: absolute;
+}

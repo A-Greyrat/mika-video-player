@@ -1,0 +1,55 @@
+@import "../Config/theme.less";
+
+.mika-message-root {
+  --duration: 0.3s;
+
+  position: fixed;
+  top: 5vh;
+  right: 50%;
+  transform: translateX(50%);
+  z-index: 9999;
+  width: fit-content;
+
+  @primary-color: var(--mika-primary-color);
+  box-shadow: 3px 3px 3px 0 color-mix(in srgb, @primary-color 20%, transparent 80%),
+    -3px -3px 15px 0 color-mix(in srgb, @primary-color 20%, transparent 80%);
+
+  border-radius: var(--mika-border-radius);
+
+  margin-top: 2px;
+  padding: var(--mika-small-padding) var(--mika-large-padding);
+  font-size: var(--mika-font-size);
+  color: var(--mika-primary-text-color);
+  background: var(--mika-background-color);
+}
+
+@keyframes mika-message-disappear-animation {
+  0% {
+    transform: translateY(0) translateX(50%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%) translateX(50%);
+    opacity: 0;
+  }
+}
+
+@keyframes mika-message-appear-animation {
+  0% {
+    transform: translateY(-100%) translateX(50%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) translateX(50%);
+    opacity: 1;
+  }
+}
+
+.mika-message-root.mika-message-appear {
+  animation: mika-message-appear-animation var(--duration) forwards;
+}
+
+
+.mika-message-root.mika-message-disappear {
+  animation: mika-message-disappear-animation var(--duration) forwards;
+}
