@@ -31,7 +31,7 @@ const VolumeButton = memo((props: {
         if (!videoElement) return;
 
         videoElement.muted = !videoElement.muted;
-        setIsMuted(videoElement.muted);
+        setIsMuted(videoElement.muted || videoElement.volume === 0);
     }, [props.videoElement]);
 
     const onChange = useCallback((value: number) => {
