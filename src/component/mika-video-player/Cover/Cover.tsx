@@ -5,20 +5,21 @@ import './Cover.less';
 const DEBUG_MODE = false;
 
 export interface CoverProps extends React.HTMLAttributes<HTMLDivElement> {
-    videoRef: React.RefObject<HTMLVideoElement>;
+    videoElement: HTMLVideoElement | null;
     containerRef: React.RefObject<HTMLDivElement>;
 }
 
 const Cover = memo((props: CoverProps) => {
-    const {videoRef, containerRef, ...rest} = props;
+    const {videoElement, containerRef, ...rest} = props;
     const coverRef = React.useRef<HTMLDivElement>(null);
 
     const switchPlayState = useCallback(() => {
-        if (videoRef.current) {
-            if (videoRef.current.paused) videoRef.current.play().catch(undefined);
-            else videoRef.current.pause();
+        if (videoElement) {
+            if (videoElement.paused) videoElement.play().catch(undefined);
+            else videoElement.pause();
         }
-    }, [videoRef]);
+    }, [videoElement]);
+    console.log(videoElement)
 
     const fullscreen = useCallback((e: { stopPropagation: () => void }) => {
         e.stopPropagation();
@@ -74,10 +75,10 @@ const Cover = memo((props: CoverProps) => {
                     fullscreen(e);
                     break;
                 case 'ArrowRight':
-                    if (videoRef.current) videoRef.current.currentTime += 5;
+                    videoElement && (videoElement.currentTime += 5);
                     break;
                 case 'ArrowLeft':
-                    if (videoRef.current) videoRef.current.currentTime -= 5;
+                    videoElement && (videoElement.currentTime -= 5);
                     break;
             }
         };
@@ -87,13 +88,13 @@ const Cover = memo((props: CoverProps) => {
         return () => {
             document.removeEventListener('keyup', handleKeyUp);
         };
-    }, [fullscreen, switchPlayState, videoRef]);
+    }, [fullscreen, switchPlayState, videoElement]);
 
     return (
         <div className="mika-video-player-cover" onPointerDown={(e) => {
             if (e.button === 0) switchPlayState();
         }} ref={coverRef} {...rest}>
-            <ToolBar videoElement={videoRef} fullscreen={fullscreen}/>
+            <ToolBar videoElement={videoElement} fullscreen={fullscreen}/>
         </div>
     );
 });

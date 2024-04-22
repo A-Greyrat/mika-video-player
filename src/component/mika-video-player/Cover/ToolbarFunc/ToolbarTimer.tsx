@@ -13,7 +13,11 @@ const ToolbarTimer = memo((props: { videoElement: HTMLVideoElement | null }) => 
                 setDuration(videoElement.duration);
             };
             videoElement.addEventListener('timeupdate', handleTimeUpdate);
-            return () => videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+            videoElement.addEventListener('loadedmetadata', handleTimeUpdate);
+            return () => {
+                videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+                videoElement.removeEventListener('loadedmetadata', handleTimeUpdate);
+            };
         }
     }, [videoElement]);
 

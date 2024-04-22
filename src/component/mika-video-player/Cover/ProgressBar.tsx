@@ -2,7 +2,7 @@ import React, {forwardRef, memo, Ref, useCallback, useEffect, useImperativeHandl
 import './ProgressBar.less';
 
 export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
-    videoElement: React.RefObject<HTMLVideoElement>;
+    videoElement: HTMLVideoElement | null;
 }
 
 const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivElement>) => {
@@ -14,10 +14,10 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
     useImperativeHandle(ref, () => barRef.current!);
 
     const seekPosition = useCallback((e: React.PointerEvent<HTMLDivElement> | PointerEvent) => {
-        if (isSeeking.current && videoElement.current) {
+        if (isSeeking.current && videoElement) {
             let progress = (e.clientX - (barRef.current?.getBoundingClientRect().x ?? 0)) / barRef.current!.clientWidth;
             progress = Math.min(1, Math.max(0, progress));
-            videoElement.current.currentTime = videoElement.current.duration * progress;
+            videoElement.currentTime = videoElement.duration * progress;
             barRef.current!.style.setProperty('--mika-video-progress', `${progress * 100}%`);
         }
     }, [videoElement]);
@@ -31,15 +31,15 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
 
     useEffect(() => {
         if (videoElement && barRef.current) {
-            videoElement.current?.addEventListener('timeupdate', () => {
+            videoElement?.addEventListener('timeupdate', () => {
                 if (isSeeking.current) return;
-                let progress = videoElement.current!.currentTime / videoElement.current!.duration * 100;
+                let progress = videoElement!.currentTime / videoElement!.duration * 100;
                 progress = isNaN(progress) ? 0 : progress;
                 barRef.current?.style.setProperty('--mika-video-progress', `${progress}%`)
 
-                const buffer = videoElement.current!.buffered;
+                const buffer = videoElement!.buffered;
                 const bufferEnd = buffer.length > 0 ? buffer.end(buffer.length - 1) : 0;
-                let bufferProgress = bufferEnd / videoElement.current!.duration * 100;
+                let bufferProgress = bufferEnd / videoElement!.duration * 100;
                 bufferProgress = isNaN(bufferProgress) ? 0 : bufferProgress;
                 barRef.current?.style.setProperty('--mika-video-buffer-progress', `${bufferProgress}%`);
             });

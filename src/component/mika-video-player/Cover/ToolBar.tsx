@@ -8,7 +8,7 @@ import FullScreenButton from "./ToolbarFunc/FullScreenButton.tsx";
 import VolumeButton from "./ToolbarFunc/VolumeButton.tsx";
 
 export interface ToolBarProps extends React.HTMLAttributes<HTMLDivElement> {
-    videoElement: React.RefObject<HTMLVideoElement>;
+    videoElement: HTMLVideoElement | null;
     fullscreen: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -22,9 +22,9 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
     const stopPropagation = (e: React.PointerEvent<HTMLDivElement>) => e.stopPropagation();
 
     useEffect(() => {
-        if (videoElement.current) {
-            videoElement.current.addEventListener('play', () => setIsPlaying(true));
-            videoElement.current.addEventListener('pause', () => setIsPlaying(false));
+        if (videoElement) {
+            videoElement.addEventListener('play', () => setIsPlaying(true));
+            videoElement.addEventListener('pause', () => setIsPlaying(false));
         }
     }, [videoElement]);
 
@@ -36,7 +36,7 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
             <div className="mika-video-player-toolbar-function-container">
                 <div className="mika-video-player-toolbar-function-container-left-area">
                     <PlayButton videoElement={videoElement} isPlaying={isPlaying} setIsPlaying={setIsPlaying}/>
-                    <ToolbarTimer videoElement={videoElement.current}/>
+                    <ToolbarTimer videoElement={videoElement}/>
                 </div>
                 <div className="mika-video-player-toolbar-function-container-middle-area">
                 </div>

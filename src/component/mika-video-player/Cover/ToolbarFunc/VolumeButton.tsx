@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useState} from "react";
+import {memo, useCallback, useState} from "react";
 import VolumeIcon from "./Icon/VolumeIcon.tsx";
 import FuncButton from "./FuncButton.tsx";
 import {Dropdown, Range} from "../../../mika-ui";
@@ -6,13 +6,13 @@ import {Dropdown, Range} from "../../../mika-ui";
 import './VolumeButton.less';
 
 const VolumeButton = memo((props: {
-    videoElement: React.RefObject<HTMLVideoElement>,
+    videoElement: HTMLVideoElement | null,
 }) => {
     const [isMuted, setIsMuted] = useState(false);
     const [_, forceUpdate] = useState(0);
 
     const onClick = useCallback(() => {
-        const videoElement = props.videoElement.current;
+        const videoElement = props.videoElement;
         if (!videoElement) return;
 
         videoElement.muted = !videoElement.muted;
@@ -20,7 +20,7 @@ const VolumeButton = memo((props: {
     }, [props.videoElement]);
 
     const onChange = useCallback((value: number) => {
-        const videoElement = props.videoElement.current;
+        const videoElement = props.videoElement;
         if (!videoElement) return;
         if (isMuted) {
             videoElement.muted = false;
@@ -35,7 +35,7 @@ const VolumeButton = memo((props: {
         <Dropdown menu={(
             <div className="mika-video-player-toolbar-func-volume-dropdown">
                 <Range className="mika-video-player-toolbar-func-volume-slider"
-                       value={isMuted ? 0 : (props.videoElement.current?.volume ?? 0) * 100}
+                       value={isMuted ? 0 : (props.videoElement?.volume ?? 0) * 100}
                        max={100}
                        onChange={onChange}
                        width="3px"

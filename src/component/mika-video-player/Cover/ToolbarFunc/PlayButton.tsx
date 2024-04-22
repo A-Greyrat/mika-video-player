@@ -1,18 +1,18 @@
-import React, {memo, useCallback} from "react";
+import {memo, useCallback} from "react";
 import PlayIcon from "./Icon/PlayIcon.tsx";
 import FuncButton from "./FuncButton.tsx";
 import './PlayButton.less';
 
 const PlayButton = memo((props: {
-    videoElement: React.RefObject<HTMLVideoElement>,
+    videoElement: HTMLVideoElement | null,
     isPlaying: boolean,
     setIsPlaying: (isPlaying: boolean) => void
 }) => {
     const {videoElement, isPlaying, setIsPlaying} = props;
     const onClick = useCallback(() => {
-        if (videoElement.current) {
-            if (videoElement.current.paused) videoElement.current.play().catch(undefined);
-            else videoElement.current.pause();
+        if (videoElement) {
+            if (videoElement.paused) videoElement.play().catch(undefined);
+            else videoElement.pause();
             setIsPlaying(!isPlaying);
         }
     }, [videoElement, isPlaying, setIsPlaying]);

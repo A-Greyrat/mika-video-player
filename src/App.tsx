@@ -12,15 +12,10 @@ const App: React.FC = () => {
     const [url, setUrl] = React.useState<string | undefined>(undefined);
 
     useEffect(() => {
-        fetch(c).then(res => res.json()).then(data => {
-            setUrl(data.data.durl[0].url);
-            console.log(data.data.durl[0].url)
-        });
-    }, []);
-
-    const [rangeValue, setRangeValue] = React.useState<number>(0);
-    const onChange = useCallback((value: number) => {
-        setRangeValue(value);
+        // fetch(c).then(res => res.json()).then(data => {
+        //     setUrl(data.data.durl[0].url);
+        //     console.log(data.data.durl[0].url)
+        // });
     }, []);
 
     return (
@@ -34,10 +29,9 @@ const App: React.FC = () => {
         }}>
             <VideoPlayer width='1200px' style={{
                 margin: "auto"
-            }} controls src={url}>
+            }} controls src="/私は雨.flv">
             </VideoPlayer>
 
-            <Range value={rangeValue} onChange={onChange} height='3px' width="400px" orient='horizontal'/>
         </div>
     )
 };

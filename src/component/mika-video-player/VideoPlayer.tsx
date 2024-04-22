@@ -21,6 +21,7 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => videoRef.current!);
+    const [_, forceUpdate] = React.useState(0);
 
     useEffect(() => {
         if (loader && videoRef.current) {
@@ -30,13 +31,18 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
         }
     }, [loader, src, videoRef]);
 
+    useEffect(() => {
+        forceUpdate((prev) => prev + 1);
+    }, []);
+
+
     return (<div className="mika-video-player-wrapper" ref={containerRef} style={{
         width: width ?? 'auto',
         height: height ?? 'auto',
         ...style
     }}>
         <video crossOrigin="anonymous" ref={videoRef} {...rest}/>
-        {controls && <Cover videoRef={videoRef} containerRef={containerRef}/>}
+        {controls && <Cover videoElement={videoRef.current} containerRef={containerRef}/>}
     </div>);
 }));
 
