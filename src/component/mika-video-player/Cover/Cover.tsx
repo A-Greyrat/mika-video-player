@@ -19,7 +19,6 @@ const Cover = memo((props: CoverProps) => {
             else videoElement.pause();
         }
     }, [videoElement]);
-    console.log(videoElement)
 
     const fullscreen = useCallback((e: { stopPropagation: () => void }) => {
         e.stopPropagation();
@@ -64,36 +63,60 @@ const Cover = memo((props: CoverProps) => {
     }, []);
 
     useEffect(() => {
-        const handleKeyUp = (e: KeyboardEvent) => {
+        const handleKeydown = (e: KeyboardEvent) => {
             if (e.target !== document.body) return;
 
             switch (e.key) {
                 case ' ':
                     switchPlayState();
+                    e.preventDefault();
                     break;
                 case 'Enter':
                     fullscreen(e);
+                    e.preventDefault();
                     break;
                 case 'ArrowRight':
                     videoElement && (videoElement.currentTime += 5);
+                    e.preventDefault();
                     break;
                 case 'ArrowLeft':
                     videoElement && (videoElement.currentTime -= 5);
+                    e.preventDefault();
                     break;
             }
         };
 
-        document.addEventListener('keyup', handleKeyUp);
+        const handleContainerKeydown = (e: KeyboardEvent) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    videoElement && (videoElement.volume = Math.min(1, videoElement.volume + 0.1));
+                    e.preventDefault();
+                    e.stopPropagation();
+                    break;
+                case 'ArrowDown':
+                    videoElement && (videoElement.volume = Math.max(0, videoElement.volume - 0.1));
+                    e.preventDefault();
+                    e.stopPropagation();
+                    break;
+            }
+        };
+
+        const cover = coverRef.current;
+        cover?.addEventListener('keydown', handleContainerKeydown);
+
+        document.addEventListener('keydown', handleKeydown);
+
 
         return () => {
-            document.removeEventListener('keyup', handleKeyUp);
+            document.removeEventListener('keydown', handleKeydown);
+            cover?.removeEventListener('keydown', handleContainerKeydown);
         };
-    }, [fullscreen, switchPlayState, videoElement]);
+    }, [switchPlayState, videoElement, fullscreen, coverRef.current]);
 
     return (
         <div className="mika-video-player-cover" onPointerDown={(e) => {
             if (e.button === 0) switchPlayState();
-        }} ref={coverRef} {...rest}>
+        }} ref={coverRef} {...rest} tabIndex={0}>
             <ToolBar videoElement={videoElement} fullscreen={fullscreen}/>
         </div>
     );
