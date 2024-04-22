@@ -15,10 +15,11 @@ const VolumeIcon = memo((props: {
     });
 
     useEffect(() => {
-        lottieItem.setSpeed(2);
         if (props.isMuted) {
+            lottieItem.setSpeed(2);
             lottieItem.playSegments([1, 35], true);
         } else {
+            lottieItem.setSpeed(4);
             lottieItem.playSegments([56, 117], true);
         }
 

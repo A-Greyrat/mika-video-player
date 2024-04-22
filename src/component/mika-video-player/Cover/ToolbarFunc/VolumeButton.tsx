@@ -32,18 +32,23 @@ const VolumeButton = memo((props: {
     }, [props.videoElement, isMuted]);
 
     return (
-        <Dropdown menu={(<div className="mika-video-player-toolbar-func-volume-dropdown">
-            <Range className="mika-video-player-toolbar-func-volume-slider"
-                   value={isMuted ? 0 : (props.videoElement.current?.volume ?? 0) * 100}
-                   max={100}
-                   onChange={onChange}
-                   width="3px"
-                   height="80px"
-                   thumbSize={8}
-                   orient="vertical"
-            />
-
-        </div>)} className="mika-video-player-toolbar-func-volume" type="hover" direction="up" paddingTrigger={5}>
+        <Dropdown menu={(
+            <div className="mika-video-player-toolbar-func-volume-dropdown">
+                <Range className="mika-video-player-toolbar-func-volume-slider"
+                       value={isMuted ? 0 : (props.videoElement.current?.volume ?? 0) * 100}
+                       max={100}
+                       onChange={onChange}
+                       width="3px"
+                       height="80px"
+                       thumbSize={8}
+                       orient="vertical"
+                />
+            </div>)}
+                  className="mika-video-player-toolbar-func-volume"
+                  type="hover"
+                  direction="up"
+                  paddingTrigger={5}
+        >
             <FuncButton icon={<VolumeIcon isMuted={isMuted}/>}
                         onClick={onClick}
                         className="mika-video-player-toolbar-func-volume-button"/>

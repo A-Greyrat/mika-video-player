@@ -2,7 +2,7 @@ import React, {memo, useCallback, useEffect} from "react";
 import ToolBar from "./ToolBar.tsx";
 import './Cover.less';
 
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 export interface CoverProps extends React.HTMLAttributes<HTMLDivElement> {
     videoRef: React.RefObject<HTMLVideoElement>;
