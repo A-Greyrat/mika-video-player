@@ -40,8 +40,7 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
     }, []);
 
     return (
-        <div ref={toolbarRef} className="mika-video-player-toolbar"
-             onPointerDown={stopPropagation} onPointerMove={stopPropagation} onPointerUp={stopPropagation}{...rest}>
+        <div ref={toolbarRef} className="mika-video-player-toolbar" onPointerDown={stopPropagation} {...rest}>
             <div className="mika-video-player-toolbar-mask"/>
             <ProgressBar videoElement={videoElement}/>
             <div className="mika-video-player-toolbar-function-container">
