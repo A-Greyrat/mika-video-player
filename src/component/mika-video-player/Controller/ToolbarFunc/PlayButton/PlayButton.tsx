@@ -1,6 +1,6 @@
 import React, {memo, useCallback, useEffect} from "react";
-import PlayIcon from "./Icon/PlayIcon";
-import FuncButton, {ToolbarFunc} from "./FuncButton";
+import PlayIcon from "../Icon/PlayIcon";
+import FuncButton, {ToolbarFunc} from "../FuncButton/FuncButton";
 
 import './PlayButton.less';
 

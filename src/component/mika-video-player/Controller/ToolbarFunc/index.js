@@ -1,5 +1,5 @@
-export {default as FullScreenButton} from './FullScreenButton';
-export {default as PlayButton} from './PlayButton';
-export {default as VolumeButton} from './VolumeButton';
-export {default as ToolbarTimer} from './ToolbarTimer';
-export {default as FuncButton} from './FuncButton';
+export {default as FullScreenButton} from './FullScreenButton/FullScreenButton';
+export {default as PlayButton} from './PlayButton/PlayButton';
+export {default as VolumeButton} from './VolumeButton/VolumeButton';
+export {default as ToolbarTimer} from './ToolbarTimer/ToolbarTimer';
+export {default as FuncButton} from './FuncButton/FuncButton';

@@ -1,5 +1,5 @@
 import React, {memo, useEffect} from "react";
-import {ToolbarFunc} from "./FuncButton";
+import {ToolbarFunc} from "../FuncButton/FuncButton";
 
 import './ToolbarTimer.less';
 

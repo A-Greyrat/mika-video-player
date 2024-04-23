@@ -1,7 +1,7 @@
 import {memo, useCallback, useEffect, useState} from "react";
-import VolumeIcon from "./Icon/VolumeIcon";
-import FuncButton, {ToolbarFunc} from "./FuncButton";
-import {Dropdown, Range} from "../../../mika-ui";
+import VolumeIcon from "../Icon/VolumeIcon";
+import FuncButton, {ToolbarFunc} from "../FuncButton/FuncButton";
+import {Dropdown, Range} from "../../../../mika-ui";
 
 import './VolumeButton.less';
 

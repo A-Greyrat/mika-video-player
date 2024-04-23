@@ -1,6 +1,6 @@
 import {memo, useCallback} from "react";
-import FullScreenIcon from "./Icon/FullScreenIcon";
-import FuncButton, {ToolbarFunc} from "./FuncButton";
+import FullScreenIcon from "../Icon/FullScreenIcon";
+import FuncButton, {ToolbarFunc} from "../FuncButton/FuncButton";
 
 const FullScreenButton: ToolbarFunc = memo((props: {
     videoElement?: HTMLVideoElement | null,
