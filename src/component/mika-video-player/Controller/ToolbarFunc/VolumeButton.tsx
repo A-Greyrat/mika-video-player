@@ -1,12 +1,12 @@
 import {memo, useCallback, useEffect, useState} from "react";
-import VolumeIcon from "./Icon/VolumeIcon.tsx";
-import FuncButton from "./FuncButton.tsx";
+import VolumeIcon from "./Icon/VolumeIcon";
+import FuncButton, {ToolbarFunc} from "./FuncButton";
 import {Dropdown, Range} from "../../../mika-ui";
 
 import './VolumeButton.less';
 
-const VolumeButton = memo((props: {
-    videoElement: HTMLVideoElement | null,
+const VolumeButton: ToolbarFunc = memo((props: {
+    videoElement?: HTMLVideoElement | null,
 }) => {
     const [isMuted, setIsMuted] = useState(false);
     const [_, forceUpdate] = useState(0);

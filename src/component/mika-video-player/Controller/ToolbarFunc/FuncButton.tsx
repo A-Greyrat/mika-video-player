@@ -1,6 +1,11 @@
 import React, {memo, useCallback} from "react";
 import './FuncButton.less';
 
+export type ToolbarFunc = React.FC<{
+    videoElement?: HTMLVideoElement | null;
+    containerElement?: HTMLDivElement | null;
+}>;
+
 const FuncButton = memo((props: {
     icon: React.ReactNode,
     onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void,

@@ -1,10 +1,11 @@
 import React, {memo, useCallback, useEffect} from "react";
-import PlayIcon from "./Icon/PlayIcon.tsx";
-import FuncButton from "./FuncButton.tsx";
+import PlayIcon from "./Icon/PlayIcon";
+import FuncButton, {ToolbarFunc} from "./FuncButton";
+
 import './PlayButton.less';
 
-const PlayButton = memo((props: {
-    videoElement: HTMLVideoElement | null,
+const PlayButton: ToolbarFunc = memo((props: {
+    videoElement?: HTMLVideoElement | null,
 }) => {
     const {videoElement} = props;
     const [isPlaying, setIsPlaying] = React.useState(false);
@@ -24,9 +25,10 @@ const PlayButton = memo((props: {
         }
     }, [videoElement]);
 
-    return (<FuncButton icon={<PlayIcon isPlaying={isPlaying}/>}
-                        onClick={onClick}
-                        className="mika-video-player-toolbar-func-play-button"/>
+    return (
+        <FuncButton icon={<PlayIcon isPlaying={isPlaying}/>}
+                    onClick={onClick}
+                    className="mika-video-player-toolbar-func-play-button"/>
     );
 });
 

@@ -1,7 +1,9 @@
 import React, {memo, useEffect} from "react";
+import {ToolbarFunc} from "./FuncButton";
+
 import './ToolbarTimer.less';
 
-const ToolbarTimer = memo((props: { videoElement: HTMLVideoElement | null }) => {
+const ToolbarTimer: ToolbarFunc = memo((props: { videoElement?: HTMLVideoElement | null }) => {
     const {videoElement} = props;
     const [currentTime, setCurrentTime] = React.useState(NaN);
     const [duration, setDuration] = React.useState(NaN);

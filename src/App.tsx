@@ -33,9 +33,12 @@ const App: React.FC = () => {
             justifyContent: 'center',
             alignItems: 'center'
         }}>
-            <VideoPlayer width='1200px' style={{
-                margin: "auto"
-            }} controls src={url}>
+            <VideoPlayer
+                width='1200px'
+                style={{margin: "auto"}}
+                controls
+                src={url}
+            >
             </VideoPlayer>
 
         </div>

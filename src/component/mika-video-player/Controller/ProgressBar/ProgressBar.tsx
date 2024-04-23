@@ -1,4 +1,5 @@
 import React, {forwardRef, memo, Ref, useCallback, useEffect, useImperativeHandle, useRef} from "react";
+
 import './ProgressBar.less';
 
 export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {

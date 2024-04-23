@@ -1,7 +1,7 @@
 import React, {memo, useEffect} from "react";
-import play from './playIcon.json';
 import {useLottie} from "lottie-react";
 
+import play from './playIcon.json';
 
 const PlayIcon = memo((props: {
     isPlaying: boolean,

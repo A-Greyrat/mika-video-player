@@ -1,6 +1,7 @@
 import {useLottie} from "lottie-react";
-import volume from './volume.json';
 import React, {memo, useEffect} from "react";
+
+import volume from './volume.json';
 
 const VolumeIcon = memo((props: {
     isMuted: boolean,
