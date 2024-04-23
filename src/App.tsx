@@ -1,21 +1,27 @@
 import './App.css'
-import React, {useCallback, useEffect} from "react";
+import React, {useEffect} from "react";
 
 import VideoPlayer from "./component/mika-video-player";
-import Range from "./component/mika-ui/Range/Range.tsx";
 
 const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
-const bv = 'BV1EE421M7zP';
-const c = 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;
+const _bv = 'BV1EE421M7zP';
+
+const getUrl = (bv: string) => {
+    return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;
+}
 
 const App: React.FC = () => {
     const [url, setUrl] = React.useState<string | undefined>(undefined);
 
     useEffect(() => {
-        // fetch(c).then(res => res.json()).then(data => {
-        //     setUrl(data.data.durl[0].url);
-        //     console.log(data.data.durl[0].url)
-        // });
+        const url = new URL(window.location.href);
+        const bv = url.searchParams.get('bv');
+        const c = getUrl(bv || _bv);
+
+        fetch(c).then(res => res.json()).then(data => {
+            setUrl(data.data.durl[0].url);
+            console.log(data.data.durl[0].url)
+        });
     }, []);
 
     return (
@@ -29,7 +35,7 @@ const App: React.FC = () => {
         }}>
             <VideoPlayer width='1200px' style={{
                 margin: "auto"
-            }} controls src="/私は雨.flv">
+            }} controls src={url}>
             </VideoPlayer>
 
         </div>
