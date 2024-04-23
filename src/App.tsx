@@ -31,14 +31,17 @@ const App: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
         }}>
             <VideoPlayer
                 width='1200px'
-                style={{margin: "auto"}}
+                style={{margin: "auto",
+                    borderRadius: '20px',
+                    overflow: 'hidden'}}
                 controls
-                src={url}
+                src='/bangumi.mkv'
             >
+                <track src="/bangumi.vtt" kind="subtitles" srcLang="zh" label="中文" default />
             </VideoPlayer>
 
         </div>

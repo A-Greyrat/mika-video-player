@@ -14,6 +14,8 @@ export interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoEle
     loader?: (videoElement: HTMLVideoElement) => void;
     toolbar?: ToolbarArea;
     shortcut?: Shortcut[];
+
+    children?: React.ReactNode;
 }
 
 const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideoElement>) => {
@@ -26,6 +28,7 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
         style,
         toolbar,
         shortcut,
+        children,
         ...rest
     } = props;
 
@@ -54,7 +57,9 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
                  ...style
              }} ref={containerRef}>
 
-            <video crossOrigin="anonymous" ref={videoRef} {...rest}/>
+            <video crossOrigin="anonymous" ref={videoRef} {...rest}>
+                {children}
+            </video>
             {controls && <Controller videoElement={videoRef.current} containerElement={containerRef.current} toolbar={toolbar} shortcut={shortcut}/>}
         </div>
     );

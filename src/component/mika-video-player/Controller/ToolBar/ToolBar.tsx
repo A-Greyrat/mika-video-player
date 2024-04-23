@@ -35,9 +35,9 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
         e.stopPropagation();
     }, []);
 
-    return (
+    return (<>
+        <div className="mika-video-player-toolbar-mask"/>
         <div ref={toolbarRef} className="mika-video-player-toolbar" onPointerDown={stopPropagation} {...rest}>
-            <div className="mika-video-player-toolbar-mask"/>
             <ProgressBar videoElement={videoElement}/>
             <div className="mika-video-player-toolbar-function-container">
                 <div className="mika-video-player-toolbar-function-container-left-area">
@@ -57,7 +57,7 @@ const ToolBar = memo(forwardRef((props: ToolBarProps, ref: React.Ref<HTMLDivElem
                 </div>
             </div>
         </div>
-    );
+    </>);
 }));
 
 ToolBar.displayName = 'ToolBar';
