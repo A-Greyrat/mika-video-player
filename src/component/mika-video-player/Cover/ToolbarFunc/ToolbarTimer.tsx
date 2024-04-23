@@ -3,8 +3,8 @@ import './ToolbarTimer.less';
 
 const ToolbarTimer = memo((props: { videoElement: HTMLVideoElement | null }) => {
     const {videoElement} = props;
-    const [currentTime, setCurrentTime] = React.useState(0);
-    const [duration, setDuration] = React.useState(0);
+    const [currentTime, setCurrentTime] = React.useState(NaN);
+    const [duration, setDuration] = React.useState(NaN);
 
     useEffect(() => {
         if (videoElement) {
