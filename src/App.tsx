@@ -39,9 +39,8 @@ const App: React.FC = () => {
                     borderRadius: '20px',
                     overflow: 'hidden'}}
                 controls
-                src='/bangumi.mkv'
+                src={url}
             >
-                <track src="/bangumi.vtt" kind="subtitles" srcLang="zh" label="中文" default />
             </VideoPlayer>
 
         </div>
