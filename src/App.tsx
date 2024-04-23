@@ -1,4 +1,4 @@
-import './App.css'
+import './App.css';
 import React, {useEffect} from "react";
 
 import VideoPlayer from "./component/mika-video-player";
@@ -8,7 +8,7 @@ const _bv = 'BV1EE421M7zP';
 
 const getUrl = (bv: string) => {
     return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;
-}
+};
 
 const App: React.FC = () => {
     const [url, setUrl] = React.useState<string | undefined>(undefined);

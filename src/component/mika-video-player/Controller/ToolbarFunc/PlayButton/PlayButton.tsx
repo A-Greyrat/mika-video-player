@@ -22,6 +22,11 @@ const PlayButton: ToolbarFunc = memo((props: {
         if (videoElement) {
             videoElement.addEventListener('play', () => setIsPlaying(true));
             videoElement.addEventListener('pause', () => setIsPlaying(false));
+
+            return () => {
+                videoElement.removeEventListener('play', () => setIsPlaying(true));
+                videoElement.removeEventListener('pause', () => setIsPlaying(false));
+            };
         }
     }, [videoElement]);
 

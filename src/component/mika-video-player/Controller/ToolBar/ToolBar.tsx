@@ -1,12 +1,8 @@
 import React, {forwardRef, memo, useCallback, useImperativeHandle} from "react";
 import ProgressBar from "../ProgressBar/ProgressBar";
+import {FullScreenButton, PlayButton, ToolbarFunc, ToolbarTimer, VolumeButton} from "../ToolbarFunc";
 
 import './ToolBar.less';
-import ToolbarTimer from "../ToolbarFunc/ToolbarTimer";
-import PlayButton from "../ToolbarFunc/PlayButton";
-import FullScreenButton from "../ToolbarFunc/FullScreenButton";
-import VolumeButton from "../ToolbarFunc/VolumeButton";
-import {ToolbarFunc} from "../ToolbarFunc";
 
 export interface ToolBarProps extends React.HTMLAttributes<HTMLDivElement> {
     videoElement: HTMLVideoElement | null;
