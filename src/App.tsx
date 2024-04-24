@@ -35,10 +35,13 @@ const App: React.FC = () => {
         }}>
             <VideoPlayer
                 width='1200px'
-                style={{margin: "auto",
+                style={{
+                    margin: "auto",
                     borderRadius: '20px',
-                    overflow: 'hidden'}}
+                    overflow: 'hidden'
+                }}
                 controls
+                loop
                 src={url}
             >
             </VideoPlayer>

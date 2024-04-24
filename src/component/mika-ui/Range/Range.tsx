@@ -38,10 +38,9 @@ const Range = memo(forwardRef((props: RangeProps, ref: React.Ref<HTMLDivElement>
     const trackRef = useRef<HTMLDivElement>(null);
 
     const changeValue = useCallback((e: React.PointerEvent | PointerEvent) => {
-        if (!isControlling.current) return;
-
+        if (!isControlling.current || !trackRef.current) return;
         const rect = trackRef.current?.getBoundingClientRect();
-        if (!rect) return;
+        if (!rect || rect.width === 0 || rect.height === 0) return;
 
         const x = e.clientX - rect.left;
         const y = rect.bottom - e.clientY;

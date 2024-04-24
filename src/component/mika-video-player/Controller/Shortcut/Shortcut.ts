@@ -87,12 +87,12 @@ export const defaultShortcuts: Shortcut[] = [
 ];
 
 export const useShortcut = (shortcuts: Shortcut[], videoElement?: HTMLVideoElement | null, containerElement?: HTMLDivElement | null, controllerElement?: HTMLDivElement | null) => {
-    const shortcutMapRef = useRef<Map<string, Map<string, Map<string | number, Shortcut>>>>(new Map());
     const videoEventMapRef = useRef<Map<string, (e: Event | React.PointerEvent | React.KeyboardEvent) => void>>(new Map());
 
     useEffect(() => {
-        const shortcutMap = shortcutMapRef.current;
+        const shortcutMap = new Map<string, Map<string, Map<string | number, Shortcut>>>();
         const uninstallList: (() => void)[] = [];
+        videoEventMapRef.current.clear();
 
         shortcuts.forEach((shortcut) => {
             if (!shortcutMap.has(shortcut.root || 'document'))
