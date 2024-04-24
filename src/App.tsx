@@ -5,6 +5,7 @@ import VideoPlayer from "./component/mika-video-player";
 
 const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
 const _bv = 'BV1EE421M7zP';
+// const proxy = 'https://api.erisu.moe/proxy?referrer=https://www.bilibili.com&url=';
 
 const getUrl = (bv: string) => {
     return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;
@@ -34,7 +35,7 @@ const App: React.FC = () => {
             alignItems: 'center',
         }}>
             <VideoPlayer
-                width='1200px'
+                width='80%'
                 style={{
                     margin: "auto",
                     borderRadius: '20px',
@@ -42,7 +43,7 @@ const App: React.FC = () => {
                 }}
                 controls
                 loop
-                src={url}
+                src={url ? url : url}
             >
             </VideoPlayer>
 

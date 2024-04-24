@@ -1,18 +1,21 @@
 import {useLottie} from "lottie-react";
-import React, {memo, useEffect} from "react";
+import React, {memo, useEffect, useRef} from "react";
 
 import volume from './volume.json';
+import {generateUniqueID} from "../../../Utils";
 
 const VolumeIcon = memo((props: {
     isMuted: boolean,
     style?: React.CSSProperties
 }) => {
+    const iconId = useRef<string>(generateUniqueID());
+
     const lottieItem = useLottie({
         animationData: volume,
         autoplay: false,
         loop: false,
         style: props.style,
-        className: 'mika-video-player-volume-icon'
+        id: 'mika-video-player-volume-icon-' + iconId.current
     });
 
     useEffect(() => {
@@ -24,7 +27,7 @@ const VolumeIcon = memo((props: {
             lottieItem.playSegments([56, 117], true);
         }
 
-        const icon = document.querySelector('.mika-video-player-volume-icon')?.querySelector('svg');
+        const icon = document.querySelector('#mika-video-player-volume-icon-' + iconId.current)?.querySelector('svg');
         icon?.setAttribute('viewBox', '43 43 43 43');
 
     }, [lottieItem, props.isMuted]);
