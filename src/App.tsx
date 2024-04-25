@@ -2,10 +2,12 @@ import './App.css';
 import React, {useEffect} from "react";
 
 import VideoPlayer from "./component/mika-video-player";
+import {Input} from "./component/mika-ui";
+import {DanmakuType} from "./component/mika-video-player/Danmaku/Danmaku.ts";
 
 const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
 const _bv = 'BV1EE421M7zP';
-// const proxy = 'https://api.erisu.moe/proxy?referrer=https://www.bilibili.com&url=';
+let proxy = 'https://118.31.42.183/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
     return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;
@@ -13,15 +15,21 @@ const getUrl = (bv: string) => {
 
 const App: React.FC = () => {
     const [url, setUrl] = React.useState<string | undefined>(undefined);
-
+    const [danmakus, setDanmakus] = React.useState<DanmakuType[]>([]);
     useEffect(() => {
         const url = new URL(window.location.href);
         const bv = url.searchParams.get('bv');
         const c = getUrl(bv || _bv);
 
         fetch(c).then(res => res.json()).then(data => {
-            setUrl(data.data.durl[0].url);
-            console.log(data.data.durl[0].url)
+            const host = data.data.durl[0].url.split('/')[2];
+            proxy += '&pHost=' + host + '&pUrl=';
+            setUrl(encodeURIComponent(data.data.durl[0].url));
+        });
+
+        fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || _bv)).then(res => res.json()).then(data => {
+            setDanmakus(data);
+            console.log(data)
         });
     }, []);
 
@@ -43,9 +51,11 @@ const App: React.FC = () => {
                 }}
                 controls
                 loop
-                src={url ? url : url}
+                danmaku={danmakus}
+                src={url ? proxy + url : url}
             >
             </VideoPlayer>
+            <Input type='filled'/>
 
         </div>
     )

@@ -16,7 +16,7 @@ const Input = memo(forwardRef((props: InputProps, ref: React.Ref<HTMLInputElemen
     return (
         <form onSubmit={onSubmit} className={`mika-input-form`}>
             <input value={value}
-                   className={`mika-input-${type || 'outline'} mika-input-${size || 'medium'} ${className}`}
+                   className={`mika-input-${type || 'outline'} mika-input-${size || 'medium'} ${className ?? ''}`}
                    ref={ref} type='text' {...rest} />
             {children}
         </form>);

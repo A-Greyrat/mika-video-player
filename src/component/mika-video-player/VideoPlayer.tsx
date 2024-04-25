@@ -3,6 +3,8 @@ import defaultLoader from "./Loader/DefaultLoader";
 import {Controller, ToolbarFunc, Shortcut} from "./Controller";
 
 import './VideoPlayer.less';
+import {DanmakuType} from "./Danmaku/Danmaku.ts";
+import DanmakuContainer from "./Danmaku/DanmakuContainer.tsx";
 
 export type ToolbarArea = {
     left: ToolbarFunc[];
@@ -14,6 +16,7 @@ export interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoEle
     loader?: (videoElement: HTMLVideoElement) => void;
     toolbar?: ToolbarArea;
     shortcut?: Shortcut[];
+    danmaku?: DanmakuType[];
 
     children?: React.ReactNode;
 }
@@ -29,6 +32,7 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
         toolbar,
         shortcut,
         children,
+        danmaku= [],
         ...rest
     } = props;
 

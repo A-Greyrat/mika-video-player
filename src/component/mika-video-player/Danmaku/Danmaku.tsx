@@ -1,15 +1,27 @@
-import React, {forwardRef, memo, Ref} from "react";
-import {DanmakuType} from "./Danmaku.ts";
+import React, {memo, useEffect} from "react";
+import {DanmakuType, getDanmakuTracks} from "./Danmaku.ts";
 
-export interface DanmakuProps extends React.HTMLAttributes<HTMLDivElement> {
-    danmaku: DanmakuType[];
+export interface DanmakuProps {
+    danmaku: DanmakuType;
 }
 
-const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) => {
-    const {...rest} = props;
+const Danmaku = memo((props: DanmakuProps) => {
+    const {danmaku} = props;
+    const ref = React.useRef<HTMLDivElement>(null);
 
-    return (<div {...rest} ref={ref}/>);
-}));
+    useEffect(() => {
+
+    }, []);
+
+    return (
+        <div className="mika-video-player-danmaku" ref={ref}>
+            <div className="mika-video-player-danmaku-content">
+                {danmaku.text}
+            </div>
+        </div>
+    );
+});
 
 Danmaku.displayName = 'Danmaku';
 export default Danmaku;
+
