@@ -51,6 +51,9 @@ export class DanmakuPool implements IDanmakuPool {
     #trackCount = 0;
     #currentTrack = 0;
 
+    #topTrack: Set<number> = new Set();
+    #bottomTrack: Set<number> = new Set();
+
     #defaultDanmakuOption: Pick<DanmakuOption, '--opacity' | '--fontFamily' | '--fontWeight' | '--textShadow'> = {
         '--opacity': '0.65',
         '--fontFamily': 'Arial, Helvetica, sans-serif',
@@ -140,14 +143,20 @@ export class DanmakuPool implements IDanmakuPool {
         const d = this.#availableDanmaku.length > 0 ? this.#availableDanmaku.pop()! : this.#container!.appendChild(document.createElement('div'));
         this.#currentDanmaku.add(d);
 
-        d.classList.remove('mika-video-player-danmaku');
+        // 暂时不支持逆向、精准定位和高级弹幕
+        const danmakuType =
+            danmaku.mode === '1' ? 'mika-video-player-danmaku' :
+                danmaku.mode === '4' ? 'mika-video-player-danmaku-bottom' :
+                    danmaku.mode === '5' ? 'mika-video-player-danmaku-top' : 'mika-video-player-danmaku';
+
+        d.className = '';
         d.ariaLive = 'polite';
         d.style.visibility = 'visible';
         d.style.animationPlayState = this.#playState.state;
 
         setTimeout(() => {
             void d.offsetWidth;
-            d.classList.add('mika-video-player-danmaku');
+            d.classList.add(danmakuType);
             d.innerText = danmaku.text;
         }, 0);
 
@@ -156,6 +165,14 @@ export class DanmakuPool implements IDanmakuPool {
         });
 
         d.onanimationend = () => {
+            if (d.className === 'mika-video-player-danmaku-bottom') {
+                this.#bottomTrack.delete(Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
+                console.log('delete bottom track:', Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
+            } else if (d.className === 'mika-video-player-danmaku-top') {
+                this.#topTrack.delete(Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
+                console.log('delete top track:', Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
+            }
+
             this.#availableDanmaku.push(d);
             this.#currentDanmaku.delete(d);
             d.innerText = '';
@@ -206,17 +223,62 @@ export class DanmakuPool implements IDanmakuPool {
 
         const width = this.#lengthMap.get(danmaku.size)! * danmaku.text.length;
 
-        // 计算弹幕的速度
-        const duration = (this.#containerWidth + width * 2) / width * this.#speed;
-        const offset = 0;
-        const top = this.#heightMap.get(danmaku.size)! * this.#currentTrack + 'px';
-        this.#currentTrack = (this.#currentTrack + 1) % this.#trackCount;
-        const translateX = 'calc(' + this.#containerWidth + 'px)';
+        if (danmaku.mode === '1') {
+            const duration = (this.#containerWidth + width * 2) / width * this.#speed;
+            const offset = 0;
+            const top = (this.#currentTrack % this.#trackCount) * 100 / (this.#trackCount / this.#displayArea) + '%';
+            this.#currentTrack = (this.#currentTrack + 1) % this.#trackCount;
+            const translateX = 'calc(' + this.#containerWidth + 'px)';
 
-        option['--offset'] = offset + 'px';
-        option['--translateX'] = translateX;
-        option['--duration'] = duration + 's';
-        option['--top'] = top;
+            option['--offset'] = offset + 'px';
+            option['--translateX'] = translateX;
+            option['--duration'] = duration + 's';
+            option['--top'] = top;
+
+            option['--offset'] = offset + 'px';
+            option['--translateX'] = translateX;
+            option['--duration'] = duration + 's';
+            option['--top'] = top;
+        } else if (danmaku.mode === '4') {
+            const duration = '5';
+            const offset = 0;
+
+            let bottomCurrent = 0;
+            for (let i = 1; ; i++) {
+                if (!this.#bottomTrack.has(i)) {
+                    this.#bottomTrack.add(i);
+                    bottomCurrent = i;
+                    break;
+                }
+            }
+            const top = bottomCurrent / (this.#trackCount / this.#displayArea) * 100 + '%';
+            const translateX = 'calc(' + (this.#containerWidth / 2 + width) + 'px)';
+
+            option['--offset'] = offset + 'px';
+            option['--translateX'] = translateX;
+            option['--duration'] = duration + 's';
+            option['--top'] = top;
+
+        } else if (danmaku.mode === '5') {
+            const duration = '5';
+            const offset = 0;
+
+            let topCurrent = 0;
+            for (let i = 0; ; i++) {
+                if (!this.#topTrack.has(i)) {
+                    this.#topTrack.add(i);
+                    topCurrent = i;
+                    break;
+                }
+            }
+            const top = topCurrent / (this.#trackCount / this.#displayArea) * 100 + '%';
+            const translateX = 'calc(' + 0 + 'px)';
+
+            option['--offset'] = offset + 'px';
+            option['--translateX'] = translateX;
+            option['--duration'] = duration + 's';
+            option['--top'] = top;
+        }
 
         return option;
     }

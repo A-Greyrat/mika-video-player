@@ -6,23 +6,26 @@
     transform: translateX(-100%);
   }
 }
+
 .mika-video-player-danmaku-container-paused {
   .mika-video-player-danmaku {
     animation-play-state: paused !important;
   }
 }
 
-.mika-video-player-danmaku {
+.mika-video-player-danmaku,
+.mika-video-player-danmaku-bottom,
+.mika-video-player-danmaku-top {
   --opacity: unset;
   --fontSize: unset;
   --fontFamily: unset;
   --fontWeight: unset;
   --textShadow: unset;
   --color: unset;
+  --top: unset;
+  --duration: unset;
   --offset: unset;
   --translateX: unset;
-  --duration: unset;
-  --top: unset;
 
   position: absolute;
   white-space: nowrap;
@@ -36,9 +39,35 @@
   text-shadow: var(--textShadow);
   color: var(--color);
   will-change: transform;
-  top: var(--top);
+}
 
+@keyframes mika-video-player-danmaku-disappear {
+  0%, 99% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+
+.mika-video-player-danmaku {
+  top: var(--top);
   animation: mika-video-player-danmaku var(--duration) linear;
+}
+
+.mika-video-player-danmaku-bottom {
+  bottom: var(--top);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: mika-video-player-danmaku-disappear var(--duration) linear;
+}
+
+.mika-video-player-danmaku-top {
+  top: var(--top);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: mika-video-player-danmaku-disappear var(--duration) linear;
 }
 
 .mika-video-player-danmaku-container {
@@ -49,9 +78,4 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
-}
-
-.mika-video-player-temp-danmaku {
-  visibility: hidden;
-  white-space: nowrap;
 }

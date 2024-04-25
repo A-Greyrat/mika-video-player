@@ -23,12 +23,7 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
             if (videoElement.paused) return;
 
             const currentTime = videoElement.currentTime;
-            console.log('currentTime:', currentTime, 'currentIndex:', currentIndex.current, 'danmaku.length:', danmaku.length)
             while (currentIndex.current < danmaku.length && danmaku[currentIndex.current].begin <= currentTime) {
-                const minute = Math.floor(danmaku[currentIndex.current].begin / 60);
-                const second = Math.floor(danmaku[currentIndex.current].begin % 60);
-
-                console.log('now display danmaku:', danmaku[currentIndex.current].text + ' at ' + minute + ':' + second);
                 danmakuPool.current?.addDanmaku(danmaku[currentIndex.current++]);
             }
         };
