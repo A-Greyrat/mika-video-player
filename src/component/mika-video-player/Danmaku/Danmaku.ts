@@ -70,16 +70,12 @@ export class DanmakuPool implements IDanmakuPool {
 
     #handlePause = () => {
         this.#playState.state = 'paused';
-        this.#currentDanmaku.forEach(d => {
-            d.style.animationPlayState = 'paused';
-        });
+        this.#container?.classList.add('mika-video-player-danmaku-container-paused');
     }
 
     #handlePlay = () => {
         this.#playState.state = 'running';
-        this.#currentDanmaku.forEach(d => {
-            d.style.animationPlayState = 'running';
-        });
+        this.#container?.classList.remove('mika-video-player-danmaku-container-paused');
     }
 
     #handleSeeked = () => {
