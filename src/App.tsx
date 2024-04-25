@@ -1,12 +1,13 @@
 import './App.css';
 import React, {useEffect} from "react";
 
-import VideoPlayer from "./component/mika-video-player";
+import VideoPlayer, {FullScreenButton, PlayButton, ToolbarTimer, VolumeButton} from "./component/mika-video-player";
+import SpeedButton from "./component/mika-video-player/Controller/ToolbarFunc/SpeedButton/SpeedButton.tsx";
 import {DanmakuType} from "./component/mika-video-player/Danmaku/Danmaku.ts";
 
 const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
 const _bv = 'BV1EE421M7zP';
-let proxy = 'https://118.31.42.183/proxy?pReferer=https://www.bilibili.com';
+let proxy = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
     return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;
@@ -41,6 +42,7 @@ const App: React.FC = () => {
             justifyContent: 'center',
             alignItems: 'center',
         }}>
+
             <VideoPlayer
                 width='80%'
                 style={{
@@ -49,6 +51,11 @@ const App: React.FC = () => {
                     overflow: 'hidden'
                 }}
                 controls
+                toolbar={{
+                    left: [PlayButton, ToolbarTimer],
+                    middle: [],
+                    right: [SpeedButton,VolumeButton, FullScreenButton],
+                }}
                 loop
                 danmaku={danmakus}
                 src={url ? proxy + url : url}
