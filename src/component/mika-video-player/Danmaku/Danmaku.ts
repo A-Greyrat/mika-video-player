@@ -1,78 +1,232 @@
 export interface DanmakuType {
-    begin: string;  // '弹幕出现的时间'
-    mode: string;   // '1: 普通弹幕 4: 底部弹幕 5: 顶部弹幕 6: 逆向弹幕 7: 精准定位 8: 高级弹幕'
-    size: string;   // '12: 非常小 16: 特小 18: 小 25: 中 36: 大 45: 很大 64: 特别大'
-    color: string;  // '弹幕颜色'
-    time: string;   // '用户发送弹幕的时间'
-    pool: string;   // '0: 普通池 1: 字幕池 2: 特殊池'
-    text: string;   // '弹幕内容'
+    // '弹幕出现的时间'
+    begin: number;
+    // '1: 普通弹幕 4: 底部弹幕 5: 顶部弹幕 6: 逆向弹幕 7: 精准定位 8: 高级弹幕'
+    mode: string;
+    // '12: 非常小 16: 特小 18: 小 25: 中 36: 大 45: 很大 64: 特别大'
+    size: string;
+    // '弹幕颜色'
+    color: string;
+    // '用户发送弹幕的时间'
+    time: string;
+    // '0: 普通池 1: 字幕池 2: 特殊池'
+    pool: string;
+    // '弹幕内容'
+    text: string;
 }
-
-export const DanmakuLifeTime = 5000;  // '弹幕的生命周期'
-
-export const getDanmakuTracks = (danmaku: DanmakuType[], screenHeight: number, trackHeight: number) => {
-    const trackCount = Math.floor(screenHeight / trackHeight);
-    const tracks: DanmakuType[][] = new Array(trackCount).fill([]);
-    danmaku.sort((a, b) => parseInt(a.time) - parseInt(b.time));
-
-    for (const d of danmaku) {
-        const time = parseInt(d.time);
-        const track = tracks.find(t => t.every(d => parseInt(d.time) + DanmakuLifeTime < time) || t.length === 0);
-        if (track) {
-            track.push(d);
-        }
-    }
-
-    return tracks;
-}
-
 
 export interface DanmakuOption {
-    '--opacity': number;
-    '--fontSize': number;
+    '--opacity': string;
+    '--fontSize': string;
     '--fontFamily': string;
     '--fontWeight': string;
     '--textShadow': string;
     '--color': string;
-    '--offset': number;
-    '--translateX': number;
-    '--duration': number;
-    '--top': number;
+    '--offset': string;
+    '--translateX': string;
+    '--duration': string;
+    '--top': string;
 }
 
 export interface IDanmakuPool {
     destroy(): void;
 
-    addDanmaku(danmaku: DanmakuType, option: DanmakuOption): void;
+    addDanmaku(danmaku: DanmakuType): void;
 }
 
-export class DanmakuPool implements IDanmakuPool{
-    #container: HTMLDivElement;
+export class DanmakuPool implements IDanmakuPool {
+    #container?: HTMLDivElement;
     #availableDanmaku: HTMLDivElement[] = [];
-    #currentDanmaku: HTMLDivElement[] = [];
+    #currentDanmaku: Set<HTMLDivElement> = new Set();
+    #tempDanmaku?: HTMLDivElement = document.createElement('div');
+    #speed = 4;
+    #containerWidth = 0;
+    #containerHeight = 0;
+    #lengthMap = new Map<string, number>();
+    #heightMap = new Map<string, number>();
+    #resizeObserver = new ResizeObserver(this.#handleResize.bind(this));
+    #video: HTMLVideoElement;
 
-    constructor(container: HTMLDivElement) {
+    #displayArea: 0.25 | 0.5 | 0.75 | 1 = 0.5;
+    #trackCount = 0;
+    #currentTrack = 0;
+
+    #defaultDanmakuOption: Pick<DanmakuOption, '--opacity' | '--fontFamily' | '--fontWeight' | '--textShadow'> = {
+        '--opacity': '0.65',
+        '--fontFamily': 'Arial, Helvetica, sans-serif',
+        '--fontWeight': 'bold',
+        '--textShadow': '1px 0 1px black, 0 1px 1px black, 0 -1px 1px black, -1px 0 1px black',
+    };
+
+    #playState: { state: 'running' | 'paused' } = {state: 'running'};
+
+    #handleResize(entries: ResizeObserverEntry[]) {
+        const entry = entries[0];
+        this.#containerWidth = entry.contentRect.width;
+        this.#containerHeight = entry.contentRect.height;
+
+        this.#trackCount = Math.floor(this.#containerHeight / this.#heightMap.get('25')!) * this.#displayArea;
+    }
+
+    #handlePause = () => {
+        this.#playState.state = 'paused';
+        this.#currentDanmaku.forEach(d => {
+            d.style.animationPlayState = 'paused';
+        });
+    }
+
+    #handlePlay = () => {
+        this.#playState.state = 'running';
+        this.#currentDanmaku.forEach(d => {
+            d.style.animationPlayState = 'running';
+        });
+    }
+
+    #handleSeeked = () => {
+        this.#currentDanmaku.forEach(d => {
+            this.#availableDanmaku.push(d);
+            d.innerText = '';
+            d.style.visibility = 'hidden';
+        });
+        this.#currentDanmaku.clear();
+        this.#currentTrack = 0;
+    }
+
+    constructor(container: HTMLDivElement, video: HTMLVideoElement) {
         this.#container = container;
+        this.#video = video;
+
+        this.#tempDanmaku!.className = 'mika-video-player-temp-danmaku';
+        this.#container.appendChild(this.#tempDanmaku!);
+        this.#playState.state = video.paused ? 'paused' : 'running';
+
+        video.addEventListener('pause', this.#handlePause);
+        video.addEventListener('play', this.#handlePlay);
+        video.addEventListener('seeked', this.#handleSeeked);
+
+        this.#containerWidth = this.#container!.clientWidth;
+        this.#containerHeight = this.#container!.clientHeight;
+
+        this.#resizeObserver.observe(this.#container);
+
+        const lengthList = ['12', '16', '18', '25', '36', '45', '64'];
+        lengthList.forEach(size => {
+            this.#tempDanmaku!.style.fontSize = this.#calculateFontSize(size) + 'px';
+            this.#tempDanmaku!.innerText = '测';
+            this.#lengthMap.set(size, this.#tempDanmaku!.clientWidth);
+            this.#heightMap.set(size, this.#tempDanmaku!.clientHeight);
+        });
+
+        this.#tempDanmaku!.remove();
+        this.#trackCount = Math.floor(this.#containerHeight / this.#heightMap.get('25')!) * this.#displayArea;
     }
 
     public destroy() {
         this.#availableDanmaku.forEach(d => d.remove);
         this.#currentDanmaku.forEach(d => d.remove);
 
+        this.#resizeObserver.disconnect();
+        this.#lengthMap.clear();
+        this.#heightMap.clear();
+
         this.#availableDanmaku = [];
-        this.#currentDanmaku = [];
+        this.#currentDanmaku.clear();
+
+        this.#container = undefined;
+        this.#tempDanmaku = undefined;
+
+        this.#video.removeEventListener('pause', this.#handlePause);
+        this.#video.removeEventListener('play', this.#handlePlay);
+        this.#video.removeEventListener('seeked', this.#handleSeeked);
     }
 
-    public addDanmaku(danmaku: DanmakuType, option: DanmakuOption) {
-        const d = document.createElement('div');
-        d.className = 'mika-video-player-danmaku';
+    #createDanmakuElement(danmaku: DanmakuType, danmakuOption: DanmakuOption): HTMLDivElement {
+        const d = this.#availableDanmaku.length > 0 ? this.#availableDanmaku.pop()! : this.#container!.appendChild(document.createElement('div'));
+        this.#currentDanmaku.add(d);
 
-        Object.entries(option).forEach(([key, value]) => {
-            d.style.setProperty(key, value.toString());
+        d.classList.remove('mika-video-player-danmaku');
+        d.ariaLive = 'polite';
+        d.style.visibility = 'visible';
+        d.style.animationPlayState = this.#playState.state;
+
+        setTimeout(() => {
+            void d.offsetWidth;
+            d.classList.add('mika-video-player-danmaku');
+            d.innerText = danmaku.text;
+        }, 0);
+
+        Object.entries(danmakuOption).forEach(([key, value]) => {
+            d.style.setProperty(key, value);
         });
 
-        d.innerText = danmaku.text;
-        this.#container.appendChild(d);
+        d.onanimationend = () => {
+            this.#availableDanmaku.push(d);
+            this.#currentDanmaku.delete(d);
+            d.innerText = '';
+            d.style.visibility = 'hidden';
+        };
+
+        return d;
+    }
+
+    public setDefaultDanmakuOption(option: Pick<DanmakuOption, '--opacity' | '--fontFamily' | '--fontWeight' | '--textShadow'>) {
+        this.#defaultDanmakuOption = option;
+    }
+
+    #calculateFontSize(fontSize: string): number {
+        const size = parseFloat(fontSize);
+        switch (size) {
+            case 12:
+                return 16;
+            case 16:
+                return 16;
+            case 18:
+                return 18;
+            case 25:
+                return 20;
+            case 36:
+                return 24;
+            case 45:
+                return 24;
+            case 64:
+                return 24;
+            default:
+                return 20;
+        }
+    }
+
+    #createDanmakuOption(danmaku: DanmakuType): DanmakuOption {
+        const option = {
+            ...this.#defaultDanmakuOption,
+            "--fontSize": this.#calculateFontSize(danmaku.size) + 'px',
+            "--color": '#' + parseInt(danmaku.color).toString(16).padStart(6, '0'),
+
+            "--offset": '',
+            "--translateX": '',
+            "--duration": '',
+            "--top": '',
+        };
+
+
+        const width = this.#lengthMap.get(danmaku.size)! * danmaku.text.length;
+
+        // 计算弹幕的速度
+        const duration = (this.#containerWidth + width * 2) / width * this.#speed;
+        const offset = 0;
+        const top = this.#heightMap.get(danmaku.size)! * this.#currentTrack + 'px';
+        this.#currentTrack = (this.#currentTrack + 1) % this.#trackCount;
+        const translateX = 'calc(' + this.#containerWidth + 'px)';
+
+        option['--offset'] = offset + 'px';
+        option['--translateX'] = translateX;
+        option['--duration'] = duration + 's';
+        option['--top'] = top;
+
+        return option;
+    }
+
+    public addDanmaku(danmaku: DanmakuType) {
+        this.#createDanmakuElement(danmaku, this.#createDanmakuOption(danmaku));
     }
 
 }

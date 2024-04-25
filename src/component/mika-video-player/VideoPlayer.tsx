@@ -4,7 +4,7 @@ import {Controller, ToolbarFunc, Shortcut} from "./Controller";
 
 import './VideoPlayer.less';
 import {DanmakuType} from "./Danmaku/Danmaku.ts";
-import DanmakuContainer from "./Danmaku/DanmakuContainer.tsx";
+import Danmaku from "./Danmaku/Danmaku.tsx";
 
 export type ToolbarArea = {
     left: ToolbarFunc[];
@@ -64,6 +64,7 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
             <video crossOrigin="anonymous" ref={videoRef} {...rest}>
                 {children}
             </video>
+            <Danmaku danmaku={danmaku} videoElement={videoRef.current}/>
             {controls && <Controller videoElement={videoRef.current} containerElement={containerRef.current} toolbar={toolbar} shortcut={shortcut}/>}
         </div>
     );

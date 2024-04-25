@@ -2,7 +2,6 @@ import './App.css';
 import React, {useEffect} from "react";
 
 import VideoPlayer from "./component/mika-video-player";
-import {Input} from "./component/mika-ui";
 import {DanmakuType} from "./component/mika-video-player/Danmaku/Danmaku.ts";
 
 const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
@@ -28,8 +27,8 @@ const App: React.FC = () => {
         });
 
         fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || _bv)).then(res => res.json()).then(data => {
+            data = [...data];
             setDanmakus(data);
-            console.log(data)
         });
     }, []);
 
@@ -55,7 +54,6 @@ const App: React.FC = () => {
                 src={url ? proxy + url : url}
             >
             </VideoPlayer>
-            <Input type='filled'/>
 
         </div>
     )
