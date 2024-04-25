@@ -89,6 +89,8 @@ export class DanmakuPool implements IDanmakuPool {
         });
         this.#currentDanmaku.clear();
         this.#currentTrack = 0;
+        this.#topTrack.clear();
+        this.#bottomTrack.clear();
     }
 
     constructor(container: HTMLDivElement, video: HTMLVideoElement) {
