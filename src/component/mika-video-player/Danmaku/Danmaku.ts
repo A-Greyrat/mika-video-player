@@ -25,7 +25,8 @@ export interface DanmakuOption {
     '--offset': string;
     '--translateX': string;
     '--duration': string;
-    '--top': string;
+    '--currentTrack': string;
+    '--totalTrack': string;
 }
 
 export interface IDanmakuPool {
@@ -69,6 +70,12 @@ export class DanmakuPool implements IDanmakuPool {
         this.#containerHeight = entry.contentRect.height;
 
         this.#trackCount = Math.floor(this.#containerHeight / this.#heightMap.get('25')!) * this.#displayArea;
+
+        this.#currentDanmaku.forEach(d => {
+            if (d.className === 'mika-video-player-danmaku')
+                d.style.setProperty('--totalTrack', this.#trackCount.toString());
+            else d.style.setProperty('--totalTrack', (this.#trackCount / this.#displayArea).toString());
+        });
     }
 
     #handlePause = () => {
@@ -156,11 +163,13 @@ export class DanmakuPool implements IDanmakuPool {
         d.style.visibility = 'visible';
         d.style.animationPlayState = this.#playState.state;
 
-        setTimeout(() => {
-            void d.offsetWidth;
-            d.classList.add(danmakuType);
-            d.innerText = danmaku.text;
-        }, 0);
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                d.classList.add(danmakuType);
+                d.innerText = danmaku.text;
+            });
+            // void d.offsetWidth;
+        });
 
         Object.entries(danmakuOption).forEach(([key, value]) => {
             d.style.setProperty(key, value);
@@ -168,11 +177,9 @@ export class DanmakuPool implements IDanmakuPool {
 
         d.onanimationend = () => {
             if (d.className === 'mika-video-player-danmaku-bottom') {
-                this.#bottomTrack.delete(Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
-                console.log('delete bottom track:', Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
+                this.#bottomTrack.delete(parseInt(danmakuOption['--currentTrack']));
             } else if (d.className === 'mika-video-player-danmaku-top') {
-                this.#topTrack.delete(Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
-                console.log('delete top track:', Math.floor(parseFloat(danmakuOption['--top']) / 100 * (this.#trackCount / this.#displayArea)));
+                this.#topTrack.delete(parseInt(danmakuOption['--currentTrack']));
             }
 
             this.#availableDanmaku.push(d);
@@ -219,7 +226,8 @@ export class DanmakuPool implements IDanmakuPool {
             "--offset": '',
             "--translateX": '',
             "--duration": '',
-            "--top": '',
+            "--currentTrack": '',
+            "--totalTrack": '',
         };
 
 
@@ -228,19 +236,15 @@ export class DanmakuPool implements IDanmakuPool {
         if (danmaku.mode === '1') {
             const duration = (this.#containerWidth + width * 2) / width * this.#speed;
             const offset = 0;
-            const top = (this.#currentTrack % this.#trackCount) * 100 / (this.#trackCount / this.#displayArea) + '%';
+            const currentTrack = this.#currentTrack;
             this.#currentTrack = (this.#currentTrack + 1) % this.#trackCount;
             const translateX = 'calc(' + this.#containerWidth + 'px)';
 
             option['--offset'] = offset + 'px';
             option['--translateX'] = translateX;
             option['--duration'] = duration + 's';
-            option['--top'] = top;
-
-            option['--offset'] = offset + 'px';
-            option['--translateX'] = translateX;
-            option['--duration'] = duration + 's';
-            option['--top'] = top;
+            option['--currentTrack'] = currentTrack.toString();
+            option['--totalTrack'] = this.#trackCount.toString();
         } else if (danmaku.mode === '4') {
             const duration = '5';
             const offset = 0;
@@ -253,13 +257,14 @@ export class DanmakuPool implements IDanmakuPool {
                     break;
                 }
             }
-            const top = bottomCurrent / (this.#trackCount / this.#displayArea) * 100 + '%';
+
             const translateX = 'calc(' + (this.#containerWidth / 2 + width) + 'px)';
 
             option['--offset'] = offset + 'px';
             option['--translateX'] = translateX;
             option['--duration'] = duration + 's';
-            option['--top'] = top;
+            option['--currentTrack'] = bottomCurrent.toString();
+            option['--totalTrack'] = (this.#trackCount / this.#displayArea).toString();
 
         } else if (danmaku.mode === '5') {
             const duration = '5';
@@ -273,13 +278,13 @@ export class DanmakuPool implements IDanmakuPool {
                     break;
                 }
             }
-            const top = topCurrent / (this.#trackCount / this.#displayArea) * 100 + '%';
             const translateX = 'calc(' + 0 + 'px)';
 
             option['--offset'] = offset + 'px';
             option['--translateX'] = translateX;
             option['--duration'] = duration + 's';
-            option['--top'] = top;
+            option['--currentTrack'] = topCurrent.toString();
+            option['--totalTrack'] = (this.#trackCount / this.#displayArea).toString();
         }
 
         return option;
@@ -287,6 +292,11 @@ export class DanmakuPool implements IDanmakuPool {
 
     public addDanmaku(danmaku: DanmakuType) {
         this.#createDanmakuElement(danmaku, this.#createDanmakuOption(danmaku));
+
+        // requestIdleCallback((deadline) => {
+        //     if (deadline.timeRemaining() < 0) this.addDanmaku(danmaku);
+        //     this.#createDanmakuElement(danmaku, this.#createDanmakuOption(danmaku));
+        // });
     }
 
 }

@@ -28,7 +28,7 @@ const App: React.FC = () => {
         });
 
         fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || _bv)).then(res => res.json()).then(data => {
-            data = [...data];
+            data = [...data, ...data, ...data,];
             setDanmakus(data);
         });
     }, []);

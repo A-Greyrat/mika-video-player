@@ -24,7 +24,8 @@
   --fontWeight: unset;
   --textShadow: unset;
   --color: unset;
-  --top: unset;
+  --currentTrack: unset;
+  --totalTrack: unset;
   --duration: unset;
   --offset: unset;
   --translateX: unset;
@@ -54,19 +55,19 @@
 
 
 .mika-video-player-danmaku {
-  top: var(--top);
+  top: calc(var(--currentTrack) / var(--totalTrack) / 2 * 100%);
   animation: mika-video-player-danmaku var(--duration) linear;
 }
 
 .mika-video-player-danmaku-bottom {
-  bottom: var(--top);
+  bottom: calc(var(--currentTrack) / var(--totalTrack) * 100%);
   left: 50%;
   transform: translateX(-50%);
   animation: mika-video-player-danmaku-disappear var(--duration) linear;
 }
 
 .mika-video-player-danmaku-top {
-  top: var(--top);
+  top: calc(var(--currentTrack) / var(--totalTrack) * 100%);
   left: 50%;
   transform: translateX(-50%);
   animation: mika-video-player-danmaku-disappear var(--duration) linear;
