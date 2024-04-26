@@ -16,6 +16,8 @@ const getUrl = (bv: string) => {
 const App: React.FC = () => {
     const [url, setUrl] = React.useState<string | undefined>(undefined);
     const [danmakus, setDanmakus] = React.useState<DanmakuType[]>([]);
+    const ref = React.useRef<HTMLVideoElement>(null);
+    const audioRef = React.useRef<HTMLAudioElement>(null);
     useEffect(() => {
         const url = new URL(window.location.href);
         const bv = url.searchParams.get('bv');
@@ -36,6 +38,10 @@ const App: React.FC = () => {
 
             setDanmakus(newDanmakus);
         });
+    }, []);
+
+    useEffect(() => {
+
     }, []);
 
     return (
@@ -63,10 +69,11 @@ const App: React.FC = () => {
                 }}
                 loop
                 danmaku={danmakus}
+                ref={ref}
                 src={url ? proxy + url : url}
             >
             </VideoPlayer>
-
+            <audio ref={audioRef}/>
         </div>
     )
 };

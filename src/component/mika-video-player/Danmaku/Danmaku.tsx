@@ -25,10 +25,6 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
 
             const currentTime = videoElement.currentTime;
             while (currentIndex.current < danmaku.length && danmaku[currentIndex.current].begin <= currentTime) {
-                const minute = Math.floor(danmaku[currentIndex.current].begin / 60);
-                const second = Math.floor(danmaku[currentIndex.current].begin % 60);
-                console.log(`[${minute}:${second}] ${danmaku[currentIndex.current].text} ${danmaku[currentIndex.current]}`);
-
                 if (lock) {
                     currentIndex.current++;
                     continue;

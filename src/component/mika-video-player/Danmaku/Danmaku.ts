@@ -39,12 +39,15 @@ interface Interval {
     width: number;
     // 高度
     height: number;
+
+    danmaku: DanmakuType;
 }
 
 class DanmakuScheduler {
     #containerHeight: number;
     #heightMap = new Map<string, number>();
     #trackList: Interval[][] = [];
+    #enableMultiTrack = false;
 
     constructor(height: number, heightMap: Map<string, number>) {
         this.#containerHeight = height;
@@ -72,7 +75,9 @@ class DanmakuScheduler {
     #recycleTrack(index: number, danmaku: DanmakuType, trackListIndex: number, compare: (a: Interval, danmaku: DanmakuType) => boolean) {
         if (index + 1 < this.#trackList[trackListIndex].length && compare(this.#trackList[trackListIndex][index + 1], danmaku)) {
             this.#trackList[trackListIndex][index].right = this.#trackList[trackListIndex][index + 1].right;
+            this.#trackList[trackListIndex][index].end = Math.min(this.#trackList[trackListIndex][index].end, this.#trackList[trackListIndex][index + 1].end);
             this.#trackList[trackListIndex].splice(index + 1, 1);
+            console.log(`合并${index}号轨道和${index + 1}号轨道, end: ${this.#trackList[trackListIndex][index].end}`);
             return true;
         }
         return false;
@@ -98,6 +103,10 @@ class DanmakuScheduler {
 
                 if (this.#size(list[i]) === this.#heightMap.get(danmaku.size)!) {
                     list[i].end = danmaku.begin + duration;
+                    list[i].danmaku = danmaku;
+                    list[i].width = this.#heightMap.get(danmaku.size)! * danmaku.text.length;
+                    list[i].height = this.#heightMap.get(danmaku.size)!;
+                    console.log(`找到${i}号轨道满足弹幕‘${danmaku.text}’的需求，前弹幕为‘${list[i].danmaku.text}’，end: ${danmaku.begin + duration}`);
                     return list[i].left;
                 }
 
@@ -105,23 +114,32 @@ class DanmakuScheduler {
                     const right = list[i].right;
                     list[i].right = list[i].left + this.#heightMap.get(danmaku.size)!;
                     list[i].end = danmaku.begin + duration;
+                    list[i].width = this.#heightMap.get(danmaku.size)! * danmaku.text.length;
+                    list[i].height = this.#heightMap.get(danmaku.size)!;
+                    list[i].danmaku = danmaku;
+                    console.log(`找到${i}号轨道满足弹幕‘${danmaku.text}’的需求，但需要拆分成${i}号和${i + 1}号轨道，前弹幕为‘${list[i].danmaku.text}’，end: ${danmaku.begin + duration}`);
+
                     list.splice(i + 1, 0, {
                         left: list[i].right,
                         right: right,
-                        end: 0,
+                        end: danmaku.begin + duration,
                         width: this.#heightMap.get(danmaku.size)! * danmaku.text.length,
-                        height: this.#heightMap.get(danmaku.size)!
+                        height: right - list[i].right,
+                        danmaku: danmaku
                     });
-
                     return list[i].left;
                 }
+
 
                 if (this.#recycleTrack(i, danmaku, trackListIndex, compare)) i--;
             }
 
             const right = list.length > 0 ? list[list.length - 1].right : 0;
             if (right + this.#heightMap.get(danmaku.size)! > this.#containerHeight) {
-                return _getAvailableTrack(danmaku, duration, trackListIndex + 1, compare);
+                if (this.#enableMultiTrack) {
+                    return _getAvailableTrack(danmaku, duration, trackListIndex + 1, compare);
+                }
+                return -1;
             }
 
             list.push({
@@ -129,8 +147,11 @@ class DanmakuScheduler {
                 right: right + this.#heightMap.get(danmaku.size)!,
                 end: danmaku.begin + duration,
                 width: this.#heightMap.get(danmaku.size)! * danmaku.text.length,
-                height: this.#heightMap.get(danmaku.size)!
+                height: this.#heightMap.get(danmaku.size)!,
+                danmaku: danmaku
             });
+
+            console.log(`为弹幕‘${danmaku.text}’新增${list.length - 1}号轨道，end: ${danmaku.begin + duration}`);
 
             return right;
         }
@@ -148,7 +169,7 @@ export class DanmakuPool {
     #currentDanmaku: Set<HTMLDivElement> = new Set();
     #tempDanmaku?: HTMLDivElement = document.createElement('div');
 
-    #speed = 8;
+    #speed = 30;
     #fontSizeScale = 1;
     #videoSpeed = 1;
 
@@ -236,7 +257,7 @@ export class DanmakuPool {
         this.#tempDanmaku!.style.width = 'fit-content';
         lengthList.forEach(size => {
             this.#tempDanmaku!.style.fontSize = this.#calculateFontSize(size) + 'px';
-            this.#tempDanmaku!.innerText = '测';
+            this.#tempDanmaku!.innerText = '未';
             this.#widthMap.set(size, this.#tempDanmaku!.offsetWidth);
             this.#heightMap.set(size, this.#tempDanmaku!.offsetHeight);
         });
@@ -271,7 +292,12 @@ export class DanmakuPool {
         this.#schedulers = [];
     }
 
-    #createDanmakuElement(danmaku: DanmakuType, danmakuOption: DanmakuOption): HTMLDivElement {
+    #createDanmakuElement(danmaku: DanmakuType, danmakuOption: DanmakuOption) {
+        if (danmakuOption['--offsetY'] === '-1px') {
+            console.log('弹幕‘' + danmaku.text + '’超出容器高度, 丢弃');
+            return;
+        }
+
         const d = this.#availableDanmaku.length > 0 ? this.#availableDanmaku.pop()! : this.#container!.appendChild(document.createElement('div'));
         this.#currentDanmaku.add(d);
 
@@ -303,8 +329,6 @@ export class DanmakuPool {
             d.innerText = '';
             d.style.visibility = 'hidden';
         };
-
-        return d;
     }
 
     public setDefaultDanmakuOption(option: Pick<DanmakuOption, '--opacity' | '--fontFamily' | '--fontWeight' | '--textShadow'>) {
@@ -317,7 +341,7 @@ export class DanmakuPool {
     }
 
     #calculateVelocity(width: number): number {
-        return Math.sqrt(width) * this.#speed;
+        return Math.log(width) * this.#speed;
     }
 
     #createDanmakuOption(danmaku: DanmakuType): DanmakuOption {
@@ -334,41 +358,32 @@ export class DanmakuPool {
 
 
         const width = this.#widthMap.get(danmaku.size)! * danmaku.text.length;
-        // console.log(this.#widthMap.get(danmaku.size),danmaku.text.length,width)
-        if (danmaku.mode === '4') {
-            const duration = 5;
-            const offset = 0;
-            const translateX = '0';
+        let duration = 5;
+        const offset = 0;
+        let translateX = '0';
 
-            option['--offset'] = offset + 'px';
-            option['--translateX'] = translateX;
-            option['--duration'] = duration + 's';
+        if (danmaku.mode === '4') {
             option['--offsetY'] = this.#schedulers[1].getAvailableTrack(danmaku, duration * this.#videoSpeed) + 'px';
         } else if (danmaku.mode === '5') {
-            const duration = 5;
-            const offset = 0;
-            const translateX = '0';
-
-            option['--offset'] = offset + 'px';
-            option['--translateX'] = translateX;
-            option['--duration'] = duration + 's';
             option['--offsetY'] = this.#schedulers[2].getAvailableTrack(danmaku, duration * this.#videoSpeed) + 'px';
         } else {
             // 不支持的弹幕类型均视为普通弹幕
-            const duration = (this.#containerWidth + width) / this.#calculateVelocity(width);
-            const offset = 0;
-            const translateX = 'calc(' + this.#containerWidth + 'px)';
+            duration = (this.#containerWidth + width) / this.#calculateVelocity(width);
+            translateX = 'calc(' + this.#containerWidth + 'px)';
+
             const compare = (a: Interval, danmaku: DanmakuType) => {
-                return this.#heightMap.get(danmaku.size)! <= a.height && (danmaku.begin - a.end + this.#containerWidth / this.#calculateVelocity(a.width) <= 0
-                    && (a.end - danmaku.begin) * this.#calculateVelocity(width) <= this.#containerWidth);
+                return danmaku.begin >= a.end ||
+                    (this.#heightMap.get(danmaku.size)! >= a.height &&
+                        (a.end - danmaku.begin) * (this.#calculateVelocity(a.width)) <= this.#containerWidth &&
+                        (a.end - danmaku.begin) * (this.#calculateVelocity(width)) <= this.#containerWidth);
             };
 
-            option['--offset'] = offset + 'px';
-            option['--translateX'] = translateX;
-            option['--duration'] = duration + 's';
             option['--offsetY'] = this.#schedulers[0].getAvailableTrack(danmaku, duration * this.#videoSpeed, compare.bind(this)) + 'px';
         }
 
+        option['--offset'] = offset + 'px';
+        option['--translateX'] = translateX;
+        option['--duration'] = duration + 's';
         return option;
     }
 
