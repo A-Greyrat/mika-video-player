@@ -18,12 +18,22 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
         if (!videoElement || !containerRef.current || danmakuPool.current) return;
         danmakuPool.current = new DanmakuPool(containerRef.current, videoElement);
         danmaku.sort((a, b) => a.begin - b.begin);
+        let lock = false;
 
         const handleTimeUpdate = () => {
             if (videoElement.paused) return;
 
             const currentTime = videoElement.currentTime;
             while (currentIndex.current < danmaku.length && danmaku[currentIndex.current].begin <= currentTime) {
+                const minute = Math.floor(danmaku[currentIndex.current].begin / 60);
+                const second = Math.floor(danmaku[currentIndex.current].begin % 60);
+                console.log(`[${minute}:${second}] ${danmaku[currentIndex.current].text} ${danmaku[currentIndex.current]}`);
+
+                if (lock) {
+                    currentIndex.current++;
+                    continue;
+                }
+
                 danmakuPool.current?.addDanmaku(danmaku[currentIndex.current++]);
             }
         };
@@ -40,16 +50,22 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
             }
 
             currentIndex.current = l;
-        }
+        };
+
+        const handleVisibilityChange = () => {
+            lock = document.hidden;
+        };
 
         videoElement.addEventListener('timeupdate', handleTimeUpdate);
         videoElement.addEventListener('seeking', handleSeeking);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
             danmakuPool.current?.destroy();
             danmakuPool.current = null;
             videoElement.removeEventListener('timeupdate', handleTimeUpdate);
             videoElement.removeEventListener('seeked', handleSeeking);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, [danmaku, videoElement]);
 

@@ -134,7 +134,7 @@ class DanmakuScheduler {
 
             return right;
         }
-        return  _getAvailableTrack(danmaku, duration, 0, compare || this.#isFree);
+        return _getAvailableTrack(danmaku, duration, 0, compare || this.#isFree);
     }
 
     public clear() {
@@ -159,7 +159,7 @@ export class DanmakuPool {
     #resizeObserver = new ResizeObserver(this.#handleResize.bind(this));
     #video: HTMLVideoElement;
 
-    #displayArea: 0.25 | 0.5 | 0.75 | 1 = 0.5;
+    #displayArea: 0.25 | 0.5 | 0.75 | 1 = 0.75;
 
     #schedulers: DanmakuScheduler[] = [];
 
@@ -359,7 +359,7 @@ export class DanmakuPool {
             const offset = 0;
             const translateX = 'calc(' + this.#containerWidth + 'px)';
             const compare = (a: Interval, danmaku: DanmakuType) => {
-                return this.#heightMap.get(danmaku.size)! <= a.height && (danmaku.begin - a.end + this.#containerWidth / this.#calculateVelocity(a.width) >= 0
+                return this.#heightMap.get(danmaku.size)! <= a.height && (danmaku.begin - a.end + this.#containerWidth / this.#calculateVelocity(a.width) <= 0
                     && (a.end - danmaku.begin) * this.#calculateVelocity(width) <= this.#containerWidth);
             };
 

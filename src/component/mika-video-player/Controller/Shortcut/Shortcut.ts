@@ -78,7 +78,7 @@ export const defaultShortcuts: Shortcut[] = [
         type: 'pointerdown',
         root: 'video',
         callback: (videoElement) => {
-            if (videoElement) {
+            if (videoElement && videoElement.readyState >= 2) {
                 if (videoElement.paused) videoElement.play().catch(undefined);
                 else videoElement.pause();
             }
