@@ -1,5 +1,5 @@
 import React, {forwardRef, memo, Ref, useEffect, useImperativeHandle, useRef} from "react";
-import {DanmakuPool, DanmakuType, IDanmakuPool} from "./Danmaku.ts";
+import {DanmakuPool, DanmakuType} from "./Danmaku.ts";
 import './Danmaku.less';
 
 export interface DanmakuProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,7 +10,7 @@ export interface DanmakuProps extends React.HTMLAttributes<HTMLDivElement> {
 const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) => {
     const {danmaku, videoElement, ...rest} = props;
     const containerRef = useRef<HTMLDivElement>(null);
-    const danmakuPool = useRef<IDanmakuPool | null>(null);
+    const danmakuPool = useRef<DanmakuPool | null>(null);
     const currentIndex = useRef(0);
     useImperativeHandle(ref, () => containerRef.current!);
 
