@@ -31,6 +31,33 @@ export interface DanmakuOption {
     '--offsetY': string;
 }
 
+class Timer {
+    #start: number = 0;
+    #paused: boolean = true;
+    #pauseTime: number = 0;
+
+    constructor() {
+        this.#start = performance.now();
+        this.#pauseTime = this.#start;
+    }
+
+    get now(): number {
+        return this.#paused ? this.#pauseTime - this.#start : performance.now() - this.#start;
+    }
+
+    public pause() {
+        if (this.#paused) return;
+        this.#paused = true;
+        this.#pauseTime = performance.now();
+    }
+
+    public resume() {
+        if (!this.#paused) return;
+        this.#paused = false;
+        this.#start += performance.now() - this.#pauseTime;
+    }
+}
+
 export class DanmakuPool {
     #container?: HTMLDivElement;
     #availableDanmaku: HTMLDivElement[] = [];
@@ -38,6 +65,7 @@ export class DanmakuPool {
     #schedulers: DanmakuScheduler[] = [];
     #resizeObserver: ResizeObserver = new ResizeObserver(this.#handleResize.bind(this));
     #video: HTMLVideoElement;
+    #timer: Timer = new Timer();
 
     #canvas = document.createElement('canvas');
     #context: CanvasRenderingContext2D = this.#canvas.getContext('2d')!;
@@ -47,7 +75,6 @@ export class DanmakuPool {
     #containerWidth = 0;
     #containerHeight = 0;
 
-    // 弹幕显示区域占容器高度比例
     #displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 0.75;
     #danmakuSpeed = 1;
     #fontSizeScale = 0.8;
@@ -64,8 +91,9 @@ export class DanmakuPool {
         this.#containerHeight = this.#container!.clientHeight;
 
         this.#resizeObserver.observe(this.#container);
-
+        this.#timer.resume();
         this.#video = video;
+
         this.#playState.state = video.paused ? 'paused' : 'running';
         video.addEventListener('pause', this.#handlePause);
         video.addEventListener('play', this.#handlePlay);
@@ -111,11 +139,13 @@ export class DanmakuPool {
     #handlePause = () => {
         this.#playState.state = 'paused';
         this.#container?.classList.add('mika-video-player-danmaku-container-paused');
+        this.#timer.pause();
     }
 
     #handlePlay = () => {
         this.#playState.state = 'running';
         this.#container?.classList.remove('mika-video-player-danmaku-container-paused');
+        this.#timer.resume();
     }
 
     #handleSeeked = () => {
@@ -215,7 +245,8 @@ export class DanmakuPool {
     #getTextSize(text: string, fontSize: number, fontFamily: string, fontWeight: string) {
         this.#context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
         const size = this.#context.measureText(text);
-        return [size.width, size.actualBoundingBoxAscent + size.actualBoundingBoxDescent + 4] as const;
+        // Firefox will return float value, but Chrome will return integer value
+        return [Math.ceil(size.width), Math.ceil(size.actualBoundingBoxAscent + size.actualBoundingBoxDescent + 4)] as const;
     }
 
     #getDanmakuOption(danmaku: DanmakuType): DanmakuOption {
@@ -235,6 +266,7 @@ export class DanmakuPool {
         let duration = 5;
         const offset = 0;
         let translateX = '0';
+        danmaku.begin = this.#timer.now / 1000;
         if (danmaku.mode === '1') {
             duration = (this.#containerWidth + width) / this.#getVelocity(width);
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -246,7 +278,7 @@ export class DanmakuPool {
             translateX = 'calc(' + this.#containerWidth + 'px)';
 
             const comparer = (a: Interval, danmaku: DanmakuType) => {
-                const delta = a.start + a.duration * this.#videoSpeed - danmaku.begin;
+                const delta = a.start + a.duration - danmaku.begin;
                 return delta * this.#getVelocity(a.width) <= this.#containerWidth && // 前弹幕以及完全进入屏幕
                     delta * this.#getVelocity(width) <= this.#containerWidth; // 在当前弹幕消失前，新弹幕不会追上前弹幕
             };

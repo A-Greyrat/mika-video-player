@@ -11,7 +11,7 @@ const PlayButton: ToolbarFunc = memo((props: {
     const [isPlaying, setIsPlaying] = React.useState(false);
 
     const onClick = useCallback(() => {
-        if (videoElement) {
+        if (videoElement && videoElement.readyState > 2) {
             if (videoElement.paused) videoElement.play().catch(undefined);
             else videoElement.pause();
             setIsPlaying(!isPlaying);

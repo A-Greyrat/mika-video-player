@@ -16,6 +16,7 @@ export interface Interval {
     width: number;
 }
 
+
 export class DanmakuScheduler {
     #trackList: Interval[][] = [];
     #enableMultiTrack = false;
@@ -54,14 +55,42 @@ export class DanmakuScheduler {
         return track.start + track.duration * this.#videoSpeed <= danmaku.begin;
     }
 
-    #combineTrack(index: number, danmaku: DanmakuType, trackListIndex: number, compare: (a: Interval, danmaku: DanmakuType) => boolean) {
-        if (index + 1 < this.#trackList[trackListIndex].length && compare(this.#trackList[trackListIndex][index + 1], danmaku)) {
-            this.#trackList[trackListIndex][index].right = this.#trackList[trackListIndex][index + 1].right;
-            this.#trackList[trackListIndex].splice(index + 1, 1);
-            Debugger.log(`合并${index}号轨道和${index + 1}号轨道, end: ${this.#trackList[trackListIndex][index].start + this.#trackList[trackListIndex][index].duration}`);
-            return true;
+    #combineTrack(index: number, danmaku: DanmakuType, trackListIndex: number, width: number, height: number, duration: number, compare: (a: Interval, danmaku: DanmakuType) => boolean) {
+        // 持续尝试合并轨道，直到满足height的需求
+        let cur = index, right = this.#trackList[trackListIndex][index].right;
+        while (cur + 1 < this.#trackList[trackListIndex].length
+            && compare(this.#trackList[trackListIndex][cur + 1], danmaku)
+            && right - this.#trackList[trackListIndex][index].left < height
+            ) {
+            cur++;
+            right = this.#trackList[trackListIndex][cur].right;
         }
-        return false;
+
+        if (right - this.#trackList[trackListIndex][index].left < height) return -1;
+
+        Debugger.log(`合并${index} - ${cur}号轨道`);
+        const lastTrack = JSON.parse(JSON.stringify(this.#trackList[trackListIndex][cur]));
+        const i = index + 1;
+        while (i <= cur) {
+            right = this.#trackList[trackListIndex][i].right;
+            this.#trackList[trackListIndex].splice(i, 1);
+            cur--;
+        }
+
+        if (right - this.#trackList[trackListIndex][index].left > height) {
+            this.#trackList[trackListIndex].splice(index + 1, 0, {
+                left: this.#trackList[trackListIndex][index].left + height,
+                right: right,
+                start: lastTrack.start,
+                duration: lastTrack.duration,
+                width: lastTrack.width,
+            });
+
+            Debugger.log(`合并后拆分为${index}号和${index + 1}号轨道`, danmaku, JSON.parse(JSON.stringify(this.#trackList[trackListIndex])));
+        }
+
+        this.#useTrack(this.#trackList[trackListIndex][index], danmaku, width, height, duration);
+        return this.#trackList[trackListIndex][index].left;
     }
 
     #size = (danmaku: Interval) => danmaku.right - danmaku.left;
@@ -93,23 +122,24 @@ export class DanmakuScheduler {
                 }
 
                 if (this.#size(list[i]) > height) {
-                    Debugger.log(`找到${i}号轨道满足弹幕‘${danmaku.text}’的需求，但需要拆分成${i}号和${i + 1}号轨道’，duration: ${duration}`, danmaku,  JSON.parse(JSON.stringify(list)));
+                    Debugger.log(`找到${i}号轨道满足弹幕‘${danmaku.text}’的需求，但需要拆分成${i}号和${i + 1}号轨道’，duration: ${duration}`, danmaku, JSON.parse(JSON.stringify(list)));
                     const right = list[i].right;
-                    this.#useTrack(list[i], danmaku, width, height, duration);
 
                     list.splice(i + 1, 0, {
                         left: list[i].right,
                         right: right,
-                        start: 0,
-                        duration: 0,
-                        width: width,
+                        start: list[i].start,
+                        duration: list[i].duration,
+                        width: list[i].width,
                     });
 
+                    this.#useTrack(list[i], danmaku, width, height, duration);
                     return list[i].left;
                 }
 
                 // 尝试合并轨道，合并成功则回退一步判断合并后的轨道是否满足需求
-                if (this.#combineTrack(i, danmaku, trackListIndex, comparer)) i--;
+                const ret = this.#combineTrack(i, danmaku, trackListIndex, width, height, duration, comparer);
+                if (ret !== -1) return ret;
             }
 
             // 如果开启多轨道列表模式，且当前轨道已满，则尝试下一个轨道列表
@@ -120,7 +150,7 @@ export class DanmakuScheduler {
                 }
                 return -1;
             }
-            Debugger.log(`为弹幕‘${danmaku.text}’新增${list.length - 1}号轨道，duration：${duration}`, danmaku, JSON.parse(JSON.stringify(list)));
+            Debugger.log(`为弹幕‘${danmaku.text}’新增${list.length}号轨道，duration：${duration}`, danmaku, JSON.parse(JSON.stringify(list)));
 
             list.push({
                 left: right,
