@@ -1,12 +1,10 @@
-import {memo, useCallback} from "react";
+import {memo, useCallback, useContext} from "react";
 import FullScreenIcon from "../Icon/FullScreenIcon";
-import FuncButton, {ToolbarFunc} from "../FuncButton/FuncButton";
+import FuncButton from "../FuncButton/FuncButton";
+import {VideoPlayerContext} from "../../../VideoPlayer.tsx";
 
-const FullScreenButton: ToolbarFunc = memo((props: {
-    videoElement?: HTMLVideoElement | null,
-    containerElement?: HTMLDivElement | null
-}) => {
-    const {containerElement} = props;
+const FullScreenButton = memo(() => {
+    const containerElement = useContext(VideoPlayerContext)?.containerElement;
 
     const fullscreen = useCallback((e: { stopPropagation: () => void }) => {
         e.stopPropagation();

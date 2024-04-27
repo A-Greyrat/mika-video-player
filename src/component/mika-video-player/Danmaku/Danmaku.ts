@@ -130,9 +130,9 @@ export class DanmakuPool {
         this.#containerHeight = entry.contentRect.height;
 
         this.#schedulers.forEach(scheduler => {
+            scheduler.clear();
             scheduler.ContainerHeight = this.#containerHeight;
         });
-
         this.#schedulers[0].ContainerHeight = this.#containerHeight * this.#displayAreaRate;
     }
 

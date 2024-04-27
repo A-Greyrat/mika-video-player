@@ -8,7 +8,7 @@ import Debugger from "./component/mika-video-player/Debugger";
 
 const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
 const _bv = 'BV1EE421M7zP';
-let proxy = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
+let proxy = 'https://118.31.42.183/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
     return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;

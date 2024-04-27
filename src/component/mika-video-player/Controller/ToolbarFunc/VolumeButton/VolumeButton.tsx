@@ -1,18 +1,18 @@
-import {memo, useCallback, useEffect, useState} from "react";
+import {memo, useCallback, useContext, useEffect, useState} from "react";
 import VolumeIcon from "../Icon/VolumeIcon";
-import FuncButton, {ToolbarFunc} from "../FuncButton/FuncButton";
+import FuncButton from "../FuncButton/FuncButton";
 import {Dropdown, Range} from "../../../../mika-ui";
 
 import './VolumeButton.less';
+import {VideoPlayerContext} from "../../../VideoPlayer.tsx";
 
-const VolumeButton: ToolbarFunc = memo((props: {
-    videoElement?: HTMLVideoElement | null,
-}) => {
+const VolumeButton = memo(() => {
     const [isMuted, setIsMuted] = useState(false);
     const [_, forceUpdate] = useState(0);
 
+    const videoElement = useContext(VideoPlayerContext)?.videoElement;
+
     useEffect(() => {
-        const videoElement = props.videoElement;
         if (!videoElement) return;
 
         const handleVolumeChange = () => {
@@ -24,35 +24,36 @@ const VolumeButton: ToolbarFunc = memo((props: {
         return () => {
             videoElement.removeEventListener('volumechange', handleVolumeChange);
         };
-    }, [props.videoElement]);
+    }, [videoElement]);
 
     const onClick = useCallback(() => {
-        const videoElement = props.videoElement;
         if (!videoElement) return;
 
         videoElement.muted = !videoElement.muted;
         setIsMuted(videoElement.muted || videoElement.volume === 0);
-    }, [props.videoElement]);
+    }, [videoElement]);
 
     const onChange = useCallback((value: number) => {
-        const videoElement = props.videoElement;
         if (!videoElement) return;
 
         forceUpdate(value => value + 1);
         videoElement.volume = value / 100;
         videoElement.muted = false;
-    }, [props.videoElement]);
+    }, [videoElement]);
 
     return (
         <Dropdown menu={(
             <div className="mika-video-player-toolbar-func-volume-dropdown">
+                <div className="mika-video-player-toolbar-func-volume-value">
+                    {isMuted ? 0 : Math.round((videoElement?.volume ?? 0) * 100)}
+                </div>
                 <Range className="mika-video-player-toolbar-func-volume-slider"
-                       value={isMuted ? 0 : (props.videoElement?.volume ?? 0) * 100}
+                       value={isMuted ? 0 : (videoElement?.volume ?? 0) * 100}
                        max={100}
                        onChange={onChange}
                        width="3px"
-                       height="80px"
-                       thumbSize={8}
+                       height="65px"
+                       thumbSize={12}
                        orient="vertical"
                 />
             </div>)}
@@ -61,7 +62,7 @@ const VolumeButton: ToolbarFunc = memo((props: {
                   direction="up"
                   paddingTrigger={5}
         >
-            <FuncButton icon={<VolumeIcon isMuted={isMuted}/>}
+        <FuncButton icon={<VolumeIcon isMuted={isMuted}/>}
                         onClick={onClick}
                         className="mika-video-player-toolbar-func-volume-button"/>
         </Dropdown>

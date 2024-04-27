@@ -1,21 +1,21 @@
-import React, {forwardRef, memo, Ref, useEffect, useImperativeHandle, useRef} from "react";
-import {DanmakuPool, DanmakuType} from "./Danmaku.ts";
+import {forwardRef, memo, Ref, useContext, useEffect, useImperativeHandle, useRef} from "react";
+import {DanmakuPool} from "./Danmaku.ts";
+import {VideoPlayerContext} from "../VideoPlayer.tsx";
+
 import './Danmaku.less';
 
-export interface DanmakuProps extends React.HTMLAttributes<HTMLDivElement> {
-    danmaku: DanmakuType[];
-    videoElement: HTMLVideoElement | null;
-}
 
-const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) => {
-    const {danmaku, videoElement, ...rest} = props;
+const Danmaku = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivElement>) => {
+    const context = useContext(VideoPlayerContext)!;
+    const videoElement = context.videoElement;
+    const danmaku = context.props.danmaku;
     const containerRef = useRef<HTMLDivElement>(null);
     const danmakuPool = useRef<DanmakuPool | null>(null);
     const currentIndex = useRef(0);
     useImperativeHandle(ref, () => containerRef.current!);
 
     useEffect(() => {
-        if (!videoElement || !containerRef.current || danmakuPool.current) return;
+        if (!videoElement || !danmaku || !danmaku.length || !containerRef.current || danmakuPool.current) return;
         danmakuPool.current = new DanmakuPool(containerRef.current, videoElement);
         danmaku.sort((a, b) => a.begin - b.begin);
         let lock = false;
@@ -30,7 +30,7 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
                     continue;
                 }
 
-                danmakuPool.current?.addDanmaku( {...danmaku[currentIndex.current++]});
+                danmakuPool.current?.addDanmaku({...danmaku[currentIndex.current++]});
             }
         };
 
@@ -65,7 +65,7 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
         };
     }, [danmaku, videoElement]);
 
-    return (<div className="mika-video-player-danmaku-container" ref={containerRef} {...rest}/>);
+    return (<div className="mika-video-player-danmaku-container" ref={containerRef}/>);
 }));
 
 Danmaku.displayName = 'Danmaku';

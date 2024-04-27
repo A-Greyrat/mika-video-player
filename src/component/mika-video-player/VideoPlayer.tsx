@@ -1,6 +1,6 @@
 import React, {forwardRef, memo, Ref, useEffect, useImperativeHandle, useRef} from "react";
 import defaultLoader from "./Loader/DefaultLoader";
-import {Controller, ToolbarFunc, Shortcut} from "./Controller";
+import {Controller, Shortcut, ToolbarFunc} from "./Controller";
 
 import './VideoPlayer.less';
 import {DanmakuType} from "./Danmaku/Danmaku.ts";
@@ -19,8 +19,19 @@ export interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoEle
     danmaku?: DanmakuType[];
 
     children?: React.ReactNode;
+    enableDanmaku?: boolean;
+
+    // 用于传递额外信息
+    extra?: unknown;
 }
 
+export interface VideoPlayerContextType {
+    props: VideoPlayerProps;
+    videoElement: HTMLVideoElement | null;
+    containerElement: HTMLDivElement | null;
+}
+
+export const VideoPlayerContext = React.createContext<VideoPlayerContextType | null>(null);
 const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideoElement>) => {
     const {
         loader,
@@ -32,7 +43,8 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
         toolbar,
         shortcut,
         children,
-        danmaku= [],
+        danmaku = [],
+        enableDanmaku= true,
         ...rest
     } = props;
 
@@ -54,19 +66,17 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
     }, []);
 
     return (
-        <div className="mika-video-player-wrapper"
-             style={{
-                 width: width ?? 'auto',
-                 height: height ?? 'auto',
-                 ...style
-             }} ref={containerRef}>
-
-            <video crossOrigin="anonymous" ref={videoRef} {...rest}>
-                {children}
-            </video>
-            <Danmaku danmaku={danmaku} videoElement={videoRef.current}/>
-            {controls && <Controller videoElement={videoRef.current} containerElement={containerRef.current} toolbar={toolbar} shortcut={shortcut}/>}
-        </div>
+        <VideoPlayerContext.Provider
+            value={{props: props, videoElement: videoRef.current, containerElement: containerRef.current}}>
+            <div className="mika-video-player-wrapper"
+                 style={{width: width ?? 'auto', height: height ?? 'auto', ...style}} ref={containerRef}>
+                <video crossOrigin="anonymous" ref={videoRef} {...rest}>
+                    {children}
+                </video>
+                {enableDanmaku && <Danmaku/>}
+                {controls && <Controller/>}
+            </div>
+        </VideoPlayerContext.Provider>
     );
 }));
 

@@ -1,14 +1,10 @@
-import React, {forwardRef, memo, Ref, useCallback, useEffect, useImperativeHandle, useRef} from "react";
+import React, {forwardRef, memo, Ref, useCallback, useContext, useEffect, useImperativeHandle, useRef} from "react";
 
 import './ProgressBar.less';
+import {VideoPlayerContext} from "../../VideoPlayer.tsx";
 
-export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
-    videoElement: HTMLVideoElement | null;
-}
-
-const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivElement>) => {
-    const {videoElement, ...rest} = props;
-
+const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivElement>) => {
+    const videoElement = useContext(VideoPlayerContext)?.videoElement;
     const barRef = useRef<HTMLDivElement>(null);
     const isSeeking = useRef(false);
 
@@ -71,9 +67,7 @@ const ProgressBar = memo(forwardRef((props: ProgressBarProps, ref: Ref<HTMLDivEl
     }, [seekPosition, videoElement]);
 
     return (
-        <div className="mika-video-player-progress-bar-wrapper" ref={barRef}
-             onPointerDown={handlePointerDown} {...rest}
-        >
+        <div className="mika-video-player-progress-bar-wrapper" ref={barRef} onPointerDown={handlePointerDown}>
             <div className="mika-video-player-progress-bar-container">
                 <div className="mika-video-player-progress-bar-background"/>
                 <div className="mika-video-player-progress-bar-buffer"/>

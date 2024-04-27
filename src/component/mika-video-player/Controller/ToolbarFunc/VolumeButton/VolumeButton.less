@@ -7,14 +7,24 @@
 }
 
 .mika-video-player-toolbar-func-volume-dropdown {
-  width: 30px;
-  height: 100px;
-  background: var(--mika-video-player-primary-color);
-  opacity: 0.8;
+  background: hsla(0, 0%, 8%, 0.75);
+  width: 35px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 
-  border-radius: 4px;
+  gap: 10px;
+  padding: 8px 0 10px 0;
+  border-radius: 6px;
+}
+
+.mika-video-player-toolbar-func-volume-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+.mika-dropdown:has(.mika-video-player-toolbar-func-volume-dropdown) {
+  animation: none !important;
 }

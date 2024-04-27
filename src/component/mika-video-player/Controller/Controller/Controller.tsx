@@ -1,27 +1,19 @@
-import React, {memo, useCallback} from "react";
+import React, {memo, useCallback, useContext} from "react";
 import ToolBar from "../ToolBar/ToolBar";
-import {ToolbarArea} from "../../VideoPlayer";
 
-import {defaultShortcuts, Shortcut, useShortcut} from "../Shortcut/Shortcut.ts";
+import {defaultShortcuts, useShortcut} from "../Shortcut/Shortcut.ts";
 
 import './Controller.less';
+import {VideoPlayerContext} from "../../VideoPlayer.tsx";
 
-export interface ControllerProps extends React.HTMLAttributes<HTMLDivElement> {
-    videoElement: HTMLVideoElement | null;
-    containerElement: HTMLDivElement | null;
-    toolbar?: ToolbarArea;
-    shortcut?: Shortcut[];
-}
 
-const Controller = memo((props: ControllerProps) => {
-    const {
-        videoElement,
-        containerElement,
-        toolbar,
-        shortcut = defaultShortcuts,
-        ...rest
-    } = props;
+const Controller = memo(() => {
     const controllerRef = React.useRef<HTMLDivElement>(null);
+    const context = useContext(VideoPlayerContext);
+
+    const videoElement = context?.videoElement;
+    const containerElement = context?.containerElement;
+    const shortcut = context?.props.shortcut || defaultShortcuts;
 
     const hideController = useCallback(() => {
         controllerRef.current && (controllerRef.current.style.opacity = '0');
@@ -50,10 +42,9 @@ const Controller = memo((props: ControllerProps) => {
              onPointerLeave={hideController}
              onPointerEnter={showController}
              onPointerDown={handlePointerDown}
-             onKeyDown={handleKeyDown} {...rest}
+             onKeyDown={handleKeyDown}
         >
-            <ToolBar videoElement={videoElement} containerElement={containerElement}
-                     leftArea={toolbar?.left} middleArea={toolbar?.middle} rightArea={toolbar?.right}/>
+            <ToolBar/>
         </div>
     );
 });
