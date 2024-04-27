@@ -30,7 +30,10 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
                     continue;
                 }
 
-                danmakuPool.current?.addDanmaku(danmaku[currentIndex.current++]);
+                // 弹幕时间修正
+                const newDanmaku = {...danmaku[currentIndex.current++]};
+                newDanmaku.begin = currentTime;
+                danmakuPool.current?.addDanmaku(newDanmaku);
             }
         };
 
