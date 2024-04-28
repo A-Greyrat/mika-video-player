@@ -19,7 +19,7 @@ export interface Interval {
 
 export class DanmakuScheduler {
     #trackList: Interval[][] = [];
-    #enableMultiTrack = false;
+    #enableMultiTrack = true;
 
     #containerHeight: number;
     #videoSpeed = 1;

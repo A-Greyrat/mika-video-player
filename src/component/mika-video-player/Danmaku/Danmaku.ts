@@ -58,6 +58,8 @@ class Timer {
     }
 }
 
+type ContainerOption = "--opacity" | "--fontFamily" | "--fontWeight" | "--textShadow";
+
 export class DanmakuPool {
     #container?: HTMLDivElement;
     #availableDanmaku: HTMLDivElement[] = [];
@@ -75,11 +77,11 @@ export class DanmakuPool {
     #containerWidth = 0;
     #containerHeight = 0;
 
-    #displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 0.75;
+    #displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 1;
     #danmakuSpeed = 1;
     #fontSizeScale = 0.8;
-    #defaultDanmakuOption: Pick<DanmakuOption, '--opacity' | '--fontFamily' | '--fontWeight' | '--textShadow'> = {
-        '--opacity': '0.65',
+    #defaultDanmakuOption: Pick<DanmakuOption, ContainerOption> = {
+        '--opacity': '0.8',
         '--fontFamily': 'Arial, Helvetica, sans-serif',
         '--fontWeight': 'bold',
         '--textShadow': '1px 0 1px black, 0 1px 1px black, 0 -1px 1px black, -1px 0 1px black',
@@ -89,6 +91,10 @@ export class DanmakuPool {
         this.#container = container;
         this.#containerWidth = this.#container!.clientWidth;
         this.#containerHeight = this.#container!.clientHeight;
+
+        Object.entries(this.#defaultDanmakuOption).forEach(([key, value]) => {
+            this.#container?.style.setProperty(key, value);
+        });
 
         this.#resizeObserver.observe(this.#container);
         this.#timer.resume();
@@ -100,23 +106,6 @@ export class DanmakuPool {
         video.addEventListener('seeked', this.#handleSeeked);
         video.addEventListener('ratechange', this.#handleRateChange);
         video.addEventListener('ended', this.#handleSeeked);
-
-        const lengthList = ['12', '16', '18', '25', '36', '45', '64'];
-
-        const tempDanmaku = document.createElement('div');
-        tempDanmaku.style.fontFamily = this.#defaultDanmakuOption['--fontFamily'];
-        tempDanmaku.style.fontWeight = this.#defaultDanmakuOption['--fontWeight'];
-        tempDanmaku.style.textShadow = this.#defaultDanmakuOption['--textShadow'];
-        tempDanmaku.style.width = 'fit-content';
-
-        this.#container?.appendChild(tempDanmaku);
-
-        lengthList.forEach(size => {
-            tempDanmaku.style.fontSize = this.#getFontSize(size) + 'px';
-            tempDanmaku.innerText = '未';
-        });
-
-        tempDanmaku.remove();
 
         // 初始化3种弹幕轨道调度器，0 - 普通、1 - 底部、2 - 顶部
         for (let i = 0; i < 3; i++) {
@@ -151,8 +140,9 @@ export class DanmakuPool {
     #handleSeeked = () => {
         this.#currentDanmaku.forEach(d => {
             this.#availableDanmaku.push(d);
-            d.innerText = '';
-            d.style.visibility = 'hidden';
+            // d.innerText = '';
+            // d.style.opacity = '0';
+            d.style.setProperty('content-visibility', 'hidden');
             d.className = '';
         });
         this.#currentDanmaku.clear();
@@ -190,9 +180,13 @@ export class DanmakuPool {
 
     public setDefaultDanmakuOption(option: Pick<DanmakuOption, '--opacity' | '--fontFamily' | '--fontWeight' | '--textShadow'>) {
         this.#defaultDanmakuOption = option;
+
+        Object.entries(this.#defaultDanmakuOption).forEach(([key, value]) => {
+            this.#container?.style.setProperty(key, value);
+        });
     }
 
-    #createDanmakuElement(danmaku: DanmakuType, danmakuOption: DanmakuOption) {
+    #createDanmakuElement(danmaku: DanmakuType, danmakuOption: Omit<DanmakuOption, ContainerOption>) {
         if (danmakuOption['--offsetY'] === '-1px') {
             Debugger.log('弹幕‘' + danmaku.text + '’超出容器范围, 丢弃');
             return;
@@ -209,16 +203,31 @@ export class DanmakuPool {
             return;
         }
 
-        const d = this.#availableDanmaku.length > 0 ? this.#availableDanmaku.pop()! : this.#container!.appendChild(document.createElement('div'));
+        let d: HTMLDivElement;
+        if (this.#availableDanmaku.length > 0) {
+            d = this.#availableDanmaku.pop()!;
+        } else {
+            d = this.#container!.appendChild(document.createElement('div'));
+            d.ariaLive = 'polite';
+            d.style.position = 'absolute';
+            d.style.whiteSpace = 'nowrap';
+            d.style.overflow = 'hidden';
+            d.style.pointerEvents = 'none';
+            d.style.willChange = 'transform, opacity';
+            d.style.opacity = this.#defaultDanmakuOption['--opacity'];
+            d.style.setProperty('content-visibility', 'auto');
+        }
+
         this.#currentDanmaku.add(d);
 
-        d.className = '';
-        d.ariaLive = 'polite';
-        d.style.visibility = 'visible';
-        d.style.animationPlayState = this.#playState.state;
-
-        d.classList.add(danmakuType);
-        d.innerText = danmaku.text;
+        d.style.setProperty('content-visibility', 'auto');
+        // d.style.opacity = this.#defaultDanmakuOption['--opacity'];
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                d.innerText = danmaku.text;
+                d.classList.add(danmakuType);
+            });
+        });
 
         Object.entries(danmakuOption).forEach(([key, value]) => {
             d.style.setProperty(key, value);
@@ -227,8 +236,8 @@ export class DanmakuPool {
         d.onanimationend = () => {
             this.#availableDanmaku.push(d);
             this.#currentDanmaku.delete(d);
-            d.innerText = '';
-            d.style.visibility = 'hidden';
+            d.style.setProperty('content-visibility', 'hidden');
+            // d.style.opacity = '0';
             d.className = '';
         };
     }
@@ -249,9 +258,8 @@ export class DanmakuPool {
         return [Math.ceil(size.width), Math.ceil(size.actualBoundingBoxAscent + size.actualBoundingBoxDescent + 4)] as const;
     }
 
-    #getDanmakuOption(danmaku: DanmakuType): DanmakuOption {
-        const option = {
-            ...this.#defaultDanmakuOption,
+    #getDanmakuOption(danmaku: DanmakuType): Omit<DanmakuOption, ContainerOption> {
+        const option: Omit<DanmakuOption, ContainerOption> = {
             "--fontSize": this.#getFontSize(danmaku.size) + 'px',
             "--color": '#' + parseInt(danmaku.color).toString(16).padStart(6, '0'),
 
@@ -261,7 +269,7 @@ export class DanmakuPool {
             "--offsetY": '',
         };
 
-        const [width, height] = this.#getTextSize(danmaku.text, this.#getFontSize(danmaku.size), option['--fontFamily'], option['--fontWeight']);
+        const [width, height] = this.#getTextSize(danmaku.text, this.#getFontSize(danmaku.size), this.#defaultDanmakuOption['--fontFamily'], this.#defaultDanmakuOption['--fontWeight']);
 
         let duration = 5;
         const offset = 0;
@@ -269,12 +277,6 @@ export class DanmakuPool {
         danmaku.begin = this.#timer.now / 1000;
         if (danmaku.mode === '1') {
             duration = (this.#containerWidth + width) / this.#getVelocity(width);
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            danmaku.v = this.#getVelocity(width);
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            danmaku.width = width;
             translateX = 'calc(' + this.#containerWidth + 'px)';
 
             const comparer = (a: Interval, danmaku: DanmakuType) => {
