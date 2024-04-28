@@ -1,6 +1,6 @@
 import {forwardRef, memo, Ref, useContext, useEffect, useImperativeHandle, useRef} from "react";
-import {DanmakuPool} from "./Danmaku.ts";
-import {VideoPlayerContext} from "../VideoPlayer.tsx";
+import {DanmakuPool} from './DanmakuPool.ts';
+import {VideoPlayerContext} from '../VideoPlayer.tsx';
 
 import './Danmaku.less';
 

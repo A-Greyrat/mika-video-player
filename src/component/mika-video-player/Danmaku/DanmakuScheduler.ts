@@ -1,5 +1,5 @@
 import Debugger from "../Debugger";
-import {DanmakuType} from "./Danmaku.ts";
+import {DanmakuAttr} from "./Danmaku.ts";
 
 export interface Interval {
     // 区间左端点
@@ -51,11 +51,11 @@ export class DanmakuScheduler {
     }
 
     // 判断轨道是否空闲可用
-    #isFree(track: Interval, danmaku: DanmakuType): boolean {
+    #isFree(track: Interval, danmaku: DanmakuAttr): boolean {
         return track.start + track.duration * this.#videoSpeed <= danmaku.begin;
     }
 
-    #combineTrack(index: number, danmaku: DanmakuType, trackListIndex: number, width: number, height: number, duration: number, compare: (a: Interval, danmaku: DanmakuType) => boolean) {
+    #combineTrack(index: number, danmaku: DanmakuAttr, trackListIndex: number, width: number, height: number, duration: number, compare: (a: Interval, danmaku: DanmakuAttr) => boolean) {
         // 持续尝试合并轨道，直到满足height的需求
         let cur = index, right = this.#trackList[trackListIndex][index].right;
         while (cur + 1 < this.#trackList[trackListIndex].length
@@ -95,7 +95,7 @@ export class DanmakuScheduler {
 
     #size = (danmaku: Interval) => danmaku.right - danmaku.left;
 
-    #useTrack = (track: Interval, danmaku: DanmakuType, width: number, height: number, duration: number) => {
+    #useTrack = (track: Interval, danmaku: DanmakuAttr, width: number, height: number, duration: number) => {
         track.right = track.left + height;
         track.start = danmaku.begin;
         track.duration = duration;
@@ -103,8 +103,8 @@ export class DanmakuScheduler {
     }
 
     // 返回距离零点的距离，并把轨道新增到轨道列表中
-    public getAvailableTrack(danmaku: DanmakuType, duration: number, width: number, height: number, comparer?: (a: Interval, danmaku: DanmakuType) => boolean): number {
-        const _getAvailableTrack = (danmaku: DanmakuType, duration: number, trackListIndex: number, comparer: (a: Interval, danmaku: DanmakuType) => boolean): number => {
+    public getAvailableTrack(danmaku: DanmakuAttr, duration: number, width: number, height: number, comparer?: (a: Interval, danmaku: DanmakuAttr) => boolean): number {
+        const _getAvailableTrack = (danmaku: DanmakuAttr, duration: number, trackListIndex: number, comparer: (a: Interval, danmaku: DanmakuAttr) => boolean): number => {
             if (trackListIndex >= this.#trackList.length) {
                 this.#trackList.push([]);
             }

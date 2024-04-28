@@ -3,7 +3,7 @@ import defaultLoader from "./Loader/DefaultLoader";
 import {Controller, Shortcut, ToolbarFunc} from "./Controller";
 
 import './VideoPlayer.less';
-import {DanmakuType} from "./Danmaku/Danmaku.ts";
+import {DanmakuAttr} from "./Danmaku/Danmaku.ts";
 import Danmaku from "./Danmaku/Danmaku.tsx";
 
 export type ToolbarArea = {
@@ -16,7 +16,7 @@ export interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoEle
     loader?: (videoElement: HTMLVideoElement) => void;
     toolbar?: ToolbarArea;
     shortcut?: Shortcut[];
-    danmaku?: DanmakuType[];
+    danmaku?: DanmakuAttr[];
 
     children?: React.ReactNode;
     enableDanmaku?: boolean;
