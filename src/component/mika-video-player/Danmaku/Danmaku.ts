@@ -17,8 +17,9 @@ export interface DanmakuAttr {
     // '弹幕内容'
     text: string;
 }
+
 export interface IDanmakuType {
-    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number): DanmakuParam;
+    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam;
 
     getDanmakuCSSClass(): string;
 
@@ -36,7 +37,7 @@ class NormalDanmaku implements IDanmakuType {
         return (40 * Math.log10(width) + 100) * this.#danmakuSpeed;
     }
 
-    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number): DanmakuParam {
+    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
         if (!this.#containerWidth || !this.#scheduler) {
             throw new Error('containerWidth or scheduler is not set');
         }
@@ -46,17 +47,18 @@ class NormalDanmaku implements IDanmakuType {
 
         const comparer = (a: Interval, danmaku: DanmakuAttr) => {
             const delta = a.start + a.duration - danmaku.begin;
-            return delta * this.#getVelocity(a.width) <= this.#containerWidth! && // 前弹幕以及完全进入屏幕
-                delta * this.#getVelocity(width) <= this.#containerWidth!; // 在当前弹幕消失前，新弹幕不会追上前弹幕
+            const delayDistance = this.#getVelocity(width) * delay;
+            return delta * this.#getVelocity(a.width) + delayDistance <= this.#containerWidth! && // 前弹幕以及完全进入屏幕
+                delta * this.#getVelocity(width) + delayDistance <= this.#containerWidth!; // 在当前弹幕消失前，新弹幕不会追上前弹幕
         };
 
-        const offsetY = this.#scheduler.getAvailableTrack(danmaku, duration, width, height, comparer);
+        const offsetY = this.#scheduler.getAvailableTrack(danmaku, duration - delay, width, height, comparer);
 
         return {
             '--duration': duration + 's',
             '--translateX': translateX,
             '--offsetY': offsetY + 'px',
-            '--offsetX': '0px',
+            '--delay': -delay + 's',
         };
     }
 
@@ -77,19 +79,22 @@ class TopDanmaku implements IDanmakuType {
     #scheduler?: DanmakuScheduler;
     #containerWidth?: number;
 
-    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number): DanmakuParam {
+    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
         if (!this.#containerWidth || !this.#scheduler) {
             throw new Error('containerWidth or scheduler is not set');
         }
 
         const duration = 5;
-        const offsetY = this.#scheduler.getAvailableTrack(danmaku, duration, width, height);
+        let offsetY = -1;
+        if (delay < duration) {
+            offsetY = this.#scheduler.getAvailableTrack(danmaku, duration, width, height);
+        }
 
         return {
             '--duration': duration + 's',
             '--translateX': '0',
             '--offsetY': offsetY + 'px',
-            '--offsetX': '0px',
+            '--delay': -delay + 's',
         };
     }
 
@@ -110,19 +115,25 @@ class BottomDanmaku implements IDanmakuType {
     #scheduler?: DanmakuScheduler;
     #containerWidth?: number;
 
-    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number): DanmakuParam {
+    getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
         if (!this.#containerWidth || !this.#scheduler) {
             throw new Error('containerWidth or scheduler is not set');
         }
 
         const duration = 5;
-        const offsetY = this.#scheduler.getAvailableTrack(danmaku, duration, width, height);
+
+        // Return -1 means that the danmaku is not available
+        let offsetY = -1;
+        if (delay < duration) {
+            offsetY = this.#scheduler.getAvailableTrack(danmaku, duration, width, height);
+        }
+
 
         return {
             '--duration': duration + 's',
             '--translateX': '0',
             '--offsetY': offsetY + 'px',
-            '--offsetX': '0px',
+            '--delay': -delay + 's',
         };
     }
 

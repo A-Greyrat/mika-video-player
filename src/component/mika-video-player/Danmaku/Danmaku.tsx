@@ -4,6 +4,8 @@ import {VideoPlayerContext} from '../VideoPlayer.tsx';
 
 import './Danmaku.less';
 
+// 在videoElement seeked事件后最大允许多少秒前的弹幕被添加至弹幕池
+const ALLOWED_MAX_DELAY: number = 10;
 
 const Danmaku = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivElement>) => {
     const context = useContext(VideoPlayerContext)!;
@@ -18,27 +20,35 @@ const Danmaku = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivE
         if (!videoElement || !danmaku || !danmaku.length || !containerRef.current || danmakuPool.current) return;
         danmakuPool.current = new DanmakuPool(containerRef.current, videoElement);
         danmaku.sort((a, b) => a.begin - b.begin);
-        let lock = false;
+        let documentLock = false, delayLock = false;
 
         const handleTimeUpdate = () => {
-            if (videoElement.paused) return;
+            // if (videoLock) return;
 
             const currentTime = videoElement.currentTime;
             while (currentIndex.current < danmaku.length && danmaku[currentIndex.current].begin <= currentTime) {
-                if (lock) {
+                if (documentLock) {
                     currentIndex.current++;
                     continue;
                 }
 
-                danmakuPool.current?.addDanmaku({...danmaku[currentIndex.current++]});
+                let delay = 0;
+                if (delayLock) {
+                    delay = currentTime - danmaku[currentIndex.current].begin;
+                }
+
+                danmakuPool.current?.addDanmaku({...danmaku[currentIndex.current++]}, delay);
             }
+            delayLock = false;
         };
 
         const handleSeeking = () => {
+            delayLock = true;
+
             let l = 0, r = danmaku.length - 1;
             while (l < r) {
                 const mid = Math.floor((l + r) / 2);
-                if (danmaku[mid].begin < videoElement.currentTime) {
+                if (danmaku[mid].begin < videoElement.currentTime - ALLOWED_MAX_DELAY) {
                     l = mid + 1;
                 } else {
                     r = mid;
@@ -49,7 +59,7 @@ const Danmaku = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivE
         };
 
         const handleVisibilityChange = () => {
-            lock = document.hidden;
+            documentLock = document.hidden;
         };
 
         videoElement.addEventListener('timeupdate', handleTimeUpdate);

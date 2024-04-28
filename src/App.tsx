@@ -31,15 +31,15 @@ const App: React.FC = () => {
         });
 
         fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || _bv)).then(res => res.json()).then(data => {
-            const newDanmakus: DanmakuAttr[] = [];
+            let newDanmakus: DanmakuAttr[] = [];
             for (const d of data) {
                 d.begin = parseFloat(d.begin);
                 newDanmakus.push(d);
             }
 
-            // for (let i = 0; i < 3; i++) {
-            //     newDanmakus = newDanmakus.concat(newDanmakus);
-            // }
+            for (let i = 0; i < 3; i++) {
+                newDanmakus = newDanmakus.concat(newDanmakus);
+            }
 
             console.log(newDanmakus.length)
 
@@ -48,7 +48,7 @@ const App: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        Debugger.setEnable(true);
+        Debugger.setEnable(false);
     }, []);
 
     return (
@@ -77,7 +77,7 @@ const App: React.FC = () => {
                 loop
                 danmaku={danmakus}
                 ref={ref}
-                src={url ? proxy + url : url}
+                src={url ? proxy + url : undefined}
             >
             </VideoPlayer>
             <audio ref={audioRef}/>

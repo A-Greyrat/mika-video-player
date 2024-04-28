@@ -22,4 +22,3 @@ const Debugger = {
 };
 
 export default Debugger;
-

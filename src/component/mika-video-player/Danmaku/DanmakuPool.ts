@@ -1,15 +1,14 @@
 import {DanmakuScheduler} from "./DanmakuScheduler.ts";
-import {DanmakuAttr} from "./Danmaku.ts";
+import DanmakuTypeMap, {DanmakuAttr} from "./Danmaku.ts";
 
 import Debugger from "../Debugger";
-import DanmakuTypeMap from "./Danmaku.ts";
 
 // 需要动态计算的弹幕参数
 export interface DanmakuParam {
     '--translateX': string;
     '--duration': string;
-    '--offsetX': string;
     '--offsetY': string;
+    '--delay': string;
 }
 
 // 包含静态属性的弹幕参数
@@ -51,7 +50,7 @@ class Timer {
 
 export class DanmakuPool {
     #container?: HTMLDivElement;
-    #availableDanmaku: HTMLDivElement[] = [];
+    #availableDanmaku: Map<string, HTMLDivElement[]> = new Map();
     #currentDanmaku: Set<HTMLDivElement> = new Set();
     #schedulers: DanmakuScheduler[] = [];
     #resizeObserver: ResizeObserver = new ResizeObserver(this.#handleResize.bind(this));
@@ -61,15 +60,14 @@ export class DanmakuPool {
     #canvas = document.createElement('canvas');
     #context: CanvasRenderingContext2D = this.#canvas.getContext('2d')!;
 
-    #playState: { state: 'running' | 'paused' } = {state: 'running'};
     #videoSpeed = 1;
     #containerWidth = 0;
     #containerHeight = 0;
 
     #displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 1;
-    #fontSizeScale = 0.8;
+    #fontSizeScale = 1;
     #defaultDanmakuOption = {
-        '--opacity': '0.8',
+        '--opacity': '0.65',
         '--fontFamily': 'Arial, Helvetica, sans-serif',
         '--fontWeight': 'bold',
         '--textShadow': '1px 0 1px black, 0 1px 1px black, 0 -1px 1px black, -1px 0 1px black',
@@ -87,13 +85,14 @@ export class DanmakuPool {
         this.#resizeObserver.observe(this.#container);
         this.#timer.resume();
         this.#video = video;
+        this.#video.paused && this.#handlePause();
 
-        this.#playState.state = video.paused ? 'paused' : 'running';
         video.addEventListener('pause', this.#handlePause);
         video.addEventListener('play', this.#handlePlay);
         video.addEventListener('seeked', this.#handleSeeked);
         video.addEventListener('ratechange', this.#handleRateChange);
-        video.addEventListener('ended', this.#handleSeeked);
+        video.addEventListener('ended', this.#handleEnded);
+        video.addEventListener('seeking', this.#handleSeeking);
 
         // 初始化弹幕轨道调度器
         for (let i = 0; i < DanmakuTypeMap.size; i++) {
@@ -108,11 +107,11 @@ export class DanmakuPool {
     }
 
     #hideDanmaku(element: HTMLDivElement) {
-        this.#availableDanmaku.push(element);
+        this.#availableDanmaku.set(element.className, (this.#availableDanmaku.get(element.className) || []).concat(element));
         this.#currentDanmaku.delete(element);
-        // element.style.setProperty('content-visibility', 'hidden');
-        element.style.opacity = '0';
-        element.className = '';
+        element.style.setProperty('content-visibility', 'hidden');
+        // element.style.opacity = '0';
+        element.classList.remove('mika-video-player-danmaku-animation');
     }
 
     #handleResize(entries: ResizeObserverEntry[]) {
@@ -132,40 +131,54 @@ export class DanmakuPool {
     }
 
     #handlePause = () => {
-        this.#playState.state = 'paused';
         this.#container?.classList.add('mika-video-player-danmaku-container-paused');
         this.#timer.pause();
-    }
+    };
 
     #handlePlay = () => {
-        this.#playState.state = 'running';
         this.#container?.classList.remove('mika-video-player-danmaku-container-paused');
         this.#timer.resume();
-    }
+    };
 
-    #handleSeeked = () => {
+    #handleSeeking = () => {
         this.#currentDanmaku.forEach(d => this.#hideDanmaku(d));
-        this.#currentDanmaku.clear();
-
+        this.#currentDanmaku.clear()
         this.#schedulers.forEach(scheduler => {
             scheduler.clear();
         });
-    }
+
+        this.#handlePause();
+    };
+
+    #handleSeeked = () => {
+        if (!this.#video.paused) {
+            this.#handlePlay();
+        }
+    };
 
     #handleRateChange = () => {
         this.#videoSpeed = this.#video.playbackRate;
         this.#schedulers.forEach(scheduler => {
             scheduler.VideoSpeed = this.#videoSpeed;
         });
-    }
+    };
+
+    #handleEnded = () => {
+        this.#currentDanmaku.forEach(d => this.#hideDanmaku(d));
+        this.#currentDanmaku.clear();
+
+        this.#schedulers.forEach(scheduler => {
+            scheduler.clear();
+        });
+    };
 
     public destroy() {
-        this.#availableDanmaku.forEach(d => d.remove);
+        this.#availableDanmaku.forEach(danmakuList => danmakuList.forEach(d => d.remove()));
         this.#currentDanmaku.forEach(d => d.remove);
 
         this.#resizeObserver.disconnect();
 
-        this.#availableDanmaku = [];
+        this.#availableDanmaku.clear();
         this.#currentDanmaku.clear();
 
         this.#container = undefined;
@@ -174,6 +187,8 @@ export class DanmakuPool {
         this.#video.removeEventListener('play', this.#handlePlay);
         this.#video.removeEventListener('seeked', this.#handleSeeked);
         this.#video.removeEventListener('ratechange', this.#handleRateChange);
+        this.#video.removeEventListener('seeking', this.#handleSeeking);
+        this.#video.removeEventListener('ended', this.#handleEnded);
 
         this.#schedulers = [];
     }
@@ -200,8 +215,8 @@ export class DanmakuPool {
         }
 
         let d: HTMLDivElement;
-        if (this.#availableDanmaku.length > 0) {
-            d = this.#availableDanmaku.pop()!;
+        if (this.#availableDanmaku.has(danmakuType) && this.#availableDanmaku.get(danmakuType)!.length > 0) {
+            d = this.#availableDanmaku.get(danmakuType)!.shift()!;
         } else {
             d = this.#container!.appendChild(document.createElement('div'));
             d.ariaLive = 'polite';
@@ -213,14 +228,15 @@ export class DanmakuPool {
             d.style.opacity = this.#defaultDanmakuOption['--opacity'];
             d.style.setProperty('content-visibility', 'auto');
             d.onanimationend = () => this.#hideDanmaku(d);
+            d.classList.add(danmakuType);
         }
 
         this.#currentDanmaku.add(d);
 
-        // d.style.setProperty('content-visibility', 'auto');
-        d.style.opacity = this.#defaultDanmakuOption['--opacity'];
-        d.classList.add(danmakuType);
         d.innerText = danmaku.text;
+        // d.style.opacity = this.#defaultDanmakuOption['--opacity'];
+        d.classList.add('mika-video-player-danmaku-animation');
+        d.style.setProperty('content-visibility', 'auto');
 
         Object.entries(danmakuParam).forEach(([key, value]) => {
             d.style.setProperty(key, value);
@@ -239,15 +255,15 @@ export class DanmakuPool {
         return [Math.ceil(size.width), Math.ceil(size.actualBoundingBoxAscent + size.actualBoundingBoxDescent + 4)] as const;
     }
 
-    #getDanmakuOption(danmaku: DanmakuAttr): Omit<DanmakuOption, ContainerOption> {
+    #getDanmakuOption(danmaku: DanmakuAttr, delay: number): Omit<DanmakuOption, ContainerOption> {
         const option: Omit<DanmakuOption, ContainerOption> = {
             "--fontSize": this.#getFontSize(danmaku.size) + 'px',
             "--color": '#' + parseInt(danmaku.color).toString(16).padStart(6, '0'),
 
             "--translateX": '',
             "--duration": '',
-            "--offsetX": '',
             "--offsetY": '',
+            "--delay": '',
         };
 
         const [width, height] = this.#getTextSize(danmaku.text, this.#getFontSize(danmaku.size), this.#defaultDanmakuOption['--fontFamily'], this.#defaultDanmakuOption['--fontWeight']);
@@ -255,11 +271,11 @@ export class DanmakuPool {
 
         return {
             ...option,
-            ...DanmakuTypeMap.get(parseInt(danmaku.mode))?.getDanmakuParam(danmaku, width, height)
+            ...DanmakuTypeMap.get(parseInt(danmaku.mode))?.getDanmakuParam(danmaku, width, height, delay)
         }
     }
 
-    public addDanmaku(danmaku: DanmakuAttr) {
-        this.#createDanmakuElement(danmaku, this.#getDanmakuOption(danmaku));
+    public addDanmaku(danmaku: DanmakuAttr, delay = 0) {
+        this.#createDanmakuElement(danmaku, this.#getDanmakuOption(danmaku, delay));
     }
 }
