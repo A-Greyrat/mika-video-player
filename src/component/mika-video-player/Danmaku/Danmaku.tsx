@@ -1,43 +1,54 @@
-import React, {forwardRef, memo, Ref, useEffect, useImperativeHandle, useRef} from "react";
-import {DanmakuPool, DanmakuType, IDanmakuPool} from "./Danmaku.ts";
+import {forwardRef, memo, Ref, useContext, useEffect, useImperativeHandle, useRef} from "react";
+import {DanmakuPool} from './DanmakuPool.ts';
+import {VideoPlayerContext} from '../VideoPlayer.tsx';
+
 import './Danmaku.less';
 
-export interface DanmakuProps extends React.HTMLAttributes<HTMLDivElement> {
-    danmaku: DanmakuType[];
-    videoElement: HTMLVideoElement | null;
-}
+// 在videoElement seeked事件后最大允许多少秒前的弹幕被添加至弹幕池
+const ALLOWED_MAX_DELAY: number = 10;
 
-const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) => {
-    const {danmaku, videoElement, ...rest} = props;
+const Danmaku = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivElement>) => {
+    const context = useContext(VideoPlayerContext)!;
+    const videoElement = context.videoElement;
+    const danmaku = context.props.danmaku;
     const containerRef = useRef<HTMLDivElement>(null);
-    const danmakuPool = useRef<IDanmakuPool | null>(null);
+    const danmakuPool = useRef<DanmakuPool | null>(null);
     const currentIndex = useRef(0);
     useImperativeHandle(ref, () => containerRef.current!);
 
     useEffect(() => {
-        if (!videoElement || !containerRef.current || danmakuPool.current) return;
+        if (!videoElement || !danmaku || !danmaku.length || !containerRef.current || danmakuPool.current) return;
         danmakuPool.current = new DanmakuPool(containerRef.current, videoElement);
         danmaku.sort((a, b) => a.begin - b.begin);
+        let documentLock = false, delayLock = false;
 
         const handleTimeUpdate = () => {
-            if (videoElement.paused) return;
+            // if (videoLock) return;
 
             const currentTime = videoElement.currentTime;
-            console.log('currentTime:', currentTime, 'currentIndex:', currentIndex.current, 'danmaku.length:', danmaku.length)
             while (currentIndex.current < danmaku.length && danmaku[currentIndex.current].begin <= currentTime) {
-                const minute = Math.floor(danmaku[currentIndex.current].begin / 60);
-                const second = Math.floor(danmaku[currentIndex.current].begin % 60);
+                if (documentLock) {
+                    currentIndex.current++;
+                    continue;
+                }
 
-                console.log('now display danmaku:', danmaku[currentIndex.current].text + ' at ' + minute + ':' + second);
-                danmakuPool.current?.addDanmaku(danmaku[currentIndex.current++]);
+                let delay = 0;
+                if (delayLock) {
+                    delay = currentTime - danmaku[currentIndex.current].begin;
+                }
+
+                danmakuPool.current?.addDanmaku({...danmaku[currentIndex.current++]}, delay);
             }
+            delayLock = false;
         };
 
         const handleSeeking = () => {
+            delayLock = true;
+
             let l = 0, r = danmaku.length - 1;
             while (l < r) {
                 const mid = Math.floor((l + r) / 2);
-                if (danmaku[mid].begin < videoElement.currentTime) {
+                if (danmaku[mid].begin < videoElement.currentTime - ALLOWED_MAX_DELAY) {
                     l = mid + 1;
                 } else {
                     r = mid;
@@ -45,20 +56,26 @@ const Danmaku = memo(forwardRef((props: DanmakuProps, ref: Ref<HTMLDivElement>) 
             }
 
             currentIndex.current = l;
-        }
+        };
+
+        const handleVisibilityChange = () => {
+            documentLock = document.hidden;
+        };
 
         videoElement.addEventListener('timeupdate', handleTimeUpdate);
         videoElement.addEventListener('seeking', handleSeeking);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
             danmakuPool.current?.destroy();
             danmakuPool.current = null;
             videoElement.removeEventListener('timeupdate', handleTimeUpdate);
             videoElement.removeEventListener('seeked', handleSeeking);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, [danmaku, videoElement]);
 
-    return (<div className="mika-video-player-danmaku-container" ref={containerRef} {...rest}/>);
+    return (<div className="mika-video-player-danmaku-container" ref={containerRef}/>);
 }));
 
 Danmaku.displayName = 'Danmaku';

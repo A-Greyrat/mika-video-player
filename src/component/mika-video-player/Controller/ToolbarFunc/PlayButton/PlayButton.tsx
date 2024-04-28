@@ -1,17 +1,16 @@
-import React, {memo, useCallback, useEffect} from "react";
+import React, {memo, useCallback, useContext, useEffect} from "react";
 import PlayIcon from "../Icon/PlayIcon";
-import FuncButton, {ToolbarFunc} from "../FuncButton/FuncButton";
+import FuncButton from "../FuncButton/FuncButton";
 
 import './PlayButton.less';
+import {VideoPlayerContext} from "../../../VideoPlayer.tsx";
 
-const PlayButton: ToolbarFunc = memo((props: {
-    videoElement?: HTMLVideoElement | null,
-}) => {
-    const {videoElement} = props;
+const PlayButton = memo(() => {
+    const videoElement = useContext(VideoPlayerContext)?.videoElement;
     const [isPlaying, setIsPlaying] = React.useState(false);
 
     const onClick = useCallback(() => {
-        if (videoElement) {
+        if (videoElement && videoElement.readyState > 2) {
             if (videoElement.paused) videoElement.play().catch(undefined);
             else videoElement.pause();
             setIsPlaying(!isPlaying);

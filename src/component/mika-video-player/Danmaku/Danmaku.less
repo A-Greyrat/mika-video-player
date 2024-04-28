@@ -1,47 +1,30 @@
 @keyframes mika-video-player-danmaku {
   0% {
-    transform: translateX(var(--translateX));
+    transform: translate3d(var(--translateX), 0, 0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
 }
+
 .mika-video-player-danmaku-container-paused {
-  .mika-video-player-danmaku {
+  .mika-video-player-danmaku,
+  .mika-video-player-danmaku-bottom,
+  .mika-video-player-danmaku-top {
     animation-play-state: paused !important;
   }
 }
 
-.mika-video-player-danmaku {
+.mika-video-player-danmaku-container {
   --opacity: unset;
-  --fontSize: unset;
   --fontFamily: unset;
   --fontWeight: unset;
   --textShadow: unset;
-  --color: unset;
-  --offset: unset;
-  --translateX: unset;
-  --duration: unset;
-  --top: unset;
 
-  position: absolute;
-  white-space: nowrap;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 100;
-  opacity: var(--opacity);
-  font-size: var(--fontSize);
   font-family: var(--fontFamily);
   font-weight: var(--fontWeight);
   text-shadow: var(--textShadow);
-  color: var(--color);
-  will-change: transform;
-  top: var(--top);
 
-  animation: mika-video-player-danmaku var(--duration) linear;
-}
-
-.mika-video-player-danmaku-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -49,9 +32,65 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
+  user-select: none;
+
+  color: transparent;
 }
 
-.mika-video-player-temp-danmaku {
-  visibility: hidden;
-  white-space: nowrap;
+.mika-video-player-danmaku,
+.mika-video-player-danmaku-bottom,
+.mika-video-player-danmaku-top {
+  --color: unset;
+  --offsetY: unset;
+  --duration: unset;
+  --offset: unset;
+  --translateX: unset;
+  --fontSize: unset;
+  --delay: unset;
+
+
+  font-size: var(--fontSize);
+  color: var(--color);
+  //animation-delay: var(--delay) !important;
+}
+
+@keyframes mika-video-player-danmaku-disappear {
+  0%, 99% {
+    opacity: var(--opacity);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+
+.mika-video-player-danmaku {
+  top: var(--offsetY);
+  z-index: 100;
+}
+
+.mika-video-player-danmaku.mika-video-player-danmaku-animation {
+  animation: mika-video-player-danmaku var(--duration) linear var(--delay) forwards;
+}
+
+.mika-video-player-danmaku-bottom {
+  z-index: 102;
+
+  bottom: var(--offsetY);
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+}
+
+.mika-video-player-danmaku-top {
+  z-index: 101;
+
+  top: var(--offsetY);
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+}
+
+
+.mika-video-player-danmaku-bottom.mika-video-player-danmaku-animation,
+.mika-video-player-danmaku-top.mika-video-player-danmaku-animation {
+  animation: mika-video-player-danmaku-disappear var(--duration) linear var(--delay) forwards;
 }

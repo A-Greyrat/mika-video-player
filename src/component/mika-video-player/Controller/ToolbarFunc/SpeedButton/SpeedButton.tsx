@@ -1,33 +1,36 @@
-import {ToolbarFunc} from "../FuncButton/FuncButton.tsx";
-import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {Dropdown} from "../../../../mika-ui";
 
 import "./SpeedButton.less"
+import {VideoPlayerContext} from "../../../VideoPlayer.tsx";
 
-const SpeedButton: ToolbarFunc = memo((props: {
-    videoElement?: HTMLVideoElement | null,
-}) => {
+const SpeedButton = memo(() => {
+    const videoElement = useContext(VideoPlayerContext)?.videoElement;
     const [speed, setSpeed] = useState('1.0');
     const [showDisplay, setShowDisplay] = useState(true);
-    const speedItemListRef = useRef(['5.0', '3.0', '2.0', '1.5', '1.25', '1.0', '0.5']);
+    const speedItemListRef = useRef(new Map<number, string>([
+        [3.0, '3.0'],
+        [2.0, '2.0'],
+        [1.5, '1.5'],
+        [1.25, '1.25'],
+        [1.0, '1.0'],
+        [0.75, '0.75'],
+        [0.5, '0.5'],
+    ]));
 
     useEffect(() => {
-        const videoElement = props.videoElement;
         if (!videoElement) return;
         videoElement.playbackRate = parseFloat(speed);
         const handleRateChange = () => {
-            if (videoElement.playbackRate === 1.25) setSpeed('1.25');
-            else if (videoElement.playbackRate === 0.5) setSpeed('0.5');
-            else setSpeed(videoElement.playbackRate.toPrecision(2));
+            setSpeed(speedItemListRef.current.get(videoElement.playbackRate)!);
         };
         videoElement.addEventListener('ratechange', handleRateChange);
         return () => {
             videoElement.removeEventListener('ratechange', handleRateChange);
         };
-    }, [props.videoElement]);
+    }, [speed, videoElement]);
 
     const onClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        const videoElement = props.videoElement;
         if (!videoElement) return;
 
         const speed = (e.target as HTMLDivElement).dataset.speed!;
@@ -37,11 +40,11 @@ const SpeedButton: ToolbarFunc = memo((props: {
         setTimeout(() => {
             setShowDisplay(true);
         }, 100);
-    }, [props.videoElement]);
+    }, [videoElement]);
 
-    const menu = useMemo( () => {
+    const menu = useMemo(() => {
         return (
-            speedItemListRef.current.map((item, index) => {
+            Array.from(speedItemListRef.current.values()).map((item, index) => {
                 return (
                     <div
                         data-speed={item}
@@ -58,13 +61,8 @@ const SpeedButton: ToolbarFunc = memo((props: {
 
     return (
         <Dropdown
-            menu={
-                <div className="mika-video-player-toolbar-func-speed-dropdown" style={{
-                    display: showDisplay ? 'block' : 'none',
-                }}>
-                    {menu}
-                </div>
-            }
+            menu={<div className="mika-video-player-toolbar-func-speed-dropdown"
+                       style={{display: showDisplay ? 'block' : 'none',}}>{menu}</div>}
             className="mika-video-player-toolbar-func-speed"
             type="hover"
             direction="up"

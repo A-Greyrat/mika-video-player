@@ -3,7 +3,8 @@ import React, {useEffect} from "react";
 
 import VideoPlayer, {FullScreenButton, PlayButton, ToolbarTimer, VolumeButton} from "./component/mika-video-player";
 import SpeedButton from "./component/mika-video-player/Controller/ToolbarFunc/SpeedButton/SpeedButton.tsx";
-import {DanmakuType} from "./component/mika-video-player/Danmaku/Danmaku.ts";
+import {DanmakuAttr} from "./component/mika-video-player/Danmaku/Danmaku.ts";
+import Debugger from "./component/mika-video-player/Debugger";
 
 const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
 const _bv = 'BV1EE421M7zP';
@@ -15,7 +16,9 @@ const getUrl = (bv: string) => {
 
 const App: React.FC = () => {
     const [url, setUrl] = React.useState<string | undefined>(undefined);
-    const [danmakus, setDanmakus] = React.useState<DanmakuType[]>([]);
+    const [danmakus, setDanmakus] = React.useState<DanmakuAttr[]>([]);
+    const ref = React.useRef<HTMLVideoElement>(null);
+    const audioRef = React.useRef<HTMLAudioElement>(null);
     useEffect(() => {
         const url = new URL(window.location.href);
         const bv = url.searchParams.get('bv');
@@ -28,9 +31,24 @@ const App: React.FC = () => {
         });
 
         fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || _bv)).then(res => res.json()).then(data => {
-            data = [...data];
-            setDanmakus(data);
+            let newDanmakus: DanmakuAttr[] = [];
+            for (const d of data) {
+                d.begin = parseFloat(d.begin);
+                newDanmakus.push(d);
+            }
+
+            for (let i = 0; i < 3; i++) {
+                newDanmakus = newDanmakus.concat(newDanmakus);
+            }
+
+            console.log(newDanmakus.length)
+
+            setDanmakus(newDanmakus);
         });
+    }, []);
+
+    useEffect(() => {
+        Debugger.setEnable(false);
     }, []);
 
     return (
@@ -54,14 +72,15 @@ const App: React.FC = () => {
                 toolbar={{
                     left: [PlayButton, ToolbarTimer],
                     middle: [],
-                    right: [SpeedButton,VolumeButton, FullScreenButton],
+                    right: [SpeedButton, VolumeButton, FullScreenButton],
                 }}
                 loop
                 danmaku={danmakus}
-                src={url ? proxy + url : url}
+                ref={ref}
+                src={url ? proxy + url : undefined}
             >
             </VideoPlayer>
-
+            <audio ref={audioRef}/>
         </div>
     )
 };
