@@ -24,10 +24,22 @@ class Timer {
     #start: number = 0;
     #paused: boolean = true;
     #pauseTime: number = 0;
+    #callbacks: {
+        callback: () => void;
+        delay: number;
+    }[] = [];
 
     constructor() {
         this.#start = performance.now();
         this.#pauseTime = this.#start;
+
+        const loop = () => {
+            if (this.#paused) return;
+            while (this.#callbacks.length > 0 && this.now >= this.#callbacks[0].delay) {
+                this.#callbacks.shift()!.callback();
+            }
+            requestAnimationFrame(loop);
+        }
     }
 
     get now(): number {
@@ -45,12 +57,16 @@ class Timer {
         this.#paused = false;
         this.#start += performance.now() - this.#pauseTime;
     }
+
+    public setTimeout(callback: () => void, delay: number) {
+        this.#callbacks.push({callback, delay});
+    }
 }
 
 
 export class DanmakuPool {
     #container?: HTMLDivElement;
-    // #availableDanmaku: Map<string, HTMLDivElement[]> = new Map();
+    #availableDanmaku: Map<string, HTMLDivElement[]> = new Map();
     #currentDanmaku: Set<HTMLDivElement> = new Set();
     #alloc: DanmakuAlloc[] = [];
     #resizeObserver: ResizeObserver = new ResizeObserver(this.#handleResize.bind(this));
@@ -107,13 +123,14 @@ export class DanmakuPool {
     }
 
     #hideDanmaku(element: HTMLDivElement) {
-        // this.#availableDanmaku.set(element.className, (this.#availableDanmaku.get(element.className) || []).concat(element));
+        this.#availableDanmaku.set(element.className, (this.#availableDanmaku.get(element.className) || []).concat(element));
         this.#currentDanmaku.delete(element);
-        element.remove();
+        // element.remove();
         // element.remove();
         // element.style.setProperty('content-visibility', 'hidden');
-        // element.style.opacity = '0';
-        // element.classList.remove('mika-video-player-danmaku-animation');
+        element.style.setProperty('--opacity', '0');
+        element.classList.remove('mika-video-player-danmaku-animation');
+        element.innerText = '';
     }
 
     #handleResize(entries: ResizeObserverEntry[]) {
@@ -183,12 +200,12 @@ export class DanmakuPool {
     };
 
     public destroy() {
-        // this.#availableDanmaku.forEach(danmakuList => danmakuList.forEach(d => d.remove()));
+        this.#availableDanmaku.forEach(danmakuList => danmakuList.forEach(d => d.remove()));
         this.#currentDanmaku.forEach(d => d.remove);
 
         this.#resizeObserver.disconnect();
 
-        // this.#availableDanmaku.clear();
+        this.#availableDanmaku.clear();
         this.#currentDanmaku.clear();
 
         this.#container = undefined;
@@ -225,22 +242,26 @@ export class DanmakuPool {
         }
 
         let d: HTMLDivElement;
-        // if (this.#availableDanmaku.has(danmakuType) && this.#availableDanmaku.get(danmakuType)!.length > 0) {
-        // d = this.#availableDanmaku.get(danmakuType)!.shift()!;
-        // } else {
-        d = document.createElement('div');
-        d.ariaLive = 'polite';
-        d.classList.add('mika-video-player-danmaku')
-        d.onanimationend = () => this.#hideDanmaku(d);
-        d.classList.add(danmakuType);
-        // }
+        if (this.#availableDanmaku.has(danmakuType) && this.#availableDanmaku.get(danmakuType)!.length > 0) {
+            d = this.#availableDanmaku.get(danmakuType)!.shift()!;
+        } else {
+            d = document.createElement('div');
+            d.ariaLive = 'polite';
+            d.classList.add('mika-video-player-danmaku');
+            d.classList.add(danmakuType);
+        }
 
         this.#currentDanmaku.add(d);
 
+        d.style.opacity = '0';
         d.innerText = danmaku.text;
-        // d.style.opacity = this.#defaultDanmakuOption['--opacity'];
-        d.classList.add('mika-video-player-danmaku-animation');
-        // d.style.setProperty('content-visibility', 'auto');
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                d.style.opacity = 'var(--opacity)';
+                d.classList.add('mika-video-player-danmaku-animation');
+            });
+        });
 
         Object.entries(danmakuParam).forEach(([key, value]) => {
             d.style.setProperty(key, value);

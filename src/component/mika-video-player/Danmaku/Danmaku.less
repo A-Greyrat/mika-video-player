@@ -47,11 +47,10 @@
   --delay: unset;
 
   position: absolute;
-  will-change: transform, opacity;
   content-visibility: auto;
   white-space: nowrap;
 
-
+  will-change: transform, opacity;
   opacity: var(--opacity);
   font-size: var(--fontSize);
   color: var(--color);
@@ -69,7 +68,6 @@
 
 .mika-video-player-danmaku-normal {
   top: var(--offsetY);
-  z-index: 100;
 }
 
 .mika-video-player-danmaku-normal.mika-video-player-danmaku-animation {
@@ -77,16 +75,12 @@
 }
 
 .mika-video-player-danmaku-bottom {
-  z-index: 102;
-
   bottom: var(--offsetY);
   left: 50%;
   transform: translate3d(-50%, 0, 0);
 }
 
 .mika-video-player-danmaku-top {
-  z-index: 101;
-
   top: var(--offsetY);
   left: 50%;
   transform: translate3d(-50%, 0, 0);
