@@ -31,14 +31,10 @@ const App: React.FC = () => {
         });
 
         fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || _bv)).then(res => res.json()).then(data => {
-            let newDanmakus: DanmakuAttr[] = [];
+            const newDanmakus: DanmakuAttr[] = [];
             for (const d of data) {
                 d.begin = parseFloat(d.begin);
                 newDanmakus.push(d);
-            }
-
-            for (let i = 0; i < 3; i++) {
-                newDanmakus = newDanmakus.concat(newDanmakus);
             }
 
             console.log(newDanmakus.length)

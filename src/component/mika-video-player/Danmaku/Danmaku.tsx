@@ -26,6 +26,7 @@ const Danmaku = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivE
             // if (videoLock) return;
 
             const currentTime = videoElement.currentTime;
+            const tempList = [];
             while (currentIndex.current < danmaku.length && danmaku[currentIndex.current].begin <= currentTime) {
                 if (documentLock) {
                     currentIndex.current++;
@@ -37,9 +38,11 @@ const Danmaku = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivE
                     delay = currentTime - danmaku[currentIndex.current].begin;
                 }
 
-                danmakuPool.current?.addDanmaku({...danmaku[currentIndex.current++]}, delay);
+                // danmakuPool.current?.addDanmaku({...danmaku[currentIndex.current++]}, delay);
+                tempList.push({...danmaku[currentIndex.current++], delay});
             }
             delayLock = false;
+            danmakuPool.current?.addDanmakuList(tempList);
         };
 
         const handleSeeking = () => {

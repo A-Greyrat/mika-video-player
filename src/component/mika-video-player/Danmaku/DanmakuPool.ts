@@ -1,4 +1,4 @@
-import {DanmakuScheduler} from "./DanmakuScheduler.ts";
+import {DanmakuAlloc} from "./DanmakuAlloc.ts";
 import DanmakuTypeMap, {DanmakuAttr} from "./Danmaku.ts";
 
 import Debugger from "../Debugger";
@@ -50,9 +50,9 @@ class Timer {
 
 export class DanmakuPool {
     #container?: HTMLDivElement;
-    #availableDanmaku: Map<string, HTMLDivElement[]> = new Map();
+    // #availableDanmaku: Map<string, HTMLDivElement[]> = new Map();
     #currentDanmaku: Set<HTMLDivElement> = new Set();
-    #schedulers: DanmakuScheduler[] = [];
+    #alloc: DanmakuAlloc[] = [];
     #resizeObserver: ResizeObserver = new ResizeObserver(this.#handleResize.bind(this));
     #video: HTMLVideoElement;
     #timer: Timer = new Timer();
@@ -96,22 +96,24 @@ export class DanmakuPool {
 
         // 初始化弹幕轨道调度器
         for (let i = 0; i < DanmakuTypeMap.size; i++) {
-            this.#schedulers.push(new DanmakuScheduler(i === 0 ? (this.#containerHeight * this.#displayAreaRate) : this.#containerHeight));
+            this.#alloc.push(new DanmakuAlloc(i === 0 ? (this.#containerHeight * this.#displayAreaRate) : this.#containerHeight));
         }
 
         let index = 0;
         DanmakuTypeMap.forEach((danmakuType, _i) => {
-            danmakuType.scheduler = this.#schedulers[index++];
+            danmakuType.alloc = this.#alloc[index++];
             danmakuType.containerWidth = this.#containerWidth;
         });
     }
 
     #hideDanmaku(element: HTMLDivElement) {
-        this.#availableDanmaku.set(element.className, (this.#availableDanmaku.get(element.className) || []).concat(element));
+        // this.#availableDanmaku.set(element.className, (this.#availableDanmaku.get(element.className) || []).concat(element));
         this.#currentDanmaku.delete(element);
-        element.style.setProperty('content-visibility', 'hidden');
+        element.remove();
+        // element.remove();
+        // element.style.setProperty('content-visibility', 'hidden');
         // element.style.opacity = '0';
-        element.classList.remove('mika-video-player-danmaku-animation');
+        // element.classList.remove('mika-video-player-danmaku-animation');
     }
 
     #handleResize(entries: ResizeObserverEntry[]) {
@@ -119,11 +121,11 @@ export class DanmakuPool {
         this.#containerWidth = entry.contentRect.width;
         this.#containerHeight = entry.contentRect.height;
 
-        this.#schedulers.forEach(scheduler => {
+        this.#alloc.forEach(scheduler => {
             scheduler.clear();
             scheduler.ContainerHeight = this.#containerHeight;
         });
-        this.#schedulers[0].ContainerHeight = this.#containerHeight * this.#displayAreaRate;
+        this.#alloc[0].ContainerHeight = this.#containerHeight * this.#displayAreaRate;
 
         DanmakuTypeMap.forEach((danmakuType, _i) => {
             danmakuType.containerWidth = this.#containerWidth;
@@ -140,10 +142,15 @@ export class DanmakuPool {
         this.#timer.resume();
     };
 
+
+    #copyCurrentDanmaku: Set<HTMLDivElement> = new Set();
     #handleSeeking = () => {
-        this.#currentDanmaku.forEach(d => this.#hideDanmaku(d));
-        this.#currentDanmaku.clear()
-        this.#schedulers.forEach(scheduler => {
+        if (this.#copyCurrentDanmaku.size > 0) return;
+
+        // 将当前弹幕保存，避免在seeking事件中清除，导致弹幕闪烁
+        this.#copyCurrentDanmaku = new Set(this.#currentDanmaku);
+        this.#currentDanmaku = new Set();
+        this.#alloc.forEach(scheduler => {
             scheduler.clear();
         });
 
@@ -151,6 +158,9 @@ export class DanmakuPool {
     };
 
     #handleSeeked = () => {
+        console.log(this.#copyCurrentDanmaku)
+        this.#copyCurrentDanmaku.forEach(d => this.#hideDanmaku(d));
+        this.#copyCurrentDanmaku.clear();
         if (!this.#video.paused) {
             this.#handlePlay();
         }
@@ -158,7 +168,7 @@ export class DanmakuPool {
 
     #handleRateChange = () => {
         this.#videoSpeed = this.#video.playbackRate;
-        this.#schedulers.forEach(scheduler => {
+        this.#alloc.forEach(scheduler => {
             scheduler.VideoSpeed = this.#videoSpeed;
         });
     };
@@ -167,18 +177,18 @@ export class DanmakuPool {
         this.#currentDanmaku.forEach(d => this.#hideDanmaku(d));
         this.#currentDanmaku.clear();
 
-        this.#schedulers.forEach(scheduler => {
+        this.#alloc.forEach(scheduler => {
             scheduler.clear();
         });
     };
 
     public destroy() {
-        this.#availableDanmaku.forEach(danmakuList => danmakuList.forEach(d => d.remove()));
+        // this.#availableDanmaku.forEach(danmakuList => danmakuList.forEach(d => d.remove()));
         this.#currentDanmaku.forEach(d => d.remove);
 
         this.#resizeObserver.disconnect();
 
-        this.#availableDanmaku.clear();
+        // this.#availableDanmaku.clear();
         this.#currentDanmaku.clear();
 
         this.#container = undefined;
@@ -190,7 +200,7 @@ export class DanmakuPool {
         this.#video.removeEventListener('seeking', this.#handleSeeking);
         this.#video.removeEventListener('ended', this.#handleEnded);
 
-        this.#schedulers = [];
+        this.#alloc = [];
     }
 
     public setDefaultDanmakuOption(option: { [key in ContainerOption]: string } & { [key: string]: string }) {
@@ -215,32 +225,28 @@ export class DanmakuPool {
         }
 
         let d: HTMLDivElement;
-        if (this.#availableDanmaku.has(danmakuType) && this.#availableDanmaku.get(danmakuType)!.length > 0) {
-            d = this.#availableDanmaku.get(danmakuType)!.shift()!;
-        } else {
-            d = this.#container!.appendChild(document.createElement('div'));
-            d.ariaLive = 'polite';
-            d.style.position = 'absolute';
-            d.style.whiteSpace = 'nowrap';
-            d.style.overflow = 'hidden';
-            d.style.pointerEvents = 'none';
-            d.style.willChange = 'transform, opacity';
-            d.style.opacity = this.#defaultDanmakuOption['--opacity'];
-            d.style.setProperty('content-visibility', 'auto');
-            d.onanimationend = () => this.#hideDanmaku(d);
-            d.classList.add(danmakuType);
-        }
+        // if (this.#availableDanmaku.has(danmakuType) && this.#availableDanmaku.get(danmakuType)!.length > 0) {
+        // d = this.#availableDanmaku.get(danmakuType)!.shift()!;
+        // } else {
+        d = document.createElement('div');
+        d.ariaLive = 'polite';
+        d.classList.add('mika-video-player-danmaku')
+        d.onanimationend = () => this.#hideDanmaku(d);
+        d.classList.add(danmakuType);
+        // }
 
         this.#currentDanmaku.add(d);
 
         d.innerText = danmaku.text;
         // d.style.opacity = this.#defaultDanmakuOption['--opacity'];
         d.classList.add('mika-video-player-danmaku-animation');
-        d.style.setProperty('content-visibility', 'auto');
+        // d.style.setProperty('content-visibility', 'auto');
 
         Object.entries(danmakuParam).forEach(([key, value]) => {
             d.style.setProperty(key, value);
         });
+
+        return d;
     }
 
     #getFontSize(fontSize: string): number {
@@ -276,6 +282,17 @@ export class DanmakuPool {
     }
 
     public addDanmaku(danmaku: DanmakuAttr, delay = 0) {
-        this.#createDanmakuElement(danmaku, this.#getDanmakuOption(danmaku, delay));
+        const d = this.#createDanmakuElement(danmaku, this.#getDanmakuOption(danmaku, delay));
+        d && this.#container?.appendChild(d);
+    }
+
+    public addDanmakuList(danmaku: (DanmakuAttr & { delay: number })[]) {
+        const fragment = document.createDocumentFragment();
+        danmaku.forEach(d => {
+            const element = this.#createDanmakuElement(d as unknown as DanmakuAttr, this.#getDanmakuOption(d as unknown as DanmakuAttr, d.delay));
+            element && fragment.appendChild(element);
+        });
+
+        this.#container?.appendChild(fragment);
     }
 }

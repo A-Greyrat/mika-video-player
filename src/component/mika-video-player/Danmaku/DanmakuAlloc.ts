@@ -17,7 +17,7 @@ export interface Interval {
 }
 
 
-export class DanmakuScheduler {
+export class DanmakuAlloc {
     #trackList: Interval[][] = [];
     #enableMultiTrack = true;
 
@@ -102,9 +102,19 @@ export class DanmakuScheduler {
         track.width = width;
     }
 
-    // 返回距离零点的距离，并把轨道新增到轨道列表中
-    public getAvailableTrack(danmaku: DanmakuAttr, duration: number, width: number, height: number, comparer?: (a: Interval, danmaku: DanmakuAttr) => boolean): number {
-        const _getAvailableTrack = (danmaku: DanmakuAttr, duration: number, trackListIndex: number, comparer: (a: Interval, danmaku: DanmakuAttr) => boolean): number => {
+    /**
+     * Tries to allocate a track for a given danmaku.
+     *
+     * @param {DanmakuAttr} danmaku - The danmaku for which a track needs to be allocated.
+     * @param {number} duration - The duration for which the danmaku needs to be displayed.
+     * @param {number} width - The width of the danmaku.
+     * @param {number} height - The height of the danmaku.
+     * @param {(track: Interval, danmaku: DanmakuAttr) => boolean} [comparer] - An optional comparison function to determine if a track is suitable for the danmaku. It's no need to consider the height of the track.
+     *
+     * @returns {number} - The left endpoint of the allocated track. If allocation fails, returns -1.
+     */
+    public tryAllocTrack(danmaku: DanmakuAttr, duration: number, width: number, height: number, comparer?: (track: Interval, danmaku: DanmakuAttr) => boolean): number {
+        const _getAvailableTrack = (danmaku: DanmakuAttr, duration: number, trackListIndex: number, comparer: (i: Interval, danmaku: DanmakuAttr) => boolean): number => {
             if (trackListIndex >= this.#trackList.length) {
                 this.#trackList.push([]);
             }
