@@ -2,7 +2,7 @@ import {DanmakuParam} from "./DanmakuPool.ts";
 import {DanmakuAlloc, Interval} from "./DanmakuAlloc.ts";
 
 export interface DanmakuAttr {
-    // '弹幕出现的时间'
+    // '弹幕出现的时间, 单位: 秒'
     begin: number;
     // '1: 普通弹幕 4: 底部弹幕 5: 顶部弹幕 6: 逆向弹幕 7: 精准定位 8: 高级弹幕'
     mode: string;

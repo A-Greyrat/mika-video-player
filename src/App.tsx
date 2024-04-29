@@ -6,12 +6,12 @@ import SpeedButton from "./component/mika-video-player/Controller/ToolbarFunc/Sp
 import {DanmakuAttr} from "./component/mika-video-player/Danmaku/Danmaku.ts";
 import Debugger from "./component/mika-video-player/Debugger";
 
-const sessdata = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
-const _bv = 'BV1EE421M7zP';
-let proxy = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
+const sess_data = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
+const default_bv = 'BV1EE421M7zP';
+let proxy_url = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
-    return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sessdata;
+    return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sess_data;
 };
 
 const App: React.FC = () => {
@@ -22,23 +22,20 @@ const App: React.FC = () => {
     useEffect(() => {
         const url = new URL(window.location.href);
         const bv = url.searchParams.get('bv');
-        const c = getUrl(bv || _bv);
+        const c = getUrl(bv || default_bv);
 
         fetch(c).then(res => res.json()).then(data => {
             const host = data.data.durl[0].url.split('/')[2];
-            proxy += '&pHost=' + host + '&pUrl=';
+            proxy_url += '&pHost=' + host + '&pUrl=';
             setUrl(encodeURIComponent(data.data.durl[0].url));
         });
 
-        fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || _bv)).then(res => res.json()).then(data => {
-            let newDanmakus: DanmakuAttr[] = [];
+        fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || default_bv)).then(res => res.json()).then(data => {
+            const newDanmakus: DanmakuAttr[] = [];
             for (const d of data) {
                 d.begin = parseFloat(d.begin);
                 newDanmakus.push(d);
             }
-            
-
-            console.log(newDanmakus.length)
 
             setDanmakus(newDanmakus);
         });
@@ -74,7 +71,7 @@ const App: React.FC = () => {
                 loop
                 danmaku={danmakus}
                 ref={ref}
-                src={url ? proxy + url : undefined}
+                src={url ? proxy_url + url : undefined}
             >
             </VideoPlayer>
             <audio ref={audioRef}/>
