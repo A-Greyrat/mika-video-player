@@ -18,11 +18,19 @@ const SpeedButton = memo(() => {
         [0.5, '0.5'],
     ]));
 
+    const hasSingleDecimalPlace = useCallback((num: number) => {
+        if (Math.floor(num) === num) {
+            return num.toString() + '.0';
+        }
+        return num.toString();
+    }, []);
+
     useEffect(() => {
         if (!videoElement) return;
         videoElement.playbackRate = parseFloat(speed);
         const handleRateChange = () => {
-            setSpeed(speedItemListRef.current.get(videoElement.playbackRate)!);
+            const speed = hasSingleDecimalPlace(videoElement.playbackRate);
+            setSpeed(speed);
         };
         videoElement.addEventListener('ratechange', handleRateChange);
         return () => {
