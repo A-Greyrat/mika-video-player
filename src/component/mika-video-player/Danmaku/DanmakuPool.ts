@@ -270,15 +270,16 @@ export class DanmakuPool {
                 this.#timer.setTimeout(() => this.#hideDanmaku(d), (parseFloat(danmakuParam['--duration']) - parseFloat(danmakuParam['--delay'])) * 1000);
 
                 // TODO: 待重构
+                // TODO: 增加animation-delay前的透明度衰减
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-expect-error
-                if (danmaku.mode === 7 && danmakuParam['--opacityMiddle'] !== danmakuParam['--opacityEnd'] && parseFloat(danmakuParam['--animationDuration']) / 1000 < parseFloat(danmakuParam['--duration'])) {
+                if (danmaku.mode === 7 && danmakuParam['--opacityMiddle'] !== danmakuParam['--opacityEnd'] && parseFloat(danmakuParam['--delay']) + parseFloat(danmakuParam['--animationDuration']) / 1000 < parseFloat(danmakuParam['--duration'])) {
                     d.style.opacity = '';
                     d.onanimationend = () => {
                         // 动画结束后，继续未完成的opacity衰减
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-expect-error
-                        const duration = parseFloat(danmakuParam['--duration']) - parseFloat(danmakuParam['--animationDuration']) / 1000;
+                        const duration = parseFloat(danmakuParam['--duration']) - parseFloat(danmakuParam['--animationDuration']) / 1000 - parseFloat(danmakuParam['--delay']);
                         d.classList.remove('mika-video-player-danmaku-animation');
                         d.style.opacity = 'var(--opacityMiddle)';
                         d.style.transform = 'matrix3d(var(--matrixEnd))';
