@@ -267,7 +267,7 @@ export class DanmakuPool {
             requestAnimationFrame(() => {
                 d.style.opacity = 'var(--opacity)';
                 d.classList.add('mika-video-player-danmaku-animation');
-                this.#timer.setTimeout(() => this.#hideDanmaku(d), (parseFloat(danmakuParam['--duration']) - parseFloat(danmakuParam['--delay'])) * 1000);
+                this.#timer.setTimeout(() => this.#hideDanmaku(d), (parseFloat(danmakuParam['--duration']) + parseFloat(danmakuParam['--delay'])) * 1000);
 
                 // TODO: 待重构
                 // TODO: 增加animation-delay前的透明度衰减
