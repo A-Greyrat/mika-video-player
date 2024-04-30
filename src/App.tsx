@@ -7,7 +7,7 @@ import {DanmakuAttr} from "./component/mika-video-player/Danmaku/Danmaku.ts";
 import Debugger from "./component/mika-video-player/Debugger";
 
 const sess_data = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
-const default_bv = 'BV1Js411o76u';
+const default_bv = 'BV16x411D7NK';
 let proxy_url = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
@@ -30,7 +30,7 @@ const App: React.FC = () => {
             setUrl(encodeURIComponent(data.data.durl[0].url));
         });
 
-        fetch('/dm.json').then(res => res.json()).then(data => {
+        fetch('/dm2.json').then(res => res.json()).then(data => {
             const newDanmakus: DanmakuAttr[] = [];
             for (const d of data) {
                 if (d.color === 0) d.color = 0xffffff;
