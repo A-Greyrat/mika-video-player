@@ -7,7 +7,7 @@ import {DanmakuAttr} from "./component/mika-video-player/Danmaku/Danmaku.ts";
 import Debugger from "./component/mika-video-player/Debugger";
 
 const sess_data = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
-const default_bv = 'BV1EE421M7zP';
+const default_bv = 'BV1Js411o76u';
 let proxy_url = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
@@ -30,15 +30,43 @@ const App: React.FC = () => {
             setUrl(encodeURIComponent(data.data.durl[0].url));
         });
 
-        fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || default_bv)).then(res => res.json()).then(data => {
+        fetch('/dm.json').then(res => res.json()).then(data => {
             const newDanmakus: DanmakuAttr[] = [];
             for (const d of data) {
-                d.begin = parseFloat(d.begin);
-                newDanmakus.push(d);
+                if (d.color === 0) d.color = 0xffffff;
+                newDanmakus.push({
+                    begin: (parseFloat(d.progress) ?? 0) / 1000,
+                    text: d.content,
+                    color: '#' + parseInt(d.color).toString(16).padStart(6, '0'),
+                    mode: d.mode,
+                    size: d.fontsize,
+                });
             }
 
+            console.log(newDanmakus);
             setDanmakus(newDanmakus);
         });
+
+        // fetch('https://b.erisu.moe/api/danmaku?bvid=' + (bv || default_bv) + '&SESSDATA=' + sess_data).then(res => res.json()).then(data => {
+        //     const newDanmakus: DanmakuAttr[] = [];
+        //     for (const d of data) {
+        //         if (d.color === 0) d.color = 0xffffff;
+        //         newDanmakus.push({
+        //             begin: (parseFloat(d.progress) ?? 0) / 1000,
+        //             text: d.content,
+        //             color: '#' + parseInt(d.color).toString(16).padStart(6, '0'),
+        //             mode: d.mode,
+        //             size: d.fontsize,
+        //         });
+        //     }
+        //     console.log(newDanmakus);
+        //
+        //     // for (let i = 0; i < 3; i++) {
+        //     //     newDanmakus = newDanmakus.concat(newDanmakus);
+        //     // }
+        //
+        //     setDanmakus(newDanmakus);
+        // });
     }, []);
 
     useEffect(() => {

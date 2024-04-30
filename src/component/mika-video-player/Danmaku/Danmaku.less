@@ -1,16 +1,23 @@
-@keyframes mika-video-player-danmaku {
+@keyframes mika-video-player-danmaku-normal {
   0% {
     transform: translate3d(var(--translateX), 0, 0);
   }
   100% {
+    transform: translate3d(var(--width), 0, 0);
+  }
+}
+
+@keyframes mika-video-player-danmaku-reverse {
+  0% {
     transform: translate3d(-100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(var(--translateX), 0, 0);
   }
 }
 
 .mika-video-player-danmaku-container-paused {
-  .mika-video-player-danmaku-normal,
-  .mika-video-player-danmaku-bottom,
-  .mika-video-player-danmaku-top {
+  .mika-video-player-danmaku {
     animation-play-state: paused !important;
   }
 }
@@ -33,6 +40,7 @@
   overflow: hidden;
   pointer-events: none;
   user-select: none;
+  perspective: 288.147px;
 
   color: transparent;
 }
@@ -50,14 +58,13 @@
   content-visibility: auto;
   white-space: nowrap;
 
-  will-change: transform, opacity;
   opacity: var(--opacity);
   font-size: var(--fontSize);
   color: var(--color);
 }
 
 @keyframes mika-video-player-danmaku-disappear {
-  0%, 99% {
+  0%, 99.9999% {
     opacity: var(--opacity);
   }
   100% {
@@ -65,29 +72,93 @@
   }
 }
 
-
+.mika-video-player-danmaku-reverse,
 .mika-video-player-danmaku-normal {
   top: var(--offsetY);
+  will-change: transform;
 }
 
 .mika-video-player-danmaku-normal.mika-video-player-danmaku-animation {
-  animation: mika-video-player-danmaku var(--duration) linear var(--delay) forwards;
+  animation: mika-video-player-danmaku-normal var(--duration) linear var(--delay) forwards;
+}
+
+.mika-video-player-danmaku-reverse.mika-video-player-danmaku-animation {
+  animation: mika-video-player-danmaku-reverse var(--duration) linear var(--delay) reverse forwards;
 }
 
 .mika-video-player-danmaku-bottom {
   bottom: var(--offsetY);
   left: 50%;
   transform: translate3d(-50%, 0, 0);
+  will-change: opacity;
 }
 
 .mika-video-player-danmaku-top {
   top: var(--offsetY);
   left: 50%;
   transform: translate3d(-50%, 0, 0);
+  will-change: opacity;
 }
 
 
 .mika-video-player-danmaku-bottom.mika-video-player-danmaku-animation,
 .mika-video-player-danmaku-top.mika-video-player-danmaku-animation {
   animation: mika-video-player-danmaku-disappear var(--duration) linear var(--delay) forwards;
+}
+
+@keyframes mika-video-player-danmaku-advanced {
+  0% {
+    transform: matrix3d(var(--matrixStart));
+    opacity: var(--opacityStart);
+  }
+  100% {
+    transform: matrix3d(var(--matrixEnd));
+    opacity: var(--opacityMiddle);
+  }
+}
+
+@keyframes mika-video-player-danmaku-advanced-opacity {
+  0% {
+    opacity: var(--opacityMiddle);
+  }
+  100% {
+    opacity: var(--opacityEnd);
+  }
+}
+
+.mika-video-player-danmaku-advanced {
+  --startX: unset;
+  --startY: unset;
+  --endX: unset;
+  --endY: unset;
+  --lifeTime: unset;
+  --animationDelay: unset;
+  --animationDuration: unset;
+  --animationTimingFunction: unset;
+  --strokeSize: 0;
+  --fontFamily: unset;
+  --advanceFontSize: unset;
+  --matrixStart: unset;
+  --matrixEnd: unset;
+  --opacityStart: unset;
+  --opacityMiddle: unset;
+  --opacityEnd: unset;
+
+  font-family: var(--fontFamily), sans-serif;
+  font-size: var(--advanceFontSize) !important;
+  text-shadow: var(--strokeSize) var(--strokeSize) var(--strokeSize) black,
+  -var(--strokeSize) -var(--strokeSize) var(--strokeSize) black,
+  var(--strokeSize) -var(--strokeSize) var(--strokeSize) black,
+  -var(--strokeSize) var(--strokeSize) var(--strokeSize) black;
+
+  transform-origin: 0 0 0;
+  opacity: unset;
+  transform: matrix3d(var(--matrixStart));
+  will-change: transform, opacity;
+
+  z-index: 10;
+}
+
+.mika-video-player-danmaku-advanced.mika-video-player-danmaku-animation {
+  animation: mika-video-player-danmaku-advanced var(--animationDuration) var(--animationTimingFunction) var(--delay) forwards;
 }

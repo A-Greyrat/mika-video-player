@@ -24,10 +24,29 @@ class Timer {
     #start: number = 0;
     #paused: boolean = true;
     #pauseTime: number = 0;
+    #callbackList: {
+        callback: () => void;
+        delay: number;
+    }[] = [];
 
     constructor() {
         this.#start = performance.now();
         this.#pauseTime = this.#start;
+
+        const loop = () => {
+            if (!this.#paused) {
+                this.#callbackList = this.#callbackList.filter(({callback, delay}) => {
+                    if (this.now >= delay) {
+                        callback();
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            requestAnimationFrame(loop);
+        }
+
+        loop();
     }
 
     // 获取当前时间, 单位: ms
@@ -45,10 +64,20 @@ class Timer {
         this.#pauseTime = performance.now();
     }
 
+    public reset() {
+        this.#start = performance.now();
+        this.#pauseTime = this.#start;
+        this.#callbackList = [];
+    }
+
     public resume() {
         if (!this.#paused) return;
         this.#paused = false;
         this.#start += performance.now() - this.#pauseTime;
+    }
+
+    public setTimeout(callback: () => void, delay: number) {
+        this.#callbackList.push({callback, delay: delay + this.now});
     }
 }
 
@@ -153,10 +182,10 @@ export class DanmakuPool {
         });
 
         this.#handlePause();
+        this.#timer.reset();
     };
 
     #handleSeeked = () => {
-        console.log(this.#copyCurrentDanmaku)
         this.#copyCurrentDanmaku.forEach(d => this.#hideDanmaku(d));
         this.#copyCurrentDanmaku.clear();
         if (!this.#video.paused) {
@@ -215,8 +244,7 @@ export class DanmakuPool {
             return;
         }
 
-        // 暂时不支持逆向、精准定位和高级弹幕
-        const danmakuType = DanmakuTypeMap.get(parseInt(danmaku.mode))?.getDanmakuCSSClass();
+        const danmakuType = DanmakuTypeMap.get(danmaku.mode)?.getDanmakuCSSClass();
         if (!danmakuType) {
             Debugger.warn('不支持的弹幕类型: ' + danmaku.mode);
             return;
@@ -228,7 +256,6 @@ export class DanmakuPool {
         d.classList.add(danmakuType);
         d.style.opacity = '0';
         d.innerText = danmaku.text;
-        d.onanimationend = () => this.#hideDanmaku(d);
 
         Object.entries(danmakuParam).forEach(([key, value]) => {
             d.style.setProperty(key, value);
@@ -240,15 +267,37 @@ export class DanmakuPool {
             requestAnimationFrame(() => {
                 d.style.opacity = 'var(--opacity)';
                 d.classList.add('mika-video-player-danmaku-animation');
+                this.#timer.setTimeout(() => this.#hideDanmaku(d), (parseFloat(danmakuParam['--duration']) - parseFloat(danmakuParam['--delay'])) * 1000);
+
+                // TODO: 待重构
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                if (danmaku.mode === 7 && danmakuParam['--opacityMiddle'] !== danmakuParam['--opacityEnd'] && parseFloat(danmakuParam['--animationDuration']) / 1000 < parseFloat(danmakuParam['--duration'])) {
+                    d.style.opacity = '';
+                    d.onanimationend = () => {
+                        // 动画结束后，继续未完成的opacity衰减
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-expect-error
+                        const duration = parseFloat(danmakuParam['--duration']) - parseFloat(danmakuParam['--animationDuration']) / 1000;
+                        d.classList.remove('mika-video-player-danmaku-animation');
+                        d.style.opacity = 'var(--opacityMiddle)';
+                        d.style.transform = 'matrix3d(var(--matrixEnd))';
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                d.style.animation = `mika-video-player-danmaku-advanced-opacity ${duration}s linear forwards`;
+                            });
+                        });
+                    }
+                }
+
             });
         });
 
         return d;
     }
 
-    #getFontSize(fontSize: string): number {
-        const size = parseFloat(fontSize);
-        return size * this.#fontSizeScale;
+    #getFontSize(fontSize: number): number {
+        return fontSize * this.#fontSizeScale;
     }
 
     #getTextSize(text: string, fontSize: number, fontFamily: string, fontWeight: string) {
@@ -261,7 +310,7 @@ export class DanmakuPool {
     #getDanmakuOption(danmaku: DanmakuAttr, delay: number): Omit<DanmakuOption, ContainerOption> {
         const option: Omit<DanmakuOption, ContainerOption> = {
             "--fontSize": this.#getFontSize(danmaku.size) + 'px',
-            "--color": '#' + parseInt(danmaku.color).toString(16).padStart(6, '0'),
+            "--color": danmaku.color,
 
             "--translateX": '',
             "--duration": '',
@@ -269,12 +318,18 @@ export class DanmakuPool {
             "--delay": '',
         };
 
-        const [width, height] = this.#getTextSize(danmaku.text, this.#getFontSize(danmaku.size), this.#defaultDanmakuOption['--fontFamily'], this.#defaultDanmakuOption['--fontWeight']);
+        let [width, height] = this.#getTextSize(danmaku.text, this.#getFontSize(danmaku.size), this.#defaultDanmakuOption['--fontFamily'], this.#defaultDanmakuOption['--fontWeight']);
         danmaku.begin = this.#timer.nowSeconds;
+
+        // TODO: 待重构
+        if (danmaku.mode === 7) {
+            width = this.#containerWidth;
+            height = this.#containerHeight;
+        }
 
         return {
             ...option,
-            ...DanmakuTypeMap.get(parseInt(danmaku.mode))?.getDanmakuParam(danmaku, width, height, delay)
+            ...DanmakuTypeMap.get(danmaku.mode)?.getDanmakuParam(danmaku, width, height, delay)
         }
     }
 

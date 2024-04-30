@@ -16,7 +16,6 @@ export interface Interval {
     width: number;
 }
 
-
 export class DanmakuAlloc {
     #trackList: Interval[][] = [];
     #enableMultiTrack = true;
@@ -106,7 +105,7 @@ export class DanmakuAlloc {
      * Tries to allocate a track for a given danmaku.
      *
      * @param {DanmakuAttr} danmaku - The danmaku for which a track needs to be allocated.
-     * @param {number} duration - The duration for which the danmaku needs to be displayed.
+     * @param {number} duration - The duration for which the danmaku needs to be displayed, in seconds.
      * @param {number} width - The width of the danmaku.
      * @param {number} height - The height of the danmaku.
      * @param {(track: Interval, danmaku: DanmakuAttr) => boolean} [comparer] - An optional comparison function to determine if a track is suitable for the danmaku. It's no need to consider the height of the track.
