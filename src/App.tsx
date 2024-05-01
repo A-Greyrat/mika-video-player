@@ -7,7 +7,7 @@ import {DanmakuAttr} from "./component/mika-video-player/Danmaku/Danmaku.ts";
 import Debugger from "./component/mika-video-player/Debugger";
 
 const sess_data = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
-const default_bv = 'BV1EE421M7zP';
+const default_bv = 'BV1qm421s7MR';
 let proxy_url = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
@@ -63,12 +63,7 @@ const App: React.FC = () => {
         }}>
 
             <VideoPlayer
-                width='80%'
-                style={{
-                    margin: "auto",
-                    borderRadius: '20px',
-                    overflow: 'hidden'
-                }}
+                height='100%'
                 controls
                 toolbar={{
                     left: [PlayButton, ToolbarTimer],
