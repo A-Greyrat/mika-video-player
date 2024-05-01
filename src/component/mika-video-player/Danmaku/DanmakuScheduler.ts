@@ -14,8 +14,10 @@ export class DanmakuScheduler {
     #delayLock = false;
 
     handleTimeUpdate = () => {
+        if (this.#video.paused) return;
         const currentTime = this.#video.currentTime;
         const tempList = [];
+
         while (this.#currentIndex < this.#danmaku.length && this.#danmaku[this.#currentIndex].begin <= currentTime) {
             if (this.#documentLock) {
                 this.#currentIndex++;

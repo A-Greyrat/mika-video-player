@@ -270,27 +270,67 @@ export class DanmakuPool {
                 this.#timer.setTimeout(() => this.#hideDanmaku(d), (parseFloat(danmakuParam['--duration']) + parseFloat(danmakuParam['--delay'])) * 1000);
 
                 // TODO: 待重构
-                // TODO: 增加animation-delay前的透明度衰减
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-expect-error
-                if (danmaku.mode === 7 && danmakuParam['--opacityMiddle'] !== danmakuParam['--opacityEnd'] && parseFloat(danmakuParam['--delay']) + parseFloat(danmakuParam['--animationDuration']) / 1000 < parseFloat(danmakuParam['--duration'])) {
+                if (danmaku.mode === 7) {
                     d.style.opacity = '';
-                    d.onanimationend = () => {
-                        // 动画结束后，继续未完成的opacity衰减
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-expect-error
-                        const duration = parseFloat(danmakuParam['--duration']) - parseFloat(danmakuParam['--animationDuration']) / 1000 - parseFloat(danmakuParam['--delay']);
-                        d.classList.remove('mika-video-player-danmaku-animation');
-                        d.style.opacity = 'var(--opacityMiddle)';
-                        d.style.transform = 'matrix3d(var(--matrixEnd))';
-                        requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                                d.style.animation = `mika-video-player-danmaku-advanced-opacity ${duration}s linear forwards`;
-                            });
-                        });
-                    }
-                }
+                    // 动画为 0 - var(--lifeTime) 的OpacityStart -> opacityEnd 的变化
+                    // var(--transformDelay) - var(--transformDelay) + var(--transformDuration) 的transform动画
+                    // 所以分为三个部分
+                    // 1. 0 - var(--transformDelay) 的透明度变化
+                    // 2. var(--transformDelay) - var(--transformDelay) + var(--transformDuration) 的transform、opacity动画
+                    // 3. var(--transformDelay) + var(--transformDuration) - var(--lifeTime) 的透明度变化
 
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const opacityStart = parseFloat(danmakuParam['--opacityStart']);
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const opacityEnd = parseFloat(danmakuParam['--opacityEnd']);
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const transformDelay = parseFloat(danmakuParam['--transformDelay']);
+                    const lifeTime = parseFloat(danmakuParam['--duration']);
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    let transformDuration = parseFloat(danmakuParam['--transformDuration']) / 1000;
+                    transformDuration = transformDelay + transformDuration > lifeTime ? lifeTime - transformDelay : transformDuration;
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const matrixStart = danmakuParam['--matrixStart'];
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const matrixEnd = danmakuParam['--matrixEnd'];
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const animationTimingFunction = danmakuParam['--animationTimingFunction']
+
+                    d.animate([
+                        {
+                            opacity: opacityStart,
+                            transform: `matrix3d(${matrixStart})`,
+                            offset: 0
+                        },
+                        {
+                            opacity: opacityStart + (opacityEnd - opacityStart) * transformDelay / lifeTime,
+                            transform: `matrix3d(${matrixStart})`,
+                            offset: transformDelay / lifeTime
+                        },
+                        {
+                            opacity: opacityStart + (opacityEnd - opacityStart) * (transformDelay + transformDuration) / lifeTime,
+                            transform: `matrix3d(${matrixEnd})`,
+                            offset: (transformDelay + transformDuration) / lifeTime
+                        },
+                        {
+                            opacity: opacityEnd,
+                            transform: `matrix3d(${matrixEnd})`,
+                            offset: 1
+                        }
+                    ], {
+                        duration: lifeTime * 1000,
+                        easing: animationTimingFunction,
+                        fill: 'forwards',
+                        delay: parseFloat(danmakuParam['--delay']) * 1000
+                    });
+                }
             });
         });
 
