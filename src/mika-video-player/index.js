@@ -1,4 +1,4 @@
-export {default} from './dist/VideoPlayer.tsx';
+export {default} from './dist/VideoPlayer';
 export * from './dist/Controller';
 
 export {Danmaku, DanmakuScheduler} from './dist/Danmaku';
