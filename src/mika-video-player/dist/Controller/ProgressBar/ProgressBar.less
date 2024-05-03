@@ -1,0 +1,91 @@
+@import '../../Theme.less';
+
+.mika-video-player-progress-bar-wrapper {
+  --mika-video-progress: 0;
+  --mika-video-buffer-progress: 0;
+  --mika-video-progressbar-thumb-visible: hidden;
+
+  border-radius: 10px;
+  height: var(--mika-video-player-progressbar-height);
+  position: relative;
+  width: 100%;
+
+  cursor: pointer;
+
+  transition: height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+
+  @thumb-size: calc(var(--mika-video-player-progressbar-height) * 2);
+
+  &:hover {
+    @scale: 1.25;
+    height: calc(var(--mika-video-player-progressbar-height) * @scale);
+
+    .mika-video-player-progress-bar-thumb {
+      visibility: visible;
+      height: calc(@thumb-size * @scale);
+      width: calc(@thumb-size * @scale);
+    }
+  }
+
+  .mika-video-player-progress-bar-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+
+    .mika-video-player-progress-bar-background {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transition: 0.3s;
+      border-radius: 10px;
+
+      width: 100%;
+      height: 100%;
+      background-color: var(--mika-video-player-progressbar-background-color);
+      transform: translateY(-50%);
+    }
+
+    .mika-video-player-progress-bar {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      border-radius: 10px;
+
+      width: 100%;
+      height: 100%;
+      background-color: var(--mika-video-player-primary-color);
+      transform-origin: left;
+      transform: scaleX(var(--mika-video-progress)) translate3d(0, -50%, 0);
+    }
+
+    .mika-video-player-progress-bar-buffer {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      border-radius: 10px;
+
+      width: 100%;
+      height: 100%;
+      background-color: var(--mika-video-player-progressbar-buffer-color);
+      transform-origin: left;
+      transform: scaleX(var(--mika-video-buffer-progress)) translate3d(0, -50%, 0);
+    }
+  }
+
+  .mika-video-player-progress-bar-thumb {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--mika-video-progress) - @thumb-size / 2);
+
+    width: @thumb-size;
+    height: @thumb-size;
+    border-radius: 50%;
+
+    background-color: var(--mika-video-player-progressbar-thumb-color);
+    transform: translate3d(0, -50%, 0);
+    visibility: var(--mika-video-progressbar-thumb-visible);
+  }
+}

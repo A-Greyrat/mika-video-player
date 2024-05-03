@@ -2,7 +2,7 @@
   "name": "mika-video-player",
   "version": "1.0.0",
   "description": "high performance danmaku video player",
-  "main": "dist/index.js",
+  "main": "index.js",
   "types": "index.d.ts",
   "repository": {
     "type": "git",

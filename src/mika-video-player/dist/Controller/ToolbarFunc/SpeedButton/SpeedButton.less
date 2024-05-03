@@ -1,0 +1,53 @@
+.mika-video-player-toolbar-func-speed-text {
+  height: 100%;
+  color: var(--mika-video-player-primary-color);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.mika-video-player-toolbar-func-speed-dropdown {
+  background: hsla(0, 0%, 8%, 0.75);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 70px;
+
+  border-radius: 6px;
+  overflow: hidden;
+
+  & > :first-child {
+    padding-top: 12px;
+  }
+
+  & > :last-child {
+    padding-bottom: 12px;
+  }
+}
+
+.mika-video-player-toolbar-func-speed-dropdown-item,
+.mika-video-player-toolbar-func-speed-dropdown-item-selected {
+  padding: 8px 0;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+
+  &:hover {
+    background: hsla(0, 0%, 100%, .1);
+  }
+}
+
+.mika-video-player-toolbar-func-speed-dropdown-item-selected {
+  color: var(--mika-video-player-emphasis-color);
+  text-shadow: 0 0 2px var(--mika-video-player-emphasis-color);
+}
+
+.mika-dropdown:has(.mika-video-player-toolbar-func-speed-dropdown) {
+  animation: none !important;
+}
