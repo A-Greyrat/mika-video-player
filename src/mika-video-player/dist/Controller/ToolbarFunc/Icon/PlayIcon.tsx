@@ -1,8 +1,8 @@
 import React, {memo, useEffect, useRef} from "react";
-import {useLottie} from "lottie-react";
 import {generateUniqueID} from "../../../Utils";
 
 import play from './playIcon.json';
+import lottie from 'lottie-web';
 
 const PlayIcon = memo((props: {
     isPlaying: boolean,
@@ -10,15 +10,16 @@ const PlayIcon = memo((props: {
 }) => {
     const iconId = useRef<string>(generateUniqueID());
 
-    const lottieItem = useLottie({
-        animationData: play,
-        autoplay: false,
-        loop: false,
-        style: props.style,
-        id: 'mika-video-player-play-icon-' + iconId.current
-    });
-
     useEffect(() => {
+        const lottieItem = lottie.loadAnimation({
+            container: document.querySelector('#mika-video-player-play-icon-' + iconId.current)!,
+            renderer: 'svg',
+            loop: false,
+            autoplay: false,
+            animationData: play,
+            name: 'play',
+        });
+
         lottieItem.setSpeed(2);
         if (!props.isPlaying) {
             lottieItem.playSegments([1, 24], true);
@@ -28,9 +29,15 @@ const PlayIcon = memo((props: {
 
         const icon = document.querySelector('#mika-video-player-play-icon-' + iconId.current)?.querySelector('svg');
         icon?.setAttribute('viewBox', '350 350 800 800');
-    }, [props.isPlaying, lottieItem]);
 
-    return lottieItem.View;
+        return () => {
+            lottieItem.destroy();
+        };
+    }, [props.isPlaying]);
+
+    return (
+        <div id={'mika-video-player-play-icon-' + iconId.current} style={props.style}/>
+    );
 });
 
 PlayIcon.displayName = 'PlayIcon';

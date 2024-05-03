@@ -1,4 +1,4 @@
-import {useLottie} from "lottie-react";
+import lottie from "lottie-web";
 import React, {memo, useEffect, useRef} from "react";
 
 import volume from './volume.json';
@@ -10,15 +10,25 @@ const VolumeIcon = memo((props: {
 }) => {
     const iconId = useRef<string>(generateUniqueID());
 
-    const lottieItem = useLottie({
-        animationData: volume,
-        autoplay: false,
-        loop: false,
-        style: props.style,
-        id: 'mika-video-player-volume-icon-' + iconId.current
-    });
+    // const lottieItem = Lottie.useLottie({
+    //     animationData: volume,
+    //     autoplay: false,
+    //     loop: false,
+    //     style: props.style,
+    //     id: 'mika-video-player-volume-icon-' + iconId.current
+    // });
+
 
     useEffect(() => {
+        const lottieItem =lottie.loadAnimation({
+            container: document.querySelector('#mika-video-player-volume-icon-' + iconId.current)!,
+            renderer: 'svg',
+            loop: false,
+            autoplay: false,
+            animationData: volume,
+            name: 'volume',
+        });
+
         if (props.isMuted) {
             lottieItem.setSpeed(2);
             lottieItem.playSegments([1, 35], true);
@@ -30,9 +40,12 @@ const VolumeIcon = memo((props: {
         const icon = document.querySelector('#mika-video-player-volume-icon-' + iconId.current)?.querySelector('svg');
         icon?.setAttribute('viewBox', '43 43 43 43');
 
-    }, [lottieItem, props.isMuted]);
+        return () => {
+            lottieItem.destroy();
+        };
+    }, [props.isMuted]);
 
-    return lottieItem.View;
+    return <div id={'mika-video-player-volume-icon-' + iconId.current} style={props.style}/>;
 });
 
 VolumeIcon.displayName = 'VolumeIcon';
