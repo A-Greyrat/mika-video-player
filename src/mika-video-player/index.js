@@ -1,4 +1,5 @@
-export {default} from './dist/VideoPlayer';
+export {default} from './dist/VideoPlayer.tsx';
 export * from './dist/Controller';
-export * from './dist/Debugger';
-export * from './dist/Danmaku';
+
+export {Danmaku, DanmakuScheduler} from './dist/Danmaku';
+export {Debugger} from './dist/Debugger';
