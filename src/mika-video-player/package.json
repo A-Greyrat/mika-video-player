@@ -1,6 +1,6 @@
 {
   "name": "mika-video-player",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "high performance danmaku video player",
   "main": "index.js",
   "types": "index.d.ts",
@@ -16,11 +16,21 @@
   "author": "natsume_shiki",
   "license": "MIT",
   "dependencies": {
-    "lottie-react": "^2.4.0",
+    "lottie-react": "^2.4.0"
+  },
+  "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
+  "devDependencies": {
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "less": "^4.2.0",
+    "typescript": "^5.2.2"
+  },
   "files": [
-    "dist"
+    "dist",
+    "index.d.ts",
+    "index.js"
   ]
 }
