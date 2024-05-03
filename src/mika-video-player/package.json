@@ -19,5 +19,10 @@
     "lottie-react": "^2.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
-  }
+  },
+  "files": [
+    "dist",
+    "index.d.ts",
+    "index.js"
+  ]
 }
