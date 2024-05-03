@@ -1,0 +1,23 @@
+{
+  "name": "mika-video-player",
+  "version": "1.0.0",
+  "description": "high performance danmaku video player",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/A-Greyrat/mika-video-player.git"
+  },
+  "keywords": [
+    "video",
+    "player",
+    "danmaku"
+  ],
+  "author": "natsume_shiki",
+  "license": "MIT",
+  "dependencies": {
+    "lottie-react": "^2.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

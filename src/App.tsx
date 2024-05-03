@@ -1,10 +1,7 @@
 import './App.css';
 import React, {useEffect} from "react";
 
-import VideoPlayer, {FullScreenButton, PlayButton, ToolbarTimer, VolumeButton} from "./component/mika-video-player";
-import SpeedButton from "./component/mika-video-player/Controller/ToolbarFunc/SpeedButton/SpeedButton.tsx";
-import {DanmakuAttr} from "./component/mika-video-player/Danmaku/Danmaku.ts";
-import Debugger from "./component/mika-video-player/Debugger";
+import VideoPlayer, {DanmakuAttr, Debugger} from "./mika-video-player";
 
 const sess_data = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
 const default_bv = 'BV1qm421s7MR';
@@ -17,8 +14,7 @@ const getUrl = (bv: string) => {
 const App: React.FC = () => {
     const [url, setUrl] = React.useState<string | undefined>(undefined);
     const [danmakus, setDanmakus] = React.useState<DanmakuAttr[]>([]);
-    const ref = React.useRef<HTMLVideoElement>(null);
-    const audioRef = React.useRef<HTMLAudioElement>(null);
+
     useEffect(() => {
         const url = new URL(window.location.href);
         const bv = url.searchParams.get('bv');
@@ -65,18 +61,11 @@ const App: React.FC = () => {
             <VideoPlayer
                 height='100%'
                 controls
-                toolbar={{
-                    left: [PlayButton, ToolbarTimer],
-                    middle: [],
-                    right: [SpeedButton, VolumeButton, FullScreenButton],
-                }}
                 loop
                 danmaku={danmakus}
-                ref={ref}
                 src={url ? proxy_url + url : undefined}
             >
             </VideoPlayer>
-            <audio ref={audioRef}/>
         </div>
     )
 };
