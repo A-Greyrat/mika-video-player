@@ -1,4 +1,4 @@
-import lottie from "lottie-web";
+const lottie = await import('lottie-web');
 import React, {memo, useEffect, useRef} from "react";
 
 import volume from './volume.json';
@@ -10,17 +10,9 @@ const VolumeIcon = memo((props: {
 }) => {
     const iconId = useRef<string>(generateUniqueID());
 
-    // const lottieItem = Lottie.useLottie({
-    //     animationData: volume,
-    //     autoplay: false,
-    //     loop: false,
-    //     style: props.style,
-    //     id: 'mika-video-player-volume-icon-' + iconId.current
-    // });
-
-
     useEffect(() => {
-        const lottieItem =lottie.loadAnimation({
+        // @ts-ignore
+        const lottieItem = lottie.loadAnimation({
             container: document.querySelector('#mika-video-player-volume-icon-' + iconId.current)!,
             renderer: 'svg',
             loop: false,

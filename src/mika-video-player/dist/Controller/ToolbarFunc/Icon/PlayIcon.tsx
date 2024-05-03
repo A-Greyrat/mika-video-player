@@ -1,8 +1,8 @@
+const lottie = await import('lottie-web');
 import React, {memo, useEffect, useRef} from "react";
 import {generateUniqueID} from "../../../Utils";
 
 import play from './playIcon.json';
-import lottie from 'lottie-web';
 
 const PlayIcon = memo((props: {
     isPlaying: boolean,
@@ -11,6 +11,7 @@ const PlayIcon = memo((props: {
     const iconId = useRef<string>(generateUniqueID());
 
     useEffect(() => {
+        // @ts-ignore
         const lottieItem = lottie.loadAnimation({
             container: document.querySelector('#mika-video-player-play-icon-' + iconId.current)!,
             renderer: 'svg',
