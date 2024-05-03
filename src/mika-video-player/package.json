@@ -1,10 +1,10 @@
 {
   "name": "mika-video-player",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "description": "high performance danmaku video player",
-  "module": "index.js",
-  "type": "module",
-  "types": "index.d.ts",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/A-Greyrat/mika-video-player.git"
@@ -23,15 +23,19 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
-  "devDependencies": {
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
-    "less": "^4.2.0",
-    "typescript": "^5.2.2"
-  },
   "files": [
-    "dist",
-    "index.d.ts",
-    "index.js"
-  ]
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-postcss": "^4.0.2"
+  }
 }
