@@ -36,30 +36,30 @@ export interface IDanmakuType {
 }
 
 class NormalDanmaku implements IDanmakuType {
-    #alloc?: DanmakuAlloc;
-    #containerWidth?: number;
-    #danmakuSpeed = 1;
+    private _alloc?: DanmakuAlloc;
+    private _containerWidth?: number;
+    private danmakuSpeed = 1;
 
-    #getVelocity(width: number): number {
-        return (40 * Math.log10(width) + 100) * this.#danmakuSpeed;
+    private getVelocity(width: number): number {
+        return (40 * Math.log10(width) + 100) * this.danmakuSpeed;
     }
 
     getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
-        if (!this.#containerWidth || !this.#alloc) {
-            throw new Error('containerWidth or scheduler is not set');
+        if (!this._containerWidth || !this._alloc) {
+            throw new Error('containerWidth or alloc is not set');
         }
 
-        const duration = (this.#containerWidth + width) / this.#getVelocity(width);
-        const translateX = 'calc(' + this.#containerWidth + 'px)';
+        const duration = (this._containerWidth + width) / this.getVelocity(width);
+        const translateX = 'calc(' + this._containerWidth + 'px)';
 
         const comparer = (i: Interval, danmaku: DanmakuAttr) => {
             const delta = i.start + i.duration - danmaku.begin;
-            const delayDistance = this.#getVelocity(width) * delay;
-            return delta * this.#getVelocity(i.width) + delayDistance <= this.#containerWidth! && // 前弹幕以及完全进入屏幕
-                delta * this.#getVelocity(width) + delayDistance <= this.#containerWidth!; // 在当前弹幕消失前，新弹幕不会追上前弹幕
+            const delayDistance = this.getVelocity(width) * delay;
+            return delta * this.getVelocity(i.width) + delayDistance <= this._containerWidth! && // 前弹幕以及完全进入屏幕
+                delta * this.getVelocity(width) + delayDistance <= this._containerWidth!; // 在当前弹幕消失前，新弹幕不会追上前弹幕
         };
 
-        const offsetY = this.#alloc.tryAllocTrack(danmaku, duration - delay, width, height, comparer);
+        const offsetY = this._alloc.tryAllocTrack(danmaku, duration - delay, width, height, comparer);
 
         return {
             '--duration': duration + 's',
@@ -75,27 +75,26 @@ class NormalDanmaku implements IDanmakuType {
     }
 
     set containerWidth(value: number) {
-        this.#containerWidth = value;
+        this._containerWidth = value;
     }
 
     set alloc(value: DanmakuAlloc) {
-        this.#alloc = value;
+        this._alloc = value;
     }
 }
 
 class TopDanmaku implements IDanmakuType {
-    #alloc?: DanmakuAlloc;
-    #containerWidth?: number;
+    private _alloc?: DanmakuAlloc;
 
     getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
-        if (!this.#containerWidth || !this.#alloc) {
-            throw new Error('containerWidth or alloc is not set');
+        if (!this._alloc) {
+            throw new Error('alloc is not set');
         }
 
         const duration = 5;
         let offsetY = -1;
         if (delay < duration) {
-            offsetY = this.#alloc.tryAllocTrack(danmaku, duration, width, height);
+            offsetY = this._alloc.tryAllocTrack(danmaku, duration, width, height);
         }
 
         return {
@@ -110,22 +109,20 @@ class TopDanmaku implements IDanmakuType {
         return 'mika-video-player-danmaku-top';
     }
 
-    set containerWidth(value: number) {
-        this.#containerWidth = value;
+    set containerWidth(_value: number) {
     }
 
-    set alloc(value: DanmakuAlloc) {
-        this.#alloc = value;
+    set alloc(_value: DanmakuAlloc) {
+        this._alloc = _value;
     }
 }
 
 class BottomDanmaku implements IDanmakuType {
-    #alloc?: DanmakuAlloc;
-    #containerWidth?: number;
+    private _alloc?: DanmakuAlloc;
 
     getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
-        if (!this.#containerWidth || !this.#alloc) {
-            throw new Error('containerWidth or scheduler is not set');
+        if (!this._alloc) {
+            throw new Error('alloc is not set');
         }
 
         const duration = 5;
@@ -133,7 +130,7 @@ class BottomDanmaku implements IDanmakuType {
         // Return -1 means that the danmaku is not available
         let offsetY = -1;
         if (delay < duration) {
-            offsetY = this.#alloc.tryAllocTrack(danmaku, duration, width, height);
+            offsetY = this.alloc.tryAllocTrack(danmaku, duration, width, height);
         }
 
 
@@ -149,40 +146,39 @@ class BottomDanmaku implements IDanmakuType {
         return 'mika-video-player-danmaku-bottom';
     }
 
-    set containerWidth(value: number) {
-        this.#containerWidth = value;
+    set containerWidth(_value: number) {
     }
 
-    set alloc(value: DanmakuAlloc) {
-        this.#alloc = value;
+    set alloc(_value: DanmakuAlloc) {
+        this._alloc = _value;
     }
 }
 
 class ReverseDanmaku implements IDanmakuType {
-    #alloc?: DanmakuAlloc;
-    #containerWidth?: number;
-    #danmakuSpeed = 1;
+    private _alloc?: DanmakuAlloc;
+    private _containerWidth?: number;
+    danmakuSpeed = 1;
 
-    #getVelocity(width: number): number {
-        return (40 * Math.log10(width) + 100) * this.#danmakuSpeed;
+    private getVelocity(width: number): number {
+        return (40 * Math.log10(width) + 100) * this.danmakuSpeed;
     }
 
     getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
-        if (!this.#containerWidth || !this.#alloc) {
-            throw new Error('containerWidth or scheduler is not set');
+        if (!this._containerWidth || !this._alloc) {
+            throw new Error('containerWidth or alloc is not set');
         }
 
-        const duration = (this.#containerWidth + width) / this.#getVelocity(width);
-        const translateX = 'calc(' + this.#containerWidth + 'px)';
+        const duration = (this._containerWidth + width) / this.getVelocity(width);
+        const translateX = 'calc(' + this._containerWidth + 'px)';
 
         const comparer = (i: Interval, danmaku: DanmakuAttr) => {
             const delta = i.start + i.duration - danmaku.begin;
-            const delayDistance = this.#getVelocity(width) * delay;
-            return delta * this.#getVelocity(i.width) + delayDistance <= this.#containerWidth! && // 前弹幕以及完全进入屏幕
-                delta * this.#getVelocity(width) + delayDistance <= this.#containerWidth!; // 在当前弹幕消失前，新弹幕不会追上前弹幕
+            const delayDistance = this.getVelocity(width) * delay;
+            return delta * this.getVelocity(i.width) + delayDistance <= this._containerWidth! && // 前弹幕以及完全进入屏幕
+                delta * this.getVelocity(width) + delayDistance <= this._containerWidth!; // 在当前弹幕消失前，新弹幕不会追上前弹幕
         };
 
-        const offsetY = this.#alloc.tryAllocTrack(danmaku, duration - delay, width, height, comparer);
+        const offsetY = this.alloc.tryAllocTrack(danmaku, duration - delay, width, height, comparer);
 
         return {
             '--duration': duration + 's',
@@ -197,11 +193,11 @@ class ReverseDanmaku implements IDanmakuType {
     }
 
     set containerWidth(value: number) {
-        this.#containerWidth = value;
+        this._containerWidth = value;
     }
 
     set alloc(value: DanmakuAlloc) {
-        this.#alloc = value;
+        this._alloc = value;
     }
 }
 
@@ -219,14 +215,8 @@ class ReverseDanmaku implements IDanmakuType {
 // "NSimSun" - 字体
 // 1 - 线性加速
 class AdvancedDanmaku implements IDanmakuType {
-    #alloc?: DanmakuAlloc;
-    #containerWidth?: number;
 
     getDanmakuParam(danmaku: DanmakuAttr, width: number, height: number, delay: number): DanmakuParam {
-        if (!this.#containerWidth || !this.#alloc) {
-            throw new Error('containerWidth or scheduler is not set');
-        }
-
         const params = JSON.parse(danmaku.text);
         let startX = params[0];
         let startY = params[1];
@@ -299,16 +289,16 @@ class AdvancedDanmaku implements IDanmakuType {
         return 'mika-video-player-danmaku-advanced';
     }
 
-    set containerWidth(value: number) {
-        this.#containerWidth = value;
+    set containerWidth(_value: number) {
+
     }
 
-    set alloc(value: DanmakuAlloc) {
-        this.#alloc = value;
+    set alloc(_value: DanmakuAlloc) {
+
     }
 }
 
-export const DanmakuTypeMap= new Map<number, IDanmakuType>([
+export const DanmakuTypeMap = new Map<number, IDanmakuType>([
     [1, new NormalDanmaku()],
     [2, new NormalDanmaku()],
     [3, new NormalDanmaku()],
