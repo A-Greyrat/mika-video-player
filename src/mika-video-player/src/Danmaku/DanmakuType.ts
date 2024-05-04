@@ -130,7 +130,7 @@ class BottomDanmaku implements IDanmakuType {
         // Return -1 means that the danmaku is not available
         let offsetY = -1;
         if (delay < duration) {
-            offsetY = this.alloc.tryAllocTrack(danmaku, duration, width, height);
+            offsetY = this._alloc.tryAllocTrack(danmaku, duration, width, height);
         }
 
 
@@ -178,7 +178,7 @@ class ReverseDanmaku implements IDanmakuType {
                 delta * this.getVelocity(width) + delayDistance <= this._containerWidth!; // 在当前弹幕消失前，新弹幕不会追上前弹幕
         };
 
-        const offsetY = this.alloc.tryAllocTrack(danmaku, duration - delay, width, height, comparer);
+        const offsetY = this._alloc.tryAllocTrack(danmaku, duration - delay, width, height, comparer);
 
         return {
             '--duration': duration + 's',
