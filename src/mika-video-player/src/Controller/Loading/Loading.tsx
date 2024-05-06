@@ -19,7 +19,7 @@ const Loading = memo(() => {
             timer && clearTimeout(timer);
             timer = setTimeout(() => {
                 setLoading(true);
-            }, 100);
+            }, 300);
         };
 
         videoElement?.addEventListener('canplay', handleCanPlay);

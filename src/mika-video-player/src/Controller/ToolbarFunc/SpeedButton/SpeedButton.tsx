@@ -37,7 +37,7 @@ const SpeedButton = memo(() => {
         return () => {
             videoElement.removeEventListener('ratechange', handleRateChange);
         };
-    }, [speed, videoElement]);
+    }, [hasSingleDecimalPlace, speed, videoElement]);
 
     const onClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!videoElement) return;
