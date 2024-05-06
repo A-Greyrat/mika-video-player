@@ -3,7 +3,7 @@ import React, {useEffect} from "react";
 
 import VideoPlayer, {DanmakuAttr} from "./mika-video-player/src";
 
-const sess_data = "1443a408%2C1719124214%2Cb72e6%2Ac1CjDvyCp9vILksJqy6P2bYiAFgSgqe5SNZAZqtgODbz0Tw5PRo5uv9ZlLW5Sngurv7GMSVnpiSFE0X1pZQWE0Z2l2aHUzWFVVRzBvZm1Ma28zTmw3SDJLNkFzYWtKTkU4eHlXZlhNTDRLQl9XOTdOQ0NTZ3Y5SW41YXdaUnNZWXlwdkNzalZhU2V3IIEC";
+const sess_data = "";
 const default_bv = 'BV1qm421s7MR';
 let proxy_url = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
 

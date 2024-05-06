@@ -1,11 +1,11 @@
 import React, {memo, useCallback, useContext} from "react";
 import ToolBar from "../ToolBar/ToolBar";
+import Loading from "../Loading/Loading";
 
 import {defaultShortcuts, useShortcut} from "../Shortcut/Shortcut.ts";
 
 import './Controller.less';
 import {VideoPlayerContext} from "../../VideoPlayerType";
-
 
 const Controller = memo(() => {
     const controllerRef = React.useRef<HTMLDivElement>(null);
@@ -36,7 +36,7 @@ const Controller = memo(() => {
 
     const [handlePointerDown, handleKeyDown] = useShortcut(shortcut, videoElement, containerElement, controllerRef.current);
 
-    return (
+    return (<>
         <div className="mika-video-player-controller" ref={controllerRef} tabIndex={0}
              onPointerMove={handlePointerMove()}
              onPointerLeave={hideController}
@@ -46,7 +46,8 @@ const Controller = memo(() => {
         >
             <ToolBar/>
         </div>
-    );
+        <Loading/>
+    </>);
 });
 
 Controller.displayName = 'Controller';

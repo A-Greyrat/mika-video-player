@@ -24,7 +24,9 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
         isSeeking.current = true;
         barRef.current!.style.setProperty('--mika-video-progressbar-thumb-visible', 'visible');
         seekPosition(e);
-    }, [seekPosition]);
+
+        videoElement?.pause();
+    }, [seekPosition, videoElement]);
 
     useEffect(() => {
         if (videoElement && barRef.current) {
@@ -55,6 +57,8 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
             seekPosition(e);
             isSeeking.current = false;
             barRef.current!.style.setProperty('--mika-video-progressbar-thumb-visible', 'hidden');
+
+            videoElement?.play().catch(() => {});
         };
 
         document.addEventListener('pointermove', seekPosition, {capture: true});

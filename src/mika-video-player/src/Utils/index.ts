@@ -5,3 +5,8 @@ export const generateUniqueID = (length: number = 8): string => {
 export const isMobile = (): boolean => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
+
+
+export const isFullScreen = (): boolean => {
+    return document.fullscreenElement !== null;
+}
