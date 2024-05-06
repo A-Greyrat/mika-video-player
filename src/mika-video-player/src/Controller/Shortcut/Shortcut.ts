@@ -109,7 +109,7 @@ export const defaultShortcuts: Shortcut[] = [
                     if (showControllerTimer) {
                         clearTimeout(showControllerTimer);
                         showControllerTimer = undefined;
-                        controllerElement && (controllerElement.classList.add('hidden'));
+                        controllerElement && (controllerElement.classList.add('mika-video-player-controller-hidden'));
                         flag = false;
                     }
 
@@ -117,9 +117,9 @@ export const defaultShortcuts: Shortcut[] = [
                         doubleClickTimer = undefined;
 
                         if (flag) {
-                            controllerElement && (controllerElement.classList.remove('hidden'));
+                            controllerElement && (controllerElement.classList.remove('mika-video-player-controller-hidden'));
                             showControllerTimer = setTimeout(() => {
-                                controllerElement && (controllerElement.classList.add('hidden'));
+                                controllerElement && (controllerElement.classList.add('mika-video-player-controller-hidden'));
                                 showControllerTimer = undefined;
                             }, defaultHideTime);
                         }

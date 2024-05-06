@@ -11,12 +11,12 @@ const Controller = memo(forwardRef((_props: NonNullable<unknown>, ref: React.Ref
 
     const hideController = useCallback(() => {
         if (isMobile()) return;
-        controllerRef.current && (controllerRef.current.classList.add('hidden'));
+        controllerRef.current && (controllerRef.current.classList.add('mika-video-player-controller-hidden'));
     }, []);
 
     const showController = useCallback(() => {
         if (isMobile()) return;
-        controllerRef.current && (controllerRef.current.classList.remove('hidden'));
+        controllerRef.current && (controllerRef.current.classList.remove('mika-video-player-controller-hidden'));
     }, []);
 
     const handleMouseMove = useCallback(() => {
@@ -31,7 +31,7 @@ const Controller = memo(forwardRef((_props: NonNullable<unknown>, ref: React.Ref
     }, [hideController, showController]);
 
     return (<>
-        <div className="mika-video-player-controller" ref={controllerRef}
+        <div className="mika-video-player-controller mika-video-player-controller-hidden" ref={controllerRef}
              onMouseMove={handleMouseMove()} onMouseLeave={hideController} onMouseEnter={showController}
         >
             <ToolBar/>

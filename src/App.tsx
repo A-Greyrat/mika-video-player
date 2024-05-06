@@ -1,7 +1,7 @@
 import './App.css';
 import React, {useEffect} from "react";
 
-import VideoPlayer, {DanmakuAttr} from "./mika-video-player/src";
+import VideoPlayer, {DanmakuAttr} from "./mika-video-player";
 
 const sess_data = "";
 const default_bv = 'BV1qm421s7MR';
