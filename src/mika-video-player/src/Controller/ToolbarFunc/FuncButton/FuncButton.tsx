@@ -1,5 +1,6 @@
 import React, {memo, useCallback} from "react";
 import './FuncButton.less';
+import {useStopPropagation} from "../../Shortcut/Shortcut.ts";
 
 const FuncButton = memo((props: {
     icon: React.ReactNode,
@@ -8,11 +9,14 @@ const FuncButton = memo((props: {
 }) => {
     const onClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
         e.currentTarget.blur();
+        e.stopPropagation();
         props.onClick?.(e);
     }, [props]);
 
+    const stopPropagation = useStopPropagation();
+
     return (
-        <button onClick={onClick} className={`mika-video-player-func-button ${props.className ?? ''}`}>
+        <button {...stopPropagation} onClick={onClick} className={`mika-video-player-func-button ${props.className ?? ''}`}>
             {props.icon}
         </button>
     );

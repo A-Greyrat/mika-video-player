@@ -3,11 +3,12 @@ import {Dropdown} from "../../../Component";
 
 import "./SpeedButton.less"
 import {VideoPlayerContext} from "../../../VideoPlayerType";
+import {useStopPropagation} from "../../Shortcut/Shortcut.ts";
 
 const SpeedButton = memo(() => {
     const videoElement = useContext(VideoPlayerContext)?.videoElement;
+    const ref = useRef<HTMLDivElement>(null);
     const [speed, setSpeed] = useState('1.0');
-    const [showDisplay, setShowDisplay] = useState(true);
     const speedItemListRef = useRef(new Map<number, string>([
         [3.0, '3.0'],
         [2.0, '2.0'],
@@ -41,13 +42,14 @@ const SpeedButton = memo(() => {
     const onClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!videoElement) return;
 
+        // ref.current && (ref.current.style.display = 'none');
         const speed = (e.target as HTMLDivElement).dataset.speed!;
         videoElement.playbackRate = parseFloat(speed);
         setSpeed(speed);
-        setShowDisplay(false);
-        setTimeout(() => {
-            setShowDisplay(true);
-        }, 100);
+
+        // setTimeout(() => {
+        //     ref.current && (ref.current.style.display = 'block');
+        // }, 1000);
     }, [videoElement]);
 
     const menu = useMemo(() => {
@@ -67,16 +69,22 @@ const SpeedButton = memo(() => {
         );
     }, [speed, onClick]);
 
+    const stopPropagation = useStopPropagation();
+
     return (
         <Dropdown
             menu={<div className="mika-video-player-toolbar-func-speed-dropdown"
-                       style={{display: showDisplay ? 'block' : 'none',}}>{menu}</div>}
+                       ref={ref}>{menu}</div>}
             className="mika-video-player-toolbar-func-speed"
             type="hover"
             direction="up"
             paddingTrigger={10}
         >
-            <div className="mika-video-player-toolbar-func-speed-text">{speed === '1.0' ? '倍速' : speed + 'x'}</div>
+            <div className="mika-video-player-toolbar-func-speed-text"
+                 {...stopPropagation}
+            >
+                {speed === '1.0' ? '倍速' : speed + 'x'}
+            </div>
         </Dropdown>
     );
 });

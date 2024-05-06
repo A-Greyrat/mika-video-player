@@ -1,14 +1,27 @@
 import React, {useCallback, useEffect, useRef} from "react";
+import {isMobile} from "../../Utils";
 
-export type ShortcutCallback = (videoElement?: HTMLVideoElement | null, containerElement?: HTMLDivElement | null) => void;
+export type ShortcutCallback = (videoElement?: HTMLVideoElement | null, containerElement?: HTMLDivElement | null, controllerElement?: HTMLDivElement | null) => void;
 
 export type Shortcut = {
     key: string | number;
-    type: 'keydown' | 'pointerdown';
+    type: 'keydown' |
+        'keyup' |
+        'pointerdown' |
+        'pointerup' |
+        'mousedown' |
+        'mouseup' |
+        'touchstart' |
+        'touchend' |
+        'touchcancel' |
+        'touchmove';
     callback: ShortcutCallback;
 
     root?: 'document' | 'video';
 };
+
+let showControllerTimer: number | undefined = undefined;
+let doubleClickTimer: number | undefined = undefined;
 
 export const defaultShortcuts: Shortcut[] = [
     {
@@ -75,19 +88,53 @@ export const defaultShortcuts: Shortcut[] = [
     },
     {
         key: 0,
-        type: 'pointerdown',
+        type: 'mousedown',
         root: 'video',
-        callback: (videoElement) => {
-            if (videoElement && videoElement.readyState >= 2) {
+        callback: (videoElement, _containerElement, controllerElement) => {
+            const defaultHideTime = 6000;
+
+            if (isMobile()) {
+                if (doubleClickTimer) {
+                    clearTimeout(doubleClickTimer);
+                    doubleClickTimer = undefined;
+
+                    if (videoElement) {
+                        if (videoElement.readyState >= 2) {
+                            if (videoElement.paused) videoElement.play().catch(undefined);
+                            else videoElement.pause();
+                        }
+                    }
+                } else {
+                    let flag = true;
+                    if (showControllerTimer) {
+                        clearTimeout(showControllerTimer);
+                        showControllerTimer = undefined;
+                        controllerElement && (controllerElement.classList.add('hidden'));
+                        flag = false;
+                    }
+
+                    doubleClickTimer = setTimeout(() => {
+                        doubleClickTimer = undefined;
+
+                        if (flag) {
+                            controllerElement && (controllerElement.classList.remove('hidden'));
+                            showControllerTimer = setTimeout(() => {
+                                controllerElement && (controllerElement.classList.add('hidden'));
+                                showControllerTimer = undefined;
+                            }, defaultHideTime);
+                        }
+                    }, 200);
+                }
+            } else if (videoElement && videoElement.readyState >= 2) {
                 if (videoElement.paused) videoElement.play().catch(undefined);
                 else videoElement.pause();
             }
         }
-    }
+    },
 ];
 
 export const useShortcut = (shortcuts: Shortcut[], videoElement?: HTMLVideoElement | null, containerElement?: HTMLDivElement | null, controllerElement?: HTMLDivElement | null) => {
-    const videoEventMapRef = useRef<Map<string, (e: Event | React.PointerEvent | React.KeyboardEvent) => void>>(new Map());
+    const videoEventMapRef = useRef<Map<string, (e: Event | React.PointerEvent | React.MouseEvent | React.KeyboardEvent | React.TouchEvent) => void>>(new Map());
 
     useEffect(() => {
         const shortcutMap = new Map<string, Map<string, Map<string | number, Shortcut>>>();
@@ -107,16 +154,22 @@ export const useShortcut = (shortcuts: Shortcut[], videoElement?: HTMLVideoEleme
         });
 
         for (const [root, shortcutList] of shortcutMap) {
-            const rootElement = root === 'document' ? document : root === 'video' ? videoElement : undefined;
+            const rootElement = root === 'document' ? document : root === 'video' ? containerElement : undefined;
             for (const [type, map] of shortcutList) {
-                const callback = (e: Event | React.PointerEvent | React.KeyboardEvent) => {
+                const callback = (e: Event | React.PointerEvent | React.MouseEvent | React.KeyboardEvent | React.TouchEvent) => {
                     if (rootElement === document && e.target !== document.body && e.target !== controllerElement && e.target !== containerElement) return;
 
-                    const key = ("key" in e) ? e.key : ("button" in e) ? e.button: undefined;
-                    if (key !== undefined && (typeof key === 'string' || typeof key === 'number') && map.has(key)) {
+                    const key = ("key" in e) ? e.key : ("button" in e) ? e.button : undefined;
+                    const isTouchEvent = 'touches' in e;
+                    const isKeyEvent = key !== undefined && (typeof key === 'string' || typeof key === 'number');
+
+                    if (isTouchEvent && map.has('touch')) {
+                        e.stopPropagation();
+                        map.get('touch')!.callback(videoElement, containerElement, controllerElement);
+                    } else if (isKeyEvent && map.has(key)) {
                         e.preventDefault();
                         e.stopPropagation();
-                        map.get(key)!.callback(videoElement, containerElement);
+                        map.get(key)!.callback(videoElement, containerElement, controllerElement);
                     }
                 };
 
@@ -132,15 +185,121 @@ export const useShortcut = (shortcuts: Shortcut[], videoElement?: HTMLVideoEleme
         };
     }, [shortcuts, videoElement, containerElement, controllerElement]);
 
-    const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    const onPointerDown = useCallback((e: React.PointerEvent) => {
         const pointerdown = videoEventMapRef.current.get('pointerdown');
         pointerdown && pointerdown(e);
     }, []);
 
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const onPointerUp = useCallback((e: React.PointerEvent) => {
+        const pointerup = videoEventMapRef.current.get('pointerup');
+        pointerup && pointerup(e);
+    }, []);
+
+    const onKeyDown = useCallback((e: React.KeyboardEvent) => {
         const keydown = videoEventMapRef.current.get('keydown');
         keydown && keydown(e);
     }, []);
 
-    return [handlePointerDown, handleKeyDown] as const;
+    const onKeyUp = useCallback((e: React.KeyboardEvent) => {
+        const keyup = videoEventMapRef.current.get('keyup');
+        keyup && keyup(e);
+    }, []);
+
+    const onMouseDown = useCallback((e: React.MouseEvent) => {
+        const mousedown = videoEventMapRef.current.get('mousedown');
+        mousedown && mousedown(e);
+    }, []);
+
+    const onMouseUp = useCallback((e: React.MouseEvent) => {
+        const mouseup = videoEventMapRef.current.get('mouseup');
+        mouseup && mouseup(e);
+    }, []);
+
+    const onTouchStart = useCallback((e: React.TouchEvent) => {
+        const touchstart = videoEventMapRef.current.get('touchstart');
+        touchstart && touchstart(e);
+    }, []);
+
+    const onTouchEnd = useCallback((e: React.TouchEvent) => {
+        const touchend = videoEventMapRef.current.get('touchend');
+        touchend && touchend(e);
+    }, []);
+
+    const onTouchCancel = useCallback((e: React.TouchEvent) => {
+        const touchcancel = videoEventMapRef.current.get('touchcancel');
+        touchcancel && touchcancel(e);
+    }, []);
+
+    const onTouchMove = useCallback((e: React.TouchEvent) => {
+        const touchmove = videoEventMapRef.current.get('touchmove');
+        touchmove && touchmove(e);
+    }, []);
+
+    return {
+        onPointerDown,
+        onKeyDown,
+        onPointerUp,
+        onKeyUp,
+        onMouseDown,
+        onMouseUp,
+        onTouchStart,
+        onTouchEnd,
+        onTouchCancel,
+        onTouchMove
+    } as const;
 };
+
+export const useStopPropagation = () => {
+    const onPointerDown = useCallback((e: React.PointerEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onPointerUp = useCallback((e: React.PointerEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onKeyUp = useCallback((e: React.KeyboardEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onMouseDown = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onMouseUp = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onTouchStart = useCallback((e: React.TouchEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onTouchEnd = useCallback((e: React.TouchEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onTouchCancel = useCallback((e: React.TouchEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    const onTouchMove = useCallback((e: React.TouchEvent) => {
+        e.stopPropagation();
+    }, []);
+
+    return {
+        onPointerDown,
+        onKeyDown,
+        onPointerUp,
+        onKeyUp,
+        onMouseDown,
+        onMouseUp,
+        onTouchStart,
+        onTouchEnd,
+        onTouchCancel,
+        onTouchMove
+    } as const;
+}

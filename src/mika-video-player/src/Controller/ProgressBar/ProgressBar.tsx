@@ -10,9 +10,16 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
 
     useImperativeHandle(ref, () => barRef.current!);
 
-    const seekPosition = useCallback((e: React.PointerEvent<HTMLDivElement> | PointerEvent) => {
+    const seekPosition = useCallback((e: React.PointerEvent<HTMLDivElement> | PointerEvent | TouchEvent) => {
         if (isSeeking.current && videoElement) {
-            let progress = (e.clientX - (barRef.current?.getBoundingClientRect().x ?? 0)) / barRef.current!.clientWidth;
+            let x;
+            if (e instanceof TouchEvent) {
+                x = e.touches[0].clientX;
+            } else {
+                x = e.clientX;
+            }
+
+            let progress = (x - (barRef.current?.getBoundingClientRect().x ?? 0)) / barRef.current!.clientWidth;
             progress = Math.min(1, Math.max(0, progress));
             videoElement.currentTime = videoElement.duration * progress;
             barRef.current!.style.setProperty('--mika-video-progress', `${progress * 100}%`);
@@ -24,7 +31,6 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
         isSeeking.current = true;
         barRef.current!.style.setProperty('--mika-video-progressbar-thumb-visible', 'visible');
         seekPosition(e);
-
         videoElement?.pause();
     }, [seekPosition, videoElement]);
 
@@ -57,16 +63,17 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
             seekPosition(e);
             isSeeking.current = false;
             barRef.current!.style.setProperty('--mika-video-progressbar-thumb-visible', 'hidden');
-
             videoElement?.play().catch(() => {});
         };
 
         document.addEventListener('pointermove', seekPosition, {capture: true});
         document.addEventListener('pointerup', handlePointerUp, {capture: true});
+        document.addEventListener('touchmove', seekPosition, {capture: true});
 
         return () => {
             document.removeEventListener('pointermove', seekPosition, {capture: true});
             document.removeEventListener('pointerup', handlePointerUp, {capture: true});
+            document.removeEventListener('touchmove', seekPosition, {capture: true});
         };
     }, [seekPosition, videoElement]);
 

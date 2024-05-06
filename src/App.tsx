@@ -55,7 +55,7 @@ const App: React.FC = () => {
         }}>
 
             <VideoPlayer
-                height='100%'
+                width='100%'
                 controls
                 loop
                 danmaku={danmakus}

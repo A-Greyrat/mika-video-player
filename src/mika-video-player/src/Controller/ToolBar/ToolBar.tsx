@@ -1,9 +1,10 @@
-import React, {forwardRef, memo, useCallback, useContext, useImperativeHandle} from "react";
+import React, {forwardRef, memo, useContext, useImperativeHandle} from "react";
 import ProgressBar from "../ProgressBar/ProgressBar";
-import {FullScreenButton, PlayButton, ToolbarTimer, VolumeButton, SpeedButton} from "../ToolbarFunc";
+import {FullScreenButton, PlayButton, SpeedButton, ToolbarTimer, VolumeButton} from "../ToolbarFunc";
 
 import './ToolBar.less';
 import {VideoPlayerContext} from "../../VideoPlayerType";
+import {useStopPropagation} from "../Shortcut/Shortcut.ts";
 
 const DefaultToolbarArea = {
     left: [PlayButton, ToolbarTimer],
@@ -18,13 +19,13 @@ const ToolBar = memo(forwardRef((_props: NonNullable<unknown>, ref: React.Ref<HT
 
     const {left: leftArea, middle: middleArea, right: rightArea} = context?.props.toolbar || DefaultToolbarArea;
 
-    const stopPropagation = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-    }, []);
+    const stopPropagation = useStopPropagation();
 
     return (<>
         <div className="mika-video-player-toolbar-mask"/>
-        <div ref={toolbarRef} className="mika-video-player-toolbar" onPointerDown={stopPropagation}>
+        <div ref={toolbarRef} className="mika-video-player-toolbar"
+             {...stopPropagation}
+        >
             <ProgressBar/>
             <div className="mika-video-player-toolbar-function-container">
                 <div className="mika-video-player-toolbar-function-container-left-area">

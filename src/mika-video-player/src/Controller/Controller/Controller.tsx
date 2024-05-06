@@ -1,29 +1,25 @@
-import React, {memo, useCallback, useContext} from "react";
+import React, {forwardRef, memo, useCallback, useImperativeHandle} from "react";
 import ToolBar from "../ToolBar/ToolBar";
 import Loading from "../Loading/Loading";
-
-import {defaultShortcuts, useShortcut} from "../Shortcut/Shortcut.ts";
+import {isMobile} from "../../Utils";
 
 import './Controller.less';
-import {VideoPlayerContext} from "../../VideoPlayerType";
 
-const Controller = memo(() => {
+const Controller = memo(forwardRef((_props: NonNullable<unknown>, ref: React.Ref<HTMLDivElement>) => {
     const controllerRef = React.useRef<HTMLDivElement>(null);
-    const context = useContext(VideoPlayerContext);
-
-    const videoElement = context?.videoElement;
-    const containerElement = context?.containerElement;
-    const shortcut = context?.props.shortcut || defaultShortcuts;
+    useImperativeHandle(ref, () => controllerRef.current!);
 
     const hideController = useCallback(() => {
-        controllerRef.current && (controllerRef.current.style.opacity = '0');
+        if (isMobile()) return;
+        controllerRef.current && (controllerRef.current.classList.add('hidden'));
     }, []);
 
     const showController = useCallback(() => {
-        controllerRef.current && (controllerRef.current.style.opacity = '1');
+        if (isMobile()) return;
+        controllerRef.current && (controllerRef.current.classList.remove('hidden'));
     }, []);
 
-    const handlePointerMove = useCallback(() => {
+    const handleMouseMove = useCallback(() => {
         let timer: number;
         const remainingTime = 3000;
 
@@ -34,21 +30,15 @@ const Controller = memo(() => {
         }
     }, [hideController, showController]);
 
-    const [handlePointerDown, handleKeyDown] = useShortcut(shortcut, videoElement, containerElement, controllerRef.current);
-
     return (<>
-        <div className="mika-video-player-controller" ref={controllerRef} tabIndex={0}
-             onPointerMove={handlePointerMove()}
-             onPointerLeave={hideController}
-             onPointerEnter={showController}
-             onPointerDown={handlePointerDown}
-             onKeyDown={handleKeyDown}
+        <div className="mika-video-player-controller" ref={controllerRef}
+             onMouseMove={handleMouseMove()} onMouseLeave={hideController} onMouseEnter={showController}
         >
             <ToolBar/>
         </div>
         <Loading/>
     </>);
-});
+}));
 
 Controller.displayName = 'Controller';
 export default Controller;
