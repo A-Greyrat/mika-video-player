@@ -22,6 +22,7 @@ class Timer {
     start: number = 0;
     paused: boolean = true;
     pauseTime: number = 0;
+    loop?: number;
     callbackList: {
         callback: () => void;
         delay: number;
@@ -41,10 +42,14 @@ class Timer {
                     return true;
                 });
             }
-            requestAnimationFrame(loop);
+            this.loop = requestAnimationFrame(loop);
         }
 
-        loop();
+        this.loop = requestAnimationFrame(loop);
+    }
+
+    public destroy() {
+        cancelAnimationFrame(this.loop!);
     }
 
     // 获取当前时间, 单位: ms
@@ -147,7 +152,6 @@ export class DanmakuPool {
         this.containerHeight = entry.contentRect.height;
 
         this.alloc.forEach(scheduler => {
-            scheduler.clear();
             scheduler.ContainerHeight = this.containerHeight;
         });
         this.alloc[0].ContainerHeight = this.containerHeight * this.displayAreaRate;
@@ -225,7 +229,9 @@ export class DanmakuPool {
             scheduler.clear();
         });
         this.alloc = [];
+
         this.timer.pause();
+        this.timer.destroy();
     }
 
     public setDefaultDanmakuOption(option: { [key in ContainerOption]: string } & { [key: string]: string }) {
@@ -264,6 +270,9 @@ export class DanmakuPool {
                 d.style.opacity = 'var(--opacity)';
                 d.classList.add('mika-video-player-danmaku-animation');
                 this.timer.setTimeout(() => this.hideDanmaku(d), (parseFloat(danmakuParam['--duration']) + parseFloat(danmakuParam['--delay'])) * 1000);
+
+                if (danmaku.mode === 4)
+                    console.log((parseFloat(danmakuParam['--duration']) + parseFloat(danmakuParam['--delay'])) * 1000)
 
                 // TODO: 待重构
                 if (danmaku.mode === 7) {

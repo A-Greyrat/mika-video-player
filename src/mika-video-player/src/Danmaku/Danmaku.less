@@ -100,29 +100,11 @@
   will-change: opacity;
 }
 
-
-.mika-video-player-danmaku-bottom.mika-video-player-danmaku-animation,
-.mika-video-player-danmaku-top.mika-video-player-danmaku-animation {
-  animation: mika-video-player-danmaku-disappear var(--duration) linear var(--delay) forwards;
-}
-
 .mika-video-player-danmaku-advanced {
-  --startX: unset;
-  --startY: unset;
-  --endX: unset;
-  --endY: unset;
-  --lifeTime: unset;
-  --animationDelay: unset;
-  --animationDuration: unset;
-  --animationTimingFunction: unset;
   --strokeSize: 0;
   --fontFamily: unset;
   --advanceFontSize: unset;
-  --matrixStart: unset;
-  --matrixEnd: unset;
   --opacityStart: unset;
-  --opacityMiddle: unset;
-  --opacityEnd: unset;
 
   font-family: var(--fontFamily), sans-serif;
   font-size: var(--advanceFontSize) !important;
@@ -135,8 +117,6 @@
   opacity: unset;
   transform: matrix3d(var(--matrixStart));
   will-change: transform, opacity;
-
-  white-space: pre;
 
   z-index: 10;
 }

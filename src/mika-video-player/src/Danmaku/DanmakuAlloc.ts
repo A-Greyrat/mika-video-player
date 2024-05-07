@@ -18,12 +18,16 @@ export interface Interval {
 export class DanmakuAlloc {
     private trackList: Interval[][] = [];
     private enableMultiTrack = false;
+    private videoSpeed = 1;
 
     private containerHeight: number;
-    private videoSpeed = 1;
 
     constructor(height: number) {
         this.containerHeight = height;
+    }
+
+    set VideoSpeed(speed: number) {
+        this.videoSpeed = speed;
     }
 
     set ContainerHeight(height: number) {
@@ -44,27 +48,35 @@ export class DanmakuAlloc {
         this.enableMultiTrack = enable;
     }
 
-    set VideoSpeed(speed: number) {
-        this.videoSpeed = speed;
-    }
-
     // 判断轨道是否空闲可用
     private isFree(track: Interval, danmaku: DanmakuAttr): boolean {
-        return track.start + track.duration * this.videoSpeed <= danmaku.begin;
+        return track.start + track.duration / this.videoSpeed <= danmaku.begin;
     }
 
     private combineTrack(index: number, danmaku: DanmakuAttr, trackListIndex: number, width: number, height: number, duration: number, compare: (a: Interval, danmaku: DanmakuAttr) => boolean) {
         // 持续尝试合并轨道，直到满足height的需求
         let cur = index, right = this.trackList[trackListIndex][index].right;
         while (cur + 1 < this.trackList[trackListIndex].length
-            && compare(this.trackList[trackListIndex][cur + 1], danmaku)
-            && right - this.trackList[trackListIndex][index].left < height
-            ) {
+        && compare(this.trackList[trackListIndex][cur + 1], danmaku)
+        && right - this.trackList[trackListIndex][index].left < height) {
             cur++;
             right = this.trackList[trackListIndex][cur].right;
         }
 
-        if (right - this.trackList[trackListIndex][index].left < height) return -1;
+        if (right - this.trackList[trackListIndex][index].left < height) {
+            // 如果合并后的轨道仍然无法满足需求，则返回-1
+            // 但是如果已经合并到最后一个轨道，可以开辟一小块新的轨道再次尝试合并，且新轨道不会超过容器高度
+            if (cur + 1 === this.trackList[trackListIndex].length && this.trackList[trackListIndex][index].left + height <= this.containerHeight) {
+                this.trackList[trackListIndex].push({
+                    left: right,
+                    right: height + this.trackList[trackListIndex][index].left,
+                    start: this.trackList[trackListIndex][cur].start,
+                    duration: this.trackList[trackListIndex][cur].duration,
+                    width: this.trackList[trackListIndex][cur].width,
+                });
+                cur++;
+            } else return -1;
+        }
 
         const lastTrack = JSON.parse(JSON.stringify(this.trackList[trackListIndex][cur]));
         const i = index + 1;
@@ -97,6 +109,19 @@ export class DanmakuAlloc {
         track.width = width;
     }
 
+    private debugCheck() {
+        // 检查上一个轨道的右端点是否等于下一个轨道的左端点
+        for (let i = 0; i < this.trackList.length; i++) {
+            for (let j = 1; j < this.trackList[i].length; j++) {
+                if (this.trackList[i][j].left !== this.trackList[i][j - 1].right) {
+                    console.error(`Track ${j} in list ${i} is not connected with previous track`, this.trackList[i][j - 1], this.trackList[i][j]);
+                }
+            }
+        }
+
+        console.log(this.trackList);
+    }
+
     /**
      * Tries to allocate a track for a given danmaku.
      *
@@ -120,16 +145,18 @@ export class DanmakuAlloc {
             for (let i = 0; i < list.length; i++) {
                 if (!comparer(list[i], danmaku)) continue;
 
+                // 如果当前轨道满足需求, 则直接使用
                 if (this.size(list[i]) === height) {
                     this.useTrack(list[i], danmaku, width, height, duration);
                     return list[i].left;
                 }
 
+                // 如果当前轨道宽度大于需求高度，则尝试分割轨道
                 if (this.size(list[i]) > height) {
                     const right = list[i].right;
 
                     list.splice(i + 1, 0, {
-                        left: list[i].right,
+                        left: list[i].left + height,
                         right: right,
                         start: list[i].start,
                         duration: list[i].duration,
@@ -165,6 +192,7 @@ export class DanmakuAlloc {
             return right;
         }
 
+        this.debugCheck();
         return _getAvailableTrack(danmaku, duration, 0, comparer || this.isFree.bind(this));
     }
 
