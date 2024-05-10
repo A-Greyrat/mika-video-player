@@ -1,12 +1,12 @@
-import {DanmakuPool} from "./DanmakuPool.ts";
-import {DanmakuAttr} from "./DanmakuType.ts";
+import {DanmakuManager} from "./DanmakuManager.ts";
+import {DanmakuAttr} from "./DanmakuRender.ts";
 
 // 在videoElement seeked事件后最大允许多少秒前的弹幕被添加至弹幕池
 const ALLOWED_MAX_DELAY: number = 10;
 
 export class DanmakuScheduler {
     video: HTMLVideoElement;
-    danmakuPool: DanmakuPool;
+    danmakuPool: DanmakuManager;
     danmaku: DanmakuAttr[];
 
     currentIndex = 0;
@@ -57,7 +57,7 @@ export class DanmakuScheduler {
 
     constructor(video: HTMLVideoElement, container: HTMLDivElement, danmaku: DanmakuAttr[]) {
         this.video = video;
-        this.danmakuPool = new DanmakuPool(container, video);
+        this.danmakuPool = new DanmakuManager(container, video);
         this.danmaku = danmaku;
 
         this.video.addEventListener('timeupdate', this.handleTimeUpdate);

@@ -3,9 +3,9 @@ import React, {useEffect} from "react";
 
 import VideoPlayer, {DanmakuAttr} from "./mika-video-player/src";
 
-const sess_data = "";
+let sess_data = "";
 const default_bv = 'BV1qm421s7MR';
-let proxy_url = 'https://api.erisu.moe/proxy?pReferer=https://www.bilibili.com';
+let proxy_url = 'https://fast.abdecd.xyz/proxy?pReferer=https://www.bilibili.com';
 
 const getUrl = (bv: string) => {
     return 'https://b.erisu.moe/api/playurl/flv?bvid=' + bv + '&SESSDATA=' + sess_data;
@@ -18,6 +18,8 @@ const App: React.FC = () => {
     useEffect(() => {
         const url = new URL(window.location.href);
         const bv = url.searchParams.get('bv');
+        sess_data = url.searchParams.get('SESSDATA') || "";
+
         const c = getUrl(bv || default_bv);
 
         fetch(c).then(res => res.json()).then(data => {
@@ -39,7 +41,6 @@ const App: React.FC = () => {
                 });
             }
 
-            console.log(newDanmakus);
             setDanmakus(newDanmakus);
         });
     }, []);
@@ -55,13 +56,16 @@ const App: React.FC = () => {
         }}>
 
             <VideoPlayer
-                width='100%'
+                style={{
+                    width: '80%'
+                }}
                 controls
                 loop
                 danmaku={danmakus}
                 src={url ? proxy_url + url : undefined}
             >
             </VideoPlayer>
+
         </div>
     )
 };

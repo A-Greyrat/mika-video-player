@@ -12,7 +12,7 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
     useImperativeHandle(ref, () => barRef.current!);
 
     const seekPosition = useCallback((e: React.PointerEvent<HTMLDivElement> | PointerEvent | TouchEvent) => {
-        if (isSeeking.current && videoElement && videoElement.readyState > 1) {
+        if (isSeeking.current && videoElement && videoElement.readyState >= 1) {
             let x;
             if (e instanceof TouchEvent) {
                 if (e.touches[0] === undefined) return;
@@ -61,7 +61,7 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
         const handlePointerUp = () => {
             if (isMobile()) return;
 
-            if (isSeeking.current && videoElement && videoElement.readyState > 1) {
+            if (isSeeking.current && videoElement && videoElement.readyState >= 1) {
                 const progress = parseFloat(barRef.current!.style.getPropertyValue('--mika-video-progress')) / 100;
                 videoElement.currentTime = videoElement.duration * progress;
             }
@@ -70,7 +70,7 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
         };
 
         const handleTouchEnd = () => {
-            if (isSeeking.current && videoElement && videoElement.readyState > 1) {
+            if (isSeeking.current && videoElement && videoElement.readyState >= 1) {
                 const progress = parseFloat(barRef.current!.style.getPropertyValue('--mika-video-progress')) / 100;
                 videoElement.currentTime = videoElement.duration * progress;
             }
@@ -80,7 +80,6 @@ const ProgressBar = memo(forwardRef((_props: NonNullable<unknown>, ref: Ref<HTML
 
         const handleSeeked = () => {
             if (videoElement) {
-                console.log(videoElement.currentTime)
                 videoElement.play().catch(undefined);
             }
         }

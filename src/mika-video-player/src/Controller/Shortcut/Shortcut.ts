@@ -1,7 +1,10 @@
 import React, {useCallback, useEffect, useRef} from "react";
 import {isMobile} from "../../Utils";
 
-export type ShortcutCallback = (videoElement?: HTMLVideoElement | null, containerElement?: HTMLDivElement | null, controllerElement?: HTMLDivElement | null) => void;
+export type ShortcutCallback = (videoElement?: HTMLVideoElement | null,
+                                containerElement?: HTMLDivElement | null,
+                                controllerElement?: HTMLDivElement | null,
+                                e?: Event | React.PointerEvent | React.MouseEvent | React.KeyboardEvent | React.TouchEvent) => void;
 
 export type Shortcut = {
     key: string | number;
@@ -28,7 +31,8 @@ export const defaultShortcuts: Shortcut[] = [
         key: ' ',
         type: 'keydown',
         root: 'document',
-        callback: (videoElement) => {
+        callback: (videoElement, _containerElement, _controllerElement, e) => {
+            e?.preventDefault();
             if (videoElement && videoElement.readyState > 2) {
                 if (videoElement.paused) videoElement.play().catch(undefined);
                 else videoElement.pause();
@@ -50,7 +54,8 @@ export const defaultShortcuts: Shortcut[] = [
         key: 'ArrowLeft',
         type: 'keydown',
         root: 'document',
-        callback: (videoElement) => {
+        callback: (videoElement, _containerElement, _controllerElement, e) => {
+            e?.preventDefault();
             if (videoElement) videoElement.currentTime -= 5;
         }
     },
@@ -58,7 +63,8 @@ export const defaultShortcuts: Shortcut[] = [
         key: 'ArrowRight',
         type: 'keydown',
         root: 'document',
-        callback: (videoElement) => {
+        callback: (videoElement, _containerElement, _controllerElement, e) => {
+            e?.preventDefault();
             if (videoElement) videoElement.currentTime += 5;
         }
     },
@@ -74,7 +80,8 @@ export const defaultShortcuts: Shortcut[] = [
         key: 'ArrowUp',
         type: 'keydown',
         root: 'video',
-        callback: (videoElement) => {
+        callback: (videoElement, _containerElement, _controllerElement, e) => {
+            e?.preventDefault();
             if (videoElement) videoElement.volume = Math.min(1, videoElement.volume + 0.1);
         },
     },
@@ -82,7 +89,8 @@ export const defaultShortcuts: Shortcut[] = [
         key: 'ArrowDown',
         type: 'keydown',
         root: 'video',
-        callback: (videoElement) => {
+        callback: (videoElement, _containerElement, _controllerElement, e) => {
+            e?.preventDefault();
             if (videoElement) videoElement.volume = Math.max(0, videoElement.volume - 0.1);
         },
     },
@@ -165,11 +173,10 @@ export const useShortcut = (shortcuts: Shortcut[], videoElement?: HTMLVideoEleme
 
                     if (isTouchEvent && map.has('touch')) {
                         e.stopPropagation();
-                        map.get('touch')!.callback(videoElement, containerElement, controllerElement);
+                        map.get('touch')!.callback(videoElement, containerElement, controllerElement, e);
                     } else if (isKeyEvent && map.has(key)) {
-                        e.preventDefault();
                         e.stopPropagation();
-                        map.get(key)!.callback(videoElement, containerElement, controllerElement);
+                        map.get(key)!.callback(videoElement, containerElement, controllerElement, e);
                     }
                 };
 
@@ -184,6 +191,22 @@ export const useShortcut = (shortcuts: Shortcut[], videoElement?: HTMLVideoEleme
             uninstallList.forEach((uninstall) => uninstall());
         };
     }, [shortcuts, videoElement, containerElement, controllerElement]);
+
+    useEffect(() => {
+        // 阻止使用空格键以及方向键时的默认滚动行为
+        const handlePreventDefault = (e: KeyboardEvent) => {
+            if ((e.target === containerElement || e.target === controllerElement) &&
+                (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                e.preventDefault();
+            }
+        }
+
+        document.addEventListener('keydown', handlePreventDefault, {capture: true});
+
+        return () => {
+            document.removeEventListener('keydown', handlePreventDefault);
+        };
+    }, [containerElement, controllerElement]);
 
     const onPointerDown = useCallback((e: React.PointerEvent) => {
         const pointerdown = videoEventMapRef.current.get('pointerdown');

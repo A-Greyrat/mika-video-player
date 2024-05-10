@@ -1,4 +1,4 @@
-import {DanmakuAttr} from "./DanmakuType.ts";
+import {DanmakuAttr} from "./DanmakuRender.ts";
 
 export interface Interval {
     // 区间左端点
@@ -18,16 +18,11 @@ export interface Interval {
 export class DanmakuAlloc {
     private trackList: Interval[][] = [];
     private enableMultiTrack = false;
-    private videoSpeed = 1;
 
     private containerHeight: number;
 
     constructor(height: number) {
         this.containerHeight = height;
-    }
-
-    set VideoSpeed(speed: number) {
-        this.videoSpeed = speed;
     }
 
     set ContainerHeight(height: number) {
@@ -50,7 +45,7 @@ export class DanmakuAlloc {
 
     // 判断轨道是否空闲可用
     private isFree(track: Interval, danmaku: DanmakuAttr): boolean {
-        return track.start + track.duration / this.videoSpeed <= danmaku.begin;
+        return track.start + track.duration <= danmaku.begin;
     }
 
     private combineTrack(index: number, danmaku: DanmakuAttr, trackListIndex: number, width: number, height: number, duration: number, compare: (a: Interval, danmaku: DanmakuAttr) => boolean) {
@@ -109,7 +104,7 @@ export class DanmakuAlloc {
         track.width = width;
     }
 
-    private debugCheck() {
+    private debugCheck = () => {
         // 检查上一个轨道的右端点是否等于下一个轨道的左端点
         for (let i = 0; i < this.trackList.length; i++) {
             for (let j = 1; j < this.trackList[i].length; j++) {
@@ -119,8 +114,17 @@ export class DanmakuAlloc {
             }
         }
 
-        console.log(this.trackList);
-    }
+        // 检查轨道是否重叠
+        for (let i = 0; i < this.trackList.length; i++) {
+            for (let j = 0; j < this.trackList[i].length; j++) {
+                for (let k = j + 1; k < this.trackList[i].length; k++) {
+                    if (this.trackList[i][j].left < this.trackList[i][k].right && this.trackList[i][j].right > this.trackList[i][k].left) {
+                        console.error(`Track ${j} and ${k} in list ${i} are overlapping`, this.trackList[i][j], this.trackList[i][k]);
+                    }
+                }
+            }
+        }
+    };
 
     /**
      * Tries to allocate a track for a given danmaku.
