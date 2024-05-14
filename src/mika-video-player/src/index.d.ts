@@ -5,5 +5,5 @@ export * from './Controller';
 export * from './Danmaku';
 export * from './VideoPlayerType.ts';
 
-export declare const VideoPlayer: React.FC<VideoPlayerProps>;
+export declare const VideoPlayer: React.ForwardRefExoticComponent<VideoPlayerProps & React.RefAttributes<HTMLVideoElement>>;
 export default VideoPlayer;

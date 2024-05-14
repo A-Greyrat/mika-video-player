@@ -1,6 +1,6 @@
 import React, {forwardRef, memo, useContext, useImperativeHandle} from "react";
 import ProgressBar from "../ProgressBar/ProgressBar";
-import {FullScreenButton, PlayButton, SpeedButton, ToolbarTimer, VolumeButton} from "../ToolbarFunc";
+import {QualityButton, FullScreenButton, PlayButton, SpeedButton, ToolbarTimer, VolumeButton} from "../ToolbarFunc";
 
 import './ToolBar.less';
 import {VideoPlayerContext} from "../../VideoPlayerType";
@@ -9,7 +9,7 @@ import {useStopPropagation} from "../Shortcut/Shortcut.ts";
 const DefaultToolbarArea = {
     left: [PlayButton, ToolbarTimer],
     middle: [],
-    right: [SpeedButton, VolumeButton, FullScreenButton],
+    right: [QualityButton, SpeedButton, VolumeButton, FullScreenButton],
 };
 
 const ToolBar = memo(forwardRef((_props: NonNullable<unknown>, ref: React.Ref<HTMLDivElement>) => {

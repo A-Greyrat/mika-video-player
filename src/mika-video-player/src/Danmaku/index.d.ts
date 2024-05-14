@@ -1,4 +1,4 @@
 import React from "react";
 
-export {DanmakuAttr} from "./DanmakuType.ts";
+export {DanmakuAttr} from "./DanmakuRender.ts";
 export declare const Danmaku: React.FC;

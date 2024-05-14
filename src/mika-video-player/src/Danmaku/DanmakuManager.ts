@@ -70,6 +70,11 @@ export class Timer {
     }
 
     public setTimeout(callback: () => void, delay: number) {
+        if (isNaN(delay) || delay < 0 || delay === Infinity) {
+            callback();
+            return;
+        }
+
         this.callbackList.push({callback, delay: delay + this.now});
     }
 }
@@ -84,15 +89,15 @@ export class DanmakuManager {
     private video: HTMLVideoElement;
     private timer: Timer = new Timer();
 
-    private canvas = document.createElement('canvas');
-    private context: CanvasRenderingContext2D = this.canvas.getContext('2d')!;
+    private canvas = OffscreenCanvas ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
+    private context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D = this.canvas.getContext('2d')!;
 
     private containerWidth = 0;
     private containerHeight = 0;
 
-    private displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 0.5;
+    private displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 1;
     private fontSizeScale = 1;
-    private fontSizeSyncWithWindow = true;
+    private fontSizeSyncWithWindow = false;
     private danmakuSpeed = 1;
     private danmakuOption: DanmakuOption = {
         'opacity': '0.8',
@@ -105,10 +110,6 @@ export class DanmakuManager {
         this.container = container;
         this.containerWidth = this.container!.clientWidth;
         this.containerHeight = this.container!.clientHeight;
-
-        Object.entries(this.danmakuOption).forEach(([key, value]) => {
-            this.container?.style.setProperty(key, value);
-        });
 
         this.resizeObserver.observe(this.container);
         this.timer.resume();
@@ -161,18 +162,14 @@ export class DanmakuManager {
     };
 
 
-    private copyCurrentDanmaku: Set<HTMLDivElement> = new Set();
     private handleSeeking = () => {
-        if (this.copyCurrentDanmaku.size > 0) return;
-
         // 暂停所有弹幕，也可以不暂停，视情况移除
         for (const d of this.currentDanmaku) {
             d.getAnimations().forEach(a => a.pause());
         }
 
-        // 将当前弹幕保存，避免在seeking事件中清除，导致弹幕闪烁
-        this.copyCurrentDanmaku = new Set(this.currentDanmaku);
-        this.currentDanmaku = new Set();
+        this.currentDanmaku.clear();
+
         this.alloc.forEach(scheduler => {
             scheduler.clear();
         });
@@ -182,8 +179,7 @@ export class DanmakuManager {
     };
 
     private handleSeeked = () => {
-        this.copyCurrentDanmaku.forEach(d => this.hideDanmaku(d));
-        this.copyCurrentDanmaku.clear();
+        this.container!.innerHTML = '';
 
         if (!this.video.paused) {
             this.handlePlay();
@@ -231,6 +227,10 @@ export class DanmakuManager {
         Object.entries(this.danmakuOption).forEach(([key, value]) => {
             this.container?.style.setProperty(key, value);
         });
+    }
+
+    public getCurrentDanmakuCount() {
+        return this.currentDanmaku.size;
     }
 
     private createDanmakuElement(danmaku: DanmakuAttr, delay: number) {

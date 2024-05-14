@@ -61,19 +61,13 @@ export class NormalDanmakuRender implements IDanmakuRender {
             hideDanmaku
         } = extraData;
 
-        e.ariaLive = 'polite';
-        e.classList.add('mika-video-player-danmaku');
-        e.style.opacity = '0';
-        e.style.zIndex = '1';
-        e.style.fontSize = fontSize + 'px';
-        e.style.color = danmaku.color;
-        e.textContent = danmaku.text;
-        e.style.textShadow = danmakuOption['textShadow'];
-        e.style.fontFamily = danmakuOption['fontFamily'];
-        e.style.fontWeight = danmakuOption['fontWeight'];
-
         const duration = (containerWidth + danmakuWidth) / this.getVelocity(danmakuWidth, danmakuSpeed);
         const translateX = containerWidth + 'px';
+        timer.setTimeout(() => hideDanmaku(e), (duration - delay) * 1000);
+
+        if (duration <= delay) {
+            return;
+        }
 
         const comparer = (i: Interval, danmaku: DanmakuAttr) => {
             const delta = i.start + i.duration - danmaku.begin;
@@ -83,30 +77,32 @@ export class NormalDanmakuRender implements IDanmakuRender {
         };
 
         const offsetY = alloc.tryAllocTrack(danmaku, duration - delay, danmakuWidth, danmakuHeight, comparer);
-        e.style.top = offsetY + 'px';
-
-        timer.setTimeout(() => hideDanmaku(e), (duration - delay) * 1000);
-
         if (offsetY === -1) {
-            e.style.display = 'none';
             return;
         }
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                e.style.opacity = danmakuOption['opacity'];
-                danmaku.style && Object.assign(e.style, danmaku.style);
-                danmaku.render && danmaku.render(e);
+        e.ariaLive = 'polite';
+        e.classList.add('mika-video-player-danmaku');
+        e.style.zIndex = '1';
+        e.style.fontSize = fontSize + 'px';
+        e.style.color = danmaku.color;
+        e.style.opacity = danmakuOption['opacity'];
+        e.style.textShadow = danmakuOption['textShadow'];
+        e.style.fontFamily = danmakuOption['fontFamily'];
+        e.style.fontWeight = danmakuOption['fontWeight'];
+        e.style.top = offsetY + 'px';
+        e.textContent = danmaku.text;
 
-                e.animate([
-                    {transform: `translate3d(${translateX}, 0, 0)`},
-                    {transform: `translate3d(-${danmakuWidth}px, 0, 0)`}
-                ], {
-                    duration: duration * 1000,
-                    delay: -delay * 1000,
-                    fill: 'forwards'
-                });
-            });
+        danmaku.style && Object.assign(e.style, danmaku.style);
+        danmaku.render && danmaku.render(e);
+
+        e.animate([
+            {transform: `translate3d(${translateX}, 0, 0)`},
+            {transform: `translate3d(-${danmakuWidth}px, 0, 0)`}
+        ], {
+            duration: duration * 1000,
+            delay: -delay * 1000,
+            fill: 'forwards'
         });
     }
 }
@@ -126,36 +122,33 @@ export class BottomDanmakuRender implements IDanmakuRender {
             timer,
             hideDanmaku
         } = extraData;
+        timer.setTimeout(() => hideDanmaku(e), (defaultFixedDanmakuLifeTime - delay) * 1000);
+
+        if (defaultFixedDanmakuLifeTime <= delay) {
+            return;
+        }
+
+        const offsetY = alloc.tryAllocTrack(danmaku, defaultFixedDanmakuLifeTime - delay, danmakuWidth, danmakuHeight);
+        if (offsetY === -1) {
+            return;
+        }
 
         e.ariaLive = 'polite';
         e.classList.add('mika-video-player-danmaku');
-        e.style.opacity = '0';
         e.style.zIndex = '3';
-        e.textContent = danmaku.text;
         e.style.fontSize = fontSize + 'px';
         e.style.color = danmaku.color;
         e.style.left = '50%';
         e.style.transform = 'translateX(-50%)';
+        e.style.opacity = danmakuOption['opacity'];
         e.style.textShadow = danmakuOption['textShadow'];
         e.style.fontFamily = danmakuOption['fontFamily'];
         e.style.fontWeight = danmakuOption['fontWeight'];
-
-        const offsetY = alloc.tryAllocTrack(danmaku, defaultFixedDanmakuLifeTime - delay, danmakuWidth, danmakuHeight);
         e.style.bottom = offsetY + 'px';
-        timer.setTimeout(() => hideDanmaku(e), (defaultFixedDanmakuLifeTime - delay) * 1000);
+        e.textContent = danmaku.text;
 
-        if (offsetY === -1) {
-            e.style.display = 'none';
-            return;
-        }
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                e.style.opacity = danmakuOption['opacity'];
-                danmaku.style && Object.assign(e.style, danmaku.style);
-                danmaku.render && danmaku.render(e);
-            });
-        });
+        danmaku.style && Object.assign(e.style, danmaku.style);
+        danmaku.render && danmaku.render(e);
     }
 }
 
@@ -173,36 +166,34 @@ export class TopDanmakuRender implements IDanmakuRender {
             hideDanmaku
         } = extraData;
 
+        timer.setTimeout(() => hideDanmaku(e), (defaultFixedDanmakuLifeTime - delay) * 1000);
+
+        if (defaultFixedDanmakuLifeTime <= delay) {
+            return;
+        }
+
+        const offsetY = alloc.tryAllocTrack(danmaku, defaultFixedDanmakuLifeTime - delay, danmakuWidth, danmakuHeight);
+        if (offsetY === -1) {
+            return;
+        }
+
         e.ariaLive = 'polite';
         e.classList.add('mika-video-player-danmaku');
-        e.style.opacity = '0';
         e.style.zIndex = '2';
-        e.textContent = danmaku.text;
         e.style.fontSize = fontSize + 'px';
         e.style.color = danmaku.color;
         e.style.left = '50%';
         e.style.transform = 'translateX(-50%)';
+        e.style.opacity = danmakuOption['opacity'];
         e.style.textShadow = danmakuOption['textShadow'];
         e.style.fontFamily = danmakuOption['fontFamily'];
         e.style.fontWeight = danmakuOption['fontWeight'];
-
-        const offsetY = alloc.tryAllocTrack(danmaku, defaultFixedDanmakuLifeTime - delay, danmakuWidth, danmakuHeight);
         e.style.top = offsetY + 'px';
+        e.textContent = danmaku.text;
 
-        timer.setTimeout(() => hideDanmaku(e), (defaultFixedDanmakuLifeTime - delay) * 1000);
+        danmaku.style && Object.assign(e.style, danmaku.style);
+        danmaku.render && danmaku.render(e);
 
-        if (offsetY === -1) {
-            e.style.display = 'none';
-            return;
-        }
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                e.style.opacity = danmakuOption['opacity'];
-                danmaku.style && Object.assign(e.style, danmaku.style);
-                danmaku.render && danmaku.render(e);
-            });
-        });
     }
 }
 
@@ -219,6 +210,7 @@ export class AdvancedDanmakuRender implements IDanmakuRender {
 
         if (danmaku.text.includes('NaN')) {
             console.warn('Invalid advanced danmaku', danmaku);
+            timer.setTimeout(() => hideDanmaku(e), 0);
             return;
         }
 
@@ -237,6 +229,12 @@ export class AdvancedDanmakuRender implements IDanmakuRender {
             const isLinear = params[11];
             const fontFamily = params[12];
 
+            timer.setTimeout(() => hideDanmaku(e), lifeTime - delay * 1000);
+
+            if (lifeTime <= delay) {
+                return;
+            }
+
             if (isNaN(opacityStart)
                 || isNaN(startX)
                 || isNaN(startY)
@@ -252,10 +250,10 @@ export class AdvancedDanmakuRender implements IDanmakuRender {
             }
 
             // 如果startX、startY、endX、endY为0-1之间的小数，则转换为百分比
-            if (startX < 1) startX *= containerWidth;
-            if (startY < 1) startY *= containerHeight;
-            if (endX < 1) endX *= containerWidth;
-            if (endY < 1) endY *= containerHeight;
+            if (startX <= 1) startX *= containerWidth;
+            if (startY <= 1) startY *= containerHeight;
+            if (endX <= 1) endX *= containerWidth;
+            if (endY <= 1) endY *= containerHeight;
 
             const sinZ = Math.sin(-params[5] * Math.PI / 180);
             const cosZ = Math.cos(-params[5] * Math.PI / 180);
@@ -283,15 +281,20 @@ export class AdvancedDanmakuRender implements IDanmakuRender {
 
             e.ariaLive = 'polite';
             e.classList.add('mika-video-player-danmaku');
-            e.style.opacity = '0';
+            e.style.opacity = opacityStart.toString();
             e.textContent = params[4];
             e.style.color = danmaku.color;
             e.style.fontFamily = fontFamily;
+            e.style.fontWeight = '800';
             e.style.fontSize = danmaku.size + 'px';
-            e.style.zIndex = '10';
+            e.style.zIndex = '100';
+            e.style.whiteSpace = 'pre';
             e.style.transformOrigin = '0 0 0';
             e.style.transform = `matrix3d(${matrixStart})`;
             e.style.textShadow = isStroke ? '1px 0 1px black, 0 1px 1px black, -1px 0 1px black, 0 -1px 1px black' : 'none';
+
+            danmaku.style && Object.assign(e.style, danmaku.style);
+            danmaku.render && danmaku.render(e);
 
             // 动画为 0 - var(--lifeTime) 的OpacityStart -> opacityEnd 的变化
             // var(--transformDelay) - var(--transformDelay) + var(--transformDuration) 的transform动画
@@ -308,46 +311,37 @@ export class AdvancedDanmakuRender implements IDanmakuRender {
                 animationDuration = lifeTime - animationDelayTime;
             }
 
-            timer.setTimeout(() => hideDanmaku(e), lifeTime - delay * 1000);
-
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    e.style.opacity = opacityStart.toString();
-
-                    e.animate([
-                        {
-                            opacity: opacityStart,
-                            transform: `matrix3d(${matrixStart})`,
-                            offset: 0
-                        },
-                        {
-                            opacity: opacityStart + (opacityEnd - opacityStart) * animationDelayTime / lifeTime,
-                            transform: `matrix3d(${matrixStart})`,
-                            offset: animationDelayTime / lifeTime
-                        },
-                        {
-                            opacity: opacityStart + (opacityEnd - opacityStart) * (animationDelayTime + animationDuration) / lifeTime,
-                            transform: `matrix3d(${matrixEnd})`,
-                            offset: (animationDelayTime + animationDuration) / lifeTime
-                        },
-                        {
-                            opacity: opacityEnd,
-                            transform: `matrix3d(${matrixEnd})`,
-                            offset: 1
-                        }
-                    ], {
-                        duration: lifeTime,
-                        easing: isLinear ? 'linear' : 'ease',
-                        fill: 'forwards',
-                        delay: delay * 1000
-                    });
-
-                    danmaku.style && Object.assign(e.style, danmaku.style);
-                    danmaku.render && danmaku.render(e);
-                });
+            e.animate([
+                {
+                    opacity: opacityStart,
+                    transform: `matrix3d(${matrixStart})`,
+                    offset: 0
+                },
+                {
+                    opacity: opacityStart + (opacityEnd - opacityStart) * animationDelayTime / lifeTime,
+                    transform: `matrix3d(${matrixStart})`,
+                    offset: animationDelayTime / lifeTime
+                },
+                {
+                    opacity: opacityStart + (opacityEnd - opacityStart) * (animationDelayTime + animationDuration) / lifeTime,
+                    transform: `matrix3d(${matrixEnd})`,
+                    offset: (animationDelayTime + animationDuration) / lifeTime
+                },
+                {
+                    opacity: opacityEnd,
+                    transform: `matrix3d(${matrixEnd})`,
+                    offset: 1
+                }
+            ], {
+                duration: lifeTime,
+                easing: isLinear ? 'linear' : 'ease',
+                fill: 'forwards',
+                delay: delay * 1000
             });
-        } catch (e) {
+
+        } catch (_) {
             console.warn('Invalid advanced danmaku', danmaku);
+            timer.setTimeout(() => hideDanmaku(e), 0);
             return;
         }
     }
@@ -373,19 +367,14 @@ export class ReverseDanmakuRender implements IDanmakuRender {
             hideDanmaku
         } = extraData;
 
-        e.ariaLive = 'polite';
-        e.classList.add('mika-video-player-danmaku');
-        e.style.opacity = '0';
-        e.style.zIndex = '1';
-        e.style.fontSize = fontSize + 'px';
-        e.style.color = danmaku.color;
-        e.textContent = danmaku.text;
-        e.style.textShadow = danmakuOption['textShadow'];
-        e.style.fontFamily = danmakuOption['fontFamily'];
-        e.style.fontWeight = danmakuOption['fontWeight'];
-
         const duration = (containerWidth + danmakuWidth) / this.getVelocity(danmakuWidth, danmakuSpeed);
         const translateX = containerWidth + 'px';
+
+        if (duration <= delay) {
+            return;
+        }
+
+        timer.setTimeout(() => hideDanmaku(e), (duration - delay) * 1000);
 
         const comparer = (i: Interval, danmaku: DanmakuAttr) => {
             const delta = i.start + i.duration - danmaku.begin;
@@ -395,30 +384,33 @@ export class ReverseDanmakuRender implements IDanmakuRender {
         };
 
         const offsetY = alloc.tryAllocTrack(danmaku, duration - delay, danmakuWidth, danmakuHeight, comparer);
-        e.style.top = offsetY + 'px';
-
-        timer.setTimeout(() => hideDanmaku(e), (duration - delay) * 1000);
 
         if (offsetY === -1) {
-            e.style.display = 'none';
             return;
         }
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                e.style.opacity = danmakuOption['opacity'];
-                danmaku.style && Object.assign(e.style, danmaku.style);
-                danmaku.render && danmaku.render(e);
+        e.ariaLive = 'polite';
+        e.classList.add('mika-video-player-danmaku');
+        e.style.zIndex = '1';
+        e.style.fontSize = fontSize + 'px';
+        e.style.color = danmaku.color;
+        e.textContent = danmaku.text;
+        e.style.opacity = danmakuOption['opacity'];
+        e.style.textShadow = danmakuOption['textShadow'];
+        e.style.fontFamily = danmakuOption['fontFamily'];
+        e.style.fontWeight = danmakuOption['fontWeight'];
+        e.style.top = offsetY + 'px';
 
-                e.animate([
-                    {transform: `translate3d(-${danmakuWidth}px, 0, 0)`},
-                    {transform: `translate3d(${translateX}, 0, 0)`}
-                ], {
-                    duration: duration * 1000,
-                    delay: -delay * 1000,
-                    fill: 'forwards'
-                });
-            });
+        danmaku.style && Object.assign(e.style, danmaku.style);
+        danmaku.render && danmaku.render(e);
+
+        e.animate([
+            {transform: `translate3d(-${danmakuWidth}px, 0, 0)`},
+            {transform: `translate3d(${translateX}, 0, 0)`}
+        ], {
+            duration: duration * 1000,
+            delay: -delay * 1000,
+            fill: 'forwards'
         });
     }
 }

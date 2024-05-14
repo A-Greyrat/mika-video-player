@@ -32,10 +32,26 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
     const handleShortcut = useShortcut(shortcut, videoRef.current, containerRef.current, controllerRef.current);
 
     useEffect(() => {
-        if (loader && videoRef.current) {
-            loader(videoRef.current);
+        let url;
+        if (typeof src === 'string') {
+            url = src;
         } else if (src) {
-            defaultLoader(videoRef.current!, src);
+            url = src.srcs[src.default ?? 0]?.url;
+            if (typeof url === 'function') {
+                url = url();
+            }
+        }
+
+        if (url === undefined) {
+            return;
+        }
+
+        if (typeof url === 'string') {
+            if (loader && videoRef.current) {
+                loader(videoRef.current);
+            } else if (src) {
+                defaultLoader(videoRef.current!, url);
+            }
         }
     }, [loader, src, videoRef]);
 
@@ -49,7 +65,7 @@ const VideoPlayer = memo(forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideo
             <div className="mika-video-player-wrapper"
                  {...handleShortcut} tabIndex={0}
                  style={{width: width ?? 'auto', height: height ?? 'auto', ...style}} ref={containerRef}>
-                <video crossOrigin="anonymous" ref={videoRef} {...rest}>
+                <video ref={videoRef} {...rest} >
                     {children}
                 </video>
                 {enableDanmaku && <Danmaku/>}

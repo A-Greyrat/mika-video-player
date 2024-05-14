@@ -9,7 +9,7 @@ export interface Interval {
     /* 区间额外信息 */
     // 开始时间
     start: number;
-    // 持续时间，受到视频播放速度影响
+    // 持续时间
     duration: number;
     // 长度
     width: number;
@@ -17,7 +17,7 @@ export interface Interval {
 
 export class DanmakuAlloc {
     private trackList: Interval[][] = [];
-    private enableMultiTrack = false;
+    private enableMultiTrack = true;
 
     private containerHeight: number;
 

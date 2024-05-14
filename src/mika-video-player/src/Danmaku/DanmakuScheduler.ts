@@ -6,7 +6,7 @@ const ALLOWED_MAX_DELAY: number = 10;
 
 export class DanmakuScheduler {
     video: HTMLVideoElement;
-    danmakuPool: DanmakuManager;
+    danmakuManager: DanmakuManager;
     danmaku: DanmakuAttr[];
 
     currentIndex = 0;
@@ -32,7 +32,7 @@ export class DanmakuScheduler {
             tempList.push({...this.danmaku[this.currentIndex++], delay});
         }
         this.delayLock = false;
-        this.danmakuPool.addDanmakuList(tempList);
+        this.danmakuManager.addDanmakuList(tempList);
     };
 
     private handleSeeking = () => {
@@ -57,7 +57,7 @@ export class DanmakuScheduler {
 
     constructor(video: HTMLVideoElement, container: HTMLDivElement, danmaku: DanmakuAttr[]) {
         this.video = video;
-        this.danmakuPool = new DanmakuManager(container, video);
+        this.danmakuManager = new DanmakuManager(container, video);
         this.danmaku = danmaku;
 
         this.video.addEventListener('timeupdate', this.handleTimeUpdate);
@@ -72,7 +72,7 @@ export class DanmakuScheduler {
         this.video.removeEventListener('seeked', this.handleSeeking);
         document.removeEventListener('visibilitychange', this.handleVisibilityChange);
 
-        this.danmakuPool.destroy();
+        this.danmakuManager.destroy();
     }
 
     public addDanmaku(danmaku: DanmakuAttr[]) {
@@ -97,5 +97,9 @@ export class DanmakuScheduler {
     public clearDanmaku() {
         this.danmaku = [];
         this.currentIndex = 0;
+    }
+
+    public getCurrentDanmakuCount() {
+        return this.danmakuManager.getCurrentDanmakuCount();
     }
 }

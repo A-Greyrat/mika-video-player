@@ -1,0 +1,48 @@
+.mika-dropdown:has(.mika-video-player-toolbar-function-Quality-dropdown-menu) {
+  animation: none !important;
+}
+
+.mika-video-player-toolbar-function-Quality-button {
+  all: unset;
+
+  height: 100%;
+  color: var(--mika-video-player-primary-color);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.mika-video-player-toolbar-function-Quality-dropdown-menu {
+  background: hsla(0, 0%, 8%, 0.75);
+  border-radius: 6px;
+  overflow: hidden;
+
+  > .mika-video-player-toolbar-function-Quality-dropdown-item {
+    padding: 8px 32px 8px 18px;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    &:hover {
+      background: hsla(0, 0%, 100%, .1);
+    }
+  }
+
+  > .mika-video-player-toolbar-function-Quality-dropdown-item.active {
+    color: var(--mika-video-player-primary-color);
+    text-shadow: 0 0 2px var(--mika-video-player-emphasis-color);
+  }
+
+  & > :first-child {
+    padding-top: 12px;
+  }
+
+  & > :last-child {
+    padding-bottom: 12px;
+  }
+
+}

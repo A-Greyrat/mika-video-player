@@ -42,14 +42,9 @@ const SpeedButton = memo(() => {
     const onClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!videoElement) return;
 
-        // ref.current && (ref.current.style.display = 'none');
         const speed = (e.target as HTMLDivElement).dataset.speed!;
         videoElement.playbackRate = parseFloat(speed);
         setSpeed(speed);
-
-        // setTimeout(() => {
-        //     ref.current && (ref.current.style.display = 'block');
-        // }, 1000);
     }, [videoElement]);
 
     const menu = useMemo(() => {
