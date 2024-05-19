@@ -14,9 +14,9 @@ export class DanmakuScheduler {
     delayLock = false;
 
     private handleTimeUpdate = () => {
-        if (this.video.paused) return;
+        if (this.video.paused || this.video.seeking) return;
         const currentTime = this.video.currentTime;
-        const tempList = [];
+        const tempList: (DanmakuAttr & { delay?: number | undefined; })[] = [];
 
         while (this.currentIndex < this.danmaku.length && this.danmaku[this.currentIndex].begin <= currentTime) {
             if (this.documentLock) {
@@ -32,7 +32,9 @@ export class DanmakuScheduler {
             tempList.push({...this.danmaku[this.currentIndex++], delay});
         }
         this.delayLock = false;
-        this.danmakuManager.addDanmakuList(tempList);
+        requestAnimationFrame(() => {
+            this.danmakuManager.addDanmakuList(tempList);
+        });
     };
 
     private handleSeeking = () => {
