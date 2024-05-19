@@ -1,5 +1,5 @@
 import {DanmakuManager} from "./DanmakuManager.ts";
-import {DanmakuAttr} from "./DanmakuRender.ts";
+import {DanmakuAttr} from "./DanmakuRenderer.ts";
 
 // 在videoElement seeked事件后最大允许多少秒前的弹幕被添加至弹幕池
 const ALLOWED_MAX_DELAY: number = 10;

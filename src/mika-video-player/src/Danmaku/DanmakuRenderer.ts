@@ -38,11 +38,11 @@ export interface DanmakuExtraData {
     hideDanmaku: (e: HTMLDivElement) => void;
 }
 
-export interface IDanmakuRender {
+export interface IDanmakuRenderer {
     render(e: HTMLDivElement, danmaku: DanmakuAttr, extraData: DanmakuExtraData): void;
 }
 
-export class NormalDanmakuRender implements IDanmakuRender {
+export class NormalDanmakuRenderer implements IDanmakuRenderer {
     private getVelocity(width: number, speed = 1): number {
         return (40 * Math.log10(width) + 100) * speed;
     }
@@ -109,7 +109,7 @@ export class NormalDanmakuRender implements IDanmakuRender {
 
 const defaultFixedDanmakuLifeTime = 5;
 
-export class BottomDanmakuRender implements IDanmakuRender {
+export class BottomDanmakuRenderer implements IDanmakuRenderer {
 
     render(e: HTMLDivElement, danmaku: DanmakuAttr, extraData: DanmakuExtraData) {
         const {
@@ -152,7 +152,7 @@ export class BottomDanmakuRender implements IDanmakuRender {
     }
 }
 
-export class TopDanmakuRender implements IDanmakuRender {
+export class TopDanmakuRenderer implements IDanmakuRenderer {
 
     render(e: HTMLDivElement, danmaku: DanmakuAttr, extraData: DanmakuExtraData) {
         const {
@@ -197,7 +197,7 @@ export class TopDanmakuRender implements IDanmakuRender {
     }
 }
 
-export class AdvancedDanmakuRender implements IDanmakuRender {
+export class AdvancedDanmakuRenderer implements IDanmakuRenderer {
 
     render(e: HTMLDivElement, danmaku: DanmakuAttr, extraData: DanmakuExtraData) {
         const {
@@ -347,7 +347,7 @@ export class AdvancedDanmakuRender implements IDanmakuRender {
     }
 }
 
-export class ReverseDanmakuRender implements IDanmakuRender {
+export class ReverseDanmakuRenderer implements IDanmakuRenderer {
 
     private getVelocity(width: number, speed = 1): number {
         return (40 * Math.log10(width) + 100) * speed;
@@ -415,14 +415,14 @@ export class ReverseDanmakuRender implements IDanmakuRender {
     }
 }
 
-export const danmakuRenderMap = new Map<number, IDanmakuRender>([
-    [1, new NormalDanmakuRender()],
-    [4, new BottomDanmakuRender()],
-    [5, new TopDanmakuRender()],
-    [6, new ReverseDanmakuRender()],
-    [7, new AdvancedDanmakuRender()],
+export const danmakuRendererMap = new Map<number, IDanmakuRenderer>([
+    [1, new NormalDanmakuRenderer()],
+    [4, new BottomDanmakuRenderer()],
+    [5, new TopDanmakuRenderer()],
+    [6, new ReverseDanmakuRenderer()],
+    [7, new AdvancedDanmakuRenderer()],
 ]);
 
-export const getDanmakuRender = (type: number): IDanmakuRender => {
-    return danmakuRenderMap.get(type) || danmakuRenderMap.get(1)!;
+export const getDanmakuRenderer = (type: number): IDanmakuRenderer => {
+    return danmakuRendererMap.get(type) || danmakuRendererMap.get(1)!;
 }

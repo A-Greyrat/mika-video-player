@@ -1,5 +1,5 @@
 import {DanmakuAlloc} from "./DanmakuAlloc.ts";
-import {getDanmakuRender, DanmakuAttr, danmakuRenderMap} from "./DanmakuRender.ts";
+import {getDanmakuRenderer, DanmakuAttr, danmakuRendererMap} from "./DanmakuRenderer.ts";
 
 export interface DanmakuOption {
     'opacity': string;
@@ -95,7 +95,7 @@ export class DanmakuManager {
     private containerWidth = 0;
     private containerHeight = 0;
 
-    private displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 1;
+    private displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 0.5;
     private fontSizeScale = 1;
     private fontSizeSyncWithWindow = false;
     private danmakuSpeed = 1;
@@ -124,7 +124,7 @@ export class DanmakuManager {
         video.addEventListener('seeking', this.handleSeeking);
 
         // 初始化弹幕轨道调度器
-        for (const mode of danmakuRenderMap.keys()) {
+        for (const mode of danmakuRendererMap.keys()) {
             this.alloc[mode] = new DanmakuAlloc(mode === 1 ? this.containerHeight * this.displayAreaRate : this.containerHeight);
         }
     }
@@ -163,18 +163,12 @@ export class DanmakuManager {
 
 
     private handleSeeking = () => {
-        // 暂停所有弹幕，也可以不暂停，视情况移除
-        for (const d of this.currentDanmaku) {
-            d.getAnimations().forEach(a => a.pause());
-        }
-
+        this.handlePause();
         this.currentDanmaku.clear();
 
         this.alloc.forEach(scheduler => {
             scheduler.clear();
         });
-
-        this.handlePause();
         this.timer.reset();
     };
 
@@ -240,7 +234,7 @@ export class DanmakuManager {
         const d: HTMLDivElement = document.createElement('div');
         this.currentDanmaku.add(d);
 
-        getDanmakuRender(danmaku.mode).render(d, danmaku, {
+        getDanmakuRenderer(danmaku.mode).render(d, danmaku, {
             containerWidth: this.containerWidth,
             containerHeight: this.containerHeight,
             danmakuWidth: width,

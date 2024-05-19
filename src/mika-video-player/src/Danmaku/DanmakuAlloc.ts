@@ -1,4 +1,4 @@
-import {DanmakuAttr} from "./DanmakuRender.ts";
+import {DanmakuAttr} from "./DanmakuRenderer.ts";
 
 export interface Interval {
     // 区间左端点
@@ -17,7 +17,7 @@ export interface Interval {
 
 export class DanmakuAlloc {
     private trackList: Interval[][] = [];
-    private enableMultiTrack = true;
+    private enableMultiTrack = false;
 
     private containerHeight: number;
 
