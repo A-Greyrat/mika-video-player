@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export declare const FullScreenButton: React.FC;
 export declare const PlayButton: React.FC;
