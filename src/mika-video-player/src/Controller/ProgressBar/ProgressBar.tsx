@@ -1,12 +1,13 @@
-import React, { forwardRef, memo, Ref, useCallback, useContext, useEffect, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, memo, Ref, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
+
+import { isMobile } from '../../Utils';
+import { useStore } from 'mika-store';
 
 import './ProgressBar.less';
-import { VideoPlayerContext } from '../../VideoPlayerType';
-import { isMobile } from '../../Utils';
 
 const ProgressBar = memo(
   forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivElement>) => {
-    const videoElement = useContext(VideoPlayerContext)?.videoElement;
+    const [{ videoElement }] = useStore<any>('mika-video-extra-data');
     const barRef = useRef<HTMLDivElement>(null);
     const isSeeking = useRef(false);
 
@@ -16,11 +17,16 @@ const ProgressBar = memo(
       (e: React.PointerEvent<HTMLDivElement> | PointerEvent | TouchEvent) => {
         if (isSeeking.current && videoElement && videoElement.readyState >= 1) {
           let x;
-          if (e instanceof TouchEvent) {
+          if (typeof TouchEvent !== 'undefined' && e instanceof TouchEvent) {
             if (e.touches[0] === undefined) return;
             x = e.touches[0].clientX;
           } else {
-            x = e.clientX;
+            'clientX' in e ? (x = e.clientX) : undefined;
+          }
+
+          if (!x) {
+            console.error('[MikaPlayer] Cannot get the x position of the pointer event');
+            return;
           }
 
           let progress = (x - (barRef.current?.getBoundingClientRect().x ?? 0)) / barRef.current!.clientWidth;

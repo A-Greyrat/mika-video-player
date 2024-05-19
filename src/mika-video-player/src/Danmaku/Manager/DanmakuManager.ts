@@ -24,9 +24,9 @@ export class DanmakuManager {
 
   private timer: Timer = new Timer();
 
-  private canvas = OffscreenCanvas ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
+  private canvas = document.createElement('canvas');
 
-  private context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D = this.canvas.getContext('2d')!;
+  private context: CanvasRenderingContext2D = this.canvas.getContext('2d')!;
 
   private containerWidth = 0;
 

@@ -1,4 +1,4 @@
-import { Interval } from '../DanmakuAlloc.ts';
+import { Interval } from '../Alloc/DanmakuAlloc.ts';
 import { DanmakuAttr, DanmakuExtraData, IDanmakuRenderer } from './index.ts';
 
 export class NormalDanmakuRenderer implements IDanmakuRenderer {

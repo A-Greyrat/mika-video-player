@@ -1,7 +1,7 @@
-import { memo, useCallback, useContext } from 'react';
+import { memo, useCallback } from 'react';
 import FullScreenIcon from '../Icon/FullScreenIcon';
 import FuncButton from '../FuncButton/FuncButton';
-import { VideoPlayerContext } from '../../../VideoPlayerType';
+import { useStore } from 'mika-store';
 
 const requestFullscreen = (element: Element) => {
   if (element.requestFullscreen) {
@@ -32,7 +32,7 @@ const requestFullscreen = (element: Element) => {
 };
 
 const FullScreenButton = memo(() => {
-  const containerElement = useContext(VideoPlayerContext)?.containerElement;
+  const [{ containerElement }] = useStore<any>('mika-video-extra-data');
 
   const fullscreen = useCallback(
     (e: { stopPropagation: () => void }) => {

@@ -1,17 +1,16 @@
-import { memo, useCallback, useContext, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import VolumeIcon from '../Icon/VolumeIcon';
 import FuncButton from '../FuncButton/FuncButton';
 import { Dropdown, Range } from '../../../Component';
-import { VideoPlayerContext } from '../../../VideoPlayerType';
 
 import './VolumeButton.less';
+import { useStore } from 'mika-store';
 
 const VolumeButton = memo(() => {
   const [isMuted, setIsMuted] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, forceUpdate] = useState(0);
-
-  const videoElement = useContext(VideoPlayerContext)?.videoElement;
+  const [{ videoElement }] = useStore<any>('mika-video-extra-data');
 
   useEffect(() => {
     if (!videoElement) return;

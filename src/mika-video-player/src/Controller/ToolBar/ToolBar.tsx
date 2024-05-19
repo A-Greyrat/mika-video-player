@@ -1,24 +1,32 @@
-import React, { forwardRef, memo, useContext, useImperativeHandle } from 'react';
+import React, { forwardRef, memo, useImperativeHandle } from 'react';
 import ProgressBar from '../ProgressBar/ProgressBar';
-import { QualityButton, FullScreenButton, PlayButton, SpeedButton, ToolbarTimer, VolumeButton } from '../ToolbarFunc';
+import {
+  QualityButton,
+  FullScreenButton,
+  PlayButton,
+  SpeedButton,
+  ToolbarTimer,
+  VolumeButton,
+  SettingButton,
+} from '../ToolbarFunc';
+import { useStopPropagation } from '../Shortcut/Shortcut.ts';
 
 import './ToolBar.less';
-import { VideoPlayerContext } from '../../VideoPlayerType';
-import { useStopPropagation } from '../Shortcut/Shortcut.ts';
+import { useStore } from 'mika-store';
 
 const DefaultToolbarArea = {
   left: [PlayButton, ToolbarTimer],
   middle: [],
-  right: [QualityButton, SpeedButton, VolumeButton, FullScreenButton],
+  right: [SettingButton, QualityButton, SpeedButton, VolumeButton, FullScreenButton],
 };
 
 const ToolBar = memo(
   forwardRef((_props: NonNullable<unknown>, ref: React.Ref<HTMLDivElement>) => {
-    const context = useContext(VideoPlayerContext)!;
+    const [{ toolbar }] = useStore<any>('mika-video-extra-data');
     const toolbarRef = React.useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => toolbarRef.current!);
 
-    const { left: leftArea, middle: middleArea, right: rightArea } = context?.props.toolbar || DefaultToolbarArea;
+    const { left: leftArea, middle: middleArea, right: rightArea } = toolbar || DefaultToolbarArea;
 
     const stopPropagation = useStopPropagation();
 
@@ -29,15 +37,17 @@ const ToolBar = memo(
           <ProgressBar />
           <div className='mika-video-player-toolbar-function-container'>
             <div className='mika-video-player-toolbar-function-container-left-area'>
-              {leftArea?.map((item, index) => <React.Fragment key={index}>{React.createElement(item)}</React.Fragment>)}
+              {leftArea?.map((item: any, index: React.Key | null | undefined) => (
+                <React.Fragment key={index}>{React.createElement(item)}</React.Fragment>
+              ))}
             </div>
             <div className='mika-video-player-toolbar-function-container-middle-area'>
-              {middleArea?.map((item, index) => (
+              {middleArea?.map((item: any, index: React.Key | null | undefined) => (
                 <React.Fragment key={index}>{React.createElement(item)}</React.Fragment>
               ))}
             </div>
             <div className='mika-video-player-toolbar-function-container-right-area'>
-              {rightArea?.map((item, index) => (
+              {rightArea?.map((item: any, index: React.Key | null | undefined) => (
                 <React.Fragment key={index}>{React.createElement(item)}</React.Fragment>
               ))}
             </div>

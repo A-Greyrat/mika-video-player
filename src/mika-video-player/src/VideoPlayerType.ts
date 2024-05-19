@@ -31,11 +31,3 @@ export interface VideoPlayerProps extends Omit<React.VideoHTMLAttributes<HTMLVid
   // 用于传递额外信息
   extra?: unknown;
 }
-
-export interface VideoPlayerContextType {
-  props: VideoPlayerProps;
-  videoElement: HTMLVideoElement | null;
-  containerElement: HTMLDivElement | null;
-}
-
-export const VideoPlayerContext = React.createContext<VideoPlayerContextType | null>(null);

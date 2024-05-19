@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { isMobile } from '../../Utils';
+import { useStore } from 'mika-store';
 
 export type ShortcutCallback = (
-  videoElement?: HTMLVideoElement | null,
-  containerElement?: HTMLDivElement | null,
-  controllerElement?: HTMLDivElement | null,
+  extraData?: any,
+  setExtraData?: React.Dispatch<React.SetStateAction<any>>,
   e?: Event | React.PointerEvent | React.MouseEvent | React.KeyboardEvent | React.TouchEvent,
 ) => void;
 
@@ -34,8 +34,10 @@ export const defaultShortcuts: Shortcut[] = [
     key: ' ',
     type: 'keydown',
     root: 'document',
-    callback: (videoElement, _containerElement, _controllerElement, e) => {
+    callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
+      const { videoElement } = extraData;
+
       if (videoElement && videoElement.readyState > 2) {
         if (videoElement.paused) videoElement.play().catch(undefined);
         else videoElement.pause();
@@ -46,7 +48,9 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'f',
     type: 'keydown',
     root: 'document',
-    callback: (_, containerElement) => {
+    callback: (extraData) => {
+      const { containerElement } = extraData;
+
       if (containerElement) {
         if (document.fullscreenElement !== null) document.exitFullscreen().catch(undefined);
         else containerElement.requestFullscreen().catch(undefined);
@@ -57,8 +61,9 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'ArrowLeft',
     type: 'keydown',
     root: 'document',
-    callback: (videoElement, _containerElement, _controllerElement, e) => {
+    callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
+      const { videoElement } = extraData;
       if (videoElement) videoElement.currentTime -= 5;
     },
   },
@@ -66,8 +71,9 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'ArrowRight',
     type: 'keydown',
     root: 'document',
-    callback: (videoElement, _containerElement, _controllerElement, e) => {
+    callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
+      const { videoElement } = extraData;
       if (videoElement) videoElement.currentTime += 5;
     },
   },
@@ -75,7 +81,8 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'm',
     type: 'keydown',
     root: 'document',
-    callback: (videoElement) => {
+    callback: (extraData) => {
+      const { videoElement } = extraData;
       if (videoElement) videoElement.muted = !videoElement.muted;
     },
   },
@@ -83,8 +90,9 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'ArrowUp',
     type: 'keydown',
     root: 'video',
-    callback: (videoElement, _containerElement, _controllerElement, e) => {
+    callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
+      const { videoElement } = extraData;
       if (videoElement) videoElement.volume = Math.min(1, videoElement.volume + 0.1);
     },
   },
@@ -92,8 +100,9 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'ArrowDown',
     type: 'keydown',
     root: 'video',
-    callback: (videoElement, _containerElement, _controllerElement, e) => {
+    callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
+      const { videoElement } = extraData;
       if (videoElement) videoElement.volume = Math.max(0, videoElement.volume - 0.1);
     },
   },
@@ -101,8 +110,9 @@ export const defaultShortcuts: Shortcut[] = [
     key: 0,
     type: 'mousedown',
     root: 'video',
-    callback: (videoElement, _containerElement, controllerElement) => {
+    callback: (extraData) => {
       const defaultHideTime = 6000;
+      const { videoElement, controllerElement } = extraData;
 
       if (isMobile()) {
         if (doubleClickTimer) {
@@ -154,6 +164,8 @@ export const useShortcut = (
     Map<string, (e: Event | React.PointerEvent | React.MouseEvent | React.KeyboardEvent | React.TouchEvent) => void>
   >(new Map());
 
+  const [extraData, setExtraData] = useStore<any>('mika-video-extra-data');
+
   useEffect(() => {
     const shortcutMap = new Map<string, Map<string, Map<string | number, Shortcut>>>();
     const uninstallList: (() => void)[] = [];
@@ -189,10 +201,10 @@ export const useShortcut = (
 
           if (isTouchEvent && map.has('touch')) {
             e.stopPropagation();
-            map.get('touch')!.callback(videoElement, containerElement, controllerElement, e);
+            map.get('touch')!.callback(extraData, setExtraData, e);
           } else if (isKeyEvent && map.has(key)) {
             e.stopPropagation();
-            map.get(key)!.callback(videoElement, containerElement, controllerElement, e);
+            map.get(key)!.callback(extraData, setExtraData, e);
           }
         };
 

@@ -9,6 +9,7 @@ const SettingIcon = memo((props: { style?: React.CSSProperties }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const handleMouseEnter = useCallback(() => {
+    lottieItem?.resetSegments(true);
     lottieItem?.play();
   }, [lottieItem]);
 
@@ -18,7 +19,7 @@ const SettingIcon = memo((props: { style?: React.CSSProperties }) => {
     const item = lottie.loadAnimation({
       container: ref.current,
       renderer: 'svg',
-      loop: true,
+      loop: false,
       autoplay: true,
       animationData: settingIcon,
       name: 'setting',

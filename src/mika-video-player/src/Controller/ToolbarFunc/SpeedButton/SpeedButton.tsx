@@ -1,13 +1,12 @@
-import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Dropdown } from '../../../Component';
-
-import { VideoPlayerContext } from '../../../VideoPlayerType';
 import { useStopPropagation } from '../../Shortcut/Shortcut.ts';
+import { useStore } from 'mika-store';
 
 import './SpeedButton.less';
 
 const SpeedButton = memo(() => {
-  const videoElement = useContext(VideoPlayerContext)?.videoElement;
+  const [{ videoElement }] = useStore<any>('mika-video-extra-data');
   const ref = useRef<HTMLDivElement>(null);
   const [speed, setSpeed] = useState('1.0');
   const speedItemListRef = useRef(

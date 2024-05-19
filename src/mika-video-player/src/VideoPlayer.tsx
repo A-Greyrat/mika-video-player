@@ -1,11 +1,12 @@
-import React, { forwardRef, memo, Ref, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, memo, Ref, useEffect, useImperativeHandle, useRef } from 'react';
 import defaultLoader from './Loader/DefaultLoader.ts';
 import { Controller } from './Controller';
+import { useStore } from 'mika-store';
+import Danmaku from './Danmaku/Danmaku.tsx';
+import { VideoPlayerProps } from './VideoPlayerType.ts';
+import { defaultShortcuts, useShortcut } from './Controller/Shortcut/Shortcut.ts';
 
 import './VideoPlayer.less';
-import Danmaku from './Danmaku/Danmaku.tsx';
-import { VideoPlayerContext, VideoPlayerProps } from './VideoPlayerType.ts';
-import { defaultShortcuts, useShortcut } from './Controller/Shortcut/Shortcut.ts';
 
 const VideoPlayer = memo(
   forwardRef((props: VideoPlayerProps, ref: Ref<HTMLVideoElement>) => {
@@ -21,8 +22,9 @@ const VideoPlayer = memo(
       shortcut = defaultShortcuts,
       children,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      danmaku = [],
+      danmaku,
       enableDanmaku = true,
+      extra,
       ...rest
     } = props;
 
@@ -30,11 +32,9 @@ const VideoPlayer = memo(
     const containerRef = useRef<HTMLDivElement>(null);
     const controllerRef = useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => videoRef.current!);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [_, forceUpdate] = React.useState(0);
+    const [extraData, setExtraData] = useStore<any>('mika-video-extra-data', {});
 
     const handleShortcut = useShortcut(shortcut, videoRef.current, containerRef.current, controllerRef.current);
-
     useEffect(() => {
       let url;
       if (typeof src === 'string') {
@@ -60,27 +60,43 @@ const VideoPlayer = memo(
     }, [loader, src, videoRef]);
 
     useEffect(() => {
-      forceUpdate((prev) => prev + 1);
-    }, []);
+      setExtraData({
+        danmaku,
+        controls,
+        enableDanmaku,
+        toolbar,
+        children,
+        extra,
+        src,
+        controllerElement: controllerRef.current,
+        containerElement: containerRef.current,
+        videoElement: videoRef.current,
+      });
+    }, [danmaku, controls, enableDanmaku, toolbar, children, extra, src, controllerRef, containerRef, videoRef]);
 
     return (
-      <VideoPlayerContext.Provider
-        value={{ props, videoElement: videoRef.current, containerElement: containerRef.current }}
+      <div
+        className='mika-video-player-wrapper'
+        tabIndex={0}
+        style={{ width: width || 'auto', height: height || 'auto', ...style }}
+        ref={containerRef}
       >
+        {/* 该Div用于处理快捷键 */}
         <div
-          className='mika-video-player-wrapper'
           {...handleShortcut}
-          tabIndex={0}
-          style={{ width: width ?? 'auto', height: height ?? 'auto', ...style }}
-          ref={containerRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+          }}
         >
           <video ref={videoRef} {...rest}>
             {children}
           </video>
-          {enableDanmaku && <Danmaku />}
-          {controls && <Controller ref={controllerRef} />}
+          {(extraData?.enableDanmaku ?? enableDanmaku) && <Danmaku />}
+          {(extraData?.controls ?? controls) && <Controller ref={controllerRef} />}
         </div>
-      </VideoPlayerContext.Provider>
+      </div>
     );
   }),
 );

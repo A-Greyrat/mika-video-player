@@ -1,10 +1,9 @@
 import React, { memo, useEffect } from 'react';
-import { VideoPlayerContext } from '../../../VideoPlayerType';
-
 import './ToolbarTimer.less';
+import { useStore } from 'mika-store';
 
 const ToolbarTimer = memo(() => {
-  const videoElement = React.useContext(VideoPlayerContext)?.videoElement;
+  const [{ videoElement }] = useStore<any>('mika-video-extra-data');
   const [currentTime, setCurrentTime] = React.useState(NaN);
   const [duration, setDuration] = React.useState(NaN);
 

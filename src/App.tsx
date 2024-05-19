@@ -5,13 +5,12 @@ import VideoPlayer, { DanmakuAttr, VideoSrc } from './mika-video-player/src';
 
 let sess_data = '';
 const default_bv = 'BV1qm421s7MR';
-// const proxy_url = 'https://fast.abdecd.xyz/proxy?pReferer=https://www.bilibili.com';
-
 const getUrl = (bv: string) => `https://b.erisu.moe/api/playurl/dash?bvid=${bv}&SESSDATA=${sess_data}`;
 
 const App: React.FC = () => {
   const [danmakus, setDanmakus] = React.useState<DanmakuAttr[]>([]);
   const [srcs, setSrcs] = React.useState<VideoSrc>();
+
   useEffect(() => {
     const url = new URL(window.location.href);
     const bv = url.searchParams.get('bv');
@@ -53,7 +52,6 @@ const App: React.FC = () => {
         }
 
         setSrcs(s);
-        console.log(s);
       });
 
     fetch(`https://b.erisu.moe/api/danmaku?bvid=${bv || default_bv}&SESSDATA=${sess_data}`)
@@ -88,8 +86,8 @@ const App: React.FC = () => {
     >
       <VideoPlayer
         style={{
-          width: '100%',
-          height: '100%',
+          width: '80%',
+          height: '80%',
           background: '#000',
         }}
         controls

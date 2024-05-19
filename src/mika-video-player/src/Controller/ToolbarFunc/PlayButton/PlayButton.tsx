@@ -1,12 +1,12 @@
-import React, { memo, useCallback, useContext, useEffect } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import PlayIcon from '../Icon/PlayIcon';
 import FuncButton from '../FuncButton/FuncButton';
+import { useStore } from 'mika-store';
 
 import './PlayButton.less';
-import { VideoPlayerContext } from '../../../VideoPlayerType';
 
 const PlayButton = memo(() => {
-  const videoElement = useContext(VideoPlayerContext)?.videoElement;
+  const [{ videoElement }] = useStore<any>('mika-video-extra-data');
   const [isPlaying, setIsPlaying] = React.useState(false);
 
   const onClick = useCallback(() => {

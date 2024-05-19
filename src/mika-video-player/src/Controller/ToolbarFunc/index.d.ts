@@ -7,3 +7,4 @@ export declare const ToolbarTimer: React.FC;
 export declare const FuncButton: React.FC;
 export declare const SpeedButton: React.FC;
 export declare const QualityButton: React.FC;
+export declare const SettingButton: React.FC;

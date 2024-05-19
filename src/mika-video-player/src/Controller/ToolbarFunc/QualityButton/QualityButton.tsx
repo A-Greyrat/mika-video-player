@@ -1,20 +1,21 @@
-import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 
 import './QualityButton.less';
 import { Dropdown } from '../../../Component';
-import { VideoPlayerContext, VideoSrc } from '../../../VideoPlayerType.ts';
+import { useStore } from 'mika-store';
 
 const QualityButton = memo(() => {
-  const { videoElement, props } = useContext(VideoPlayerContext)!;
+  const [{ videoElement, src }] = useStore<any>('mika-video-extra-data');
+
   const [quality, setQuality] = useState('清晰度');
   const [activeIndex, setActiveIndex] = useState(0);
   const [qualityList, setQualityList] = useState<string[]>([]);
-  const src = props.src as VideoSrc;
+
   useEffect(() => {
-    if (typeof props.src === 'string' || !src?.srcs || src?.srcs?.length === 0) return;
-    setQualityList(src?.srcs.map((item) => item.type) || []);
+    if (typeof src === 'string' || !src?.srcs || src?.srcs?.length === 0) return;
+    setQualityList(src?.srcs.map((item: { type: any }) => item.type) || []);
     setQuality(src?.srcs[src.default ?? 0].type);
-  }, [props.src, src]);
+  }, [src, src]);
 
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -35,7 +36,7 @@ const QualityButton = memo(() => {
     [src, videoElement],
   );
 
-  if (typeof props.src === 'string') {
+  if (typeof src === 'string') {
     return null;
   }
 
