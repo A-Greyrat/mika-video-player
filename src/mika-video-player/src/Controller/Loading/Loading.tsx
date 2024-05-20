@@ -2,9 +2,10 @@ import { memo, useEffect, useState } from 'react';
 
 import './Loading.less';
 import { useStore } from 'mika-store';
+import {VideoPlayerExtraData} from "../../VideoPlayerType.ts";
 
 const Loading = memo(() => {
-  const [{ videoElement }] = useStore<any>('mika-video-extra-data');
+  const [{ videoElement }] = useStore<VideoPlayerExtraData>('mika-video-extra-data');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -4,10 +4,11 @@ import { isMobile } from '../../Utils';
 import { useStore } from 'mika-store';
 
 import './ProgressBar.less';
+import {VideoPlayerExtraData} from "../../VideoPlayerType.ts";
 
 const ProgressBar = memo(
   forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivElement>) => {
-    const [{ videoElement }] = useStore<any>('mika-video-extra-data');
+    const [{ videoElement }] = useStore<VideoPlayerExtraData>('mika-video-extra-data');
     const barRef = useRef<HTMLDivElement>(null);
     const isSeeking = useRef(false);
 

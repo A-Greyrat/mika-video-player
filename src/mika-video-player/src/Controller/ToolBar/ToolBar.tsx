@@ -9,12 +9,13 @@ import {
   VolumeButton,
   SettingButton,
 } from '../ToolbarFunc';
-import { useStopPropagation } from '../Shortcut/Shortcut.ts';
+import { useStopPropagation } from '../Shortcut/Shortcut.tsx';
+import { useStore } from 'mika-store';
+import { VideoPlayerExtraData } from '../../VideoPlayerType.ts';
 
 import './ToolBar.less';
-import { useStore } from 'mika-store';
 
-const DefaultToolbarArea = {
+export const DefaultToolbarArea = {
   left: [PlayButton, ToolbarTimer],
   middle: [],
   right: [SettingButton, QualityButton, SpeedButton, VolumeButton, FullScreenButton],
@@ -22,7 +23,7 @@ const DefaultToolbarArea = {
 
 const ToolBar = memo(
   forwardRef((_props: NonNullable<unknown>, ref: React.Ref<HTMLDivElement>) => {
-    const [{ toolbar }] = useStore<any>('mika-video-extra-data');
+    const [{ toolbar }] = useStore<VideoPlayerExtraData>('mika-video-extra-data');
     const toolbarRef = React.useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => toolbarRef.current!);
 

@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { isMobile } from '../../Utils';
 import { useStore } from 'mika-store';
-import { showPanel } from '../../Hooks';
+import { VideoPlayerExtraData } from '../../VideoPlayerType.ts';
+import VolumeChangeInfo from './VolumeChangeInfo.tsx';
 
 export type ShortcutCallback = (
-  extraData?: any,
-  setExtraData?: React.Dispatch<React.SetStateAction<any>>,
+  extraData: VideoPlayerExtraData,
+  setExtraData: React.Dispatch<React.SetStateAction<VideoPlayerExtraData>>,
   e?: Event | React.PointerEvent | React.MouseEvent | React.KeyboardEvent | React.TouchEvent,
 ) => void;
 
@@ -29,67 +30,6 @@ export type Shortcut = {
 
 let showControllerTimer: number | undefined;
 let doubleClickTimer: number | undefined;
-
-let volumePanelElement: HTMLDivElement | null = null;
-let volumePanelTimer: number | undefined;
-
-let arrowRightTimer: number | undefined;
-let inForward: boolean = false;
-let originalPlaybackRate: number | undefined;
-let arrowRightPanelElement: HTMLDivElement | null = null;
-
-const showVolumeChangePanel = (containerElement: HTMLDivElement, videoElement: HTMLVideoElement) => {
-  if (volumePanelTimer) {
-    clearTimeout(volumePanelTimer);
-
-    volumePanelTimer = setTimeout(() => {
-      volumePanelElement?.remove();
-      volumePanelTimer = undefined;
-    }, 1500);
-
-    volumePanelElement!.textContent = '音量 ' + Math.round(videoElement.volume * 100).toString() + '%';
-    return;
-  }
-
-  volumePanelElement?.remove();
-  volumePanelElement = showPanel(
-    containerElement,
-    {
-      width: '120px',
-      height: '30px',
-      backgroundColor: 'rgba(0, 0, 0, 0.65)',
-      color: 'white',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: '5px',
-      lineHeight: '1',
-      fontSize: '1.2rem',
-      padding: '0.4rem',
-    },
-    (e) => {
-      e.textContent = '音量 ' + Math.round(videoElement.volume * 100).toString() + '%';
-    },
-  );
-
-  volumePanelTimer = setTimeout(() => {
-    volumePanelElement?.remove();
-    volumePanelTimer = undefined;
-  }, 1500);
-};
-
-const revertPlaybackRate = (videoElement: HTMLVideoElement) => {
-  if (videoElement) {
-    !inForward && (videoElement.currentTime += 5);
-    videoElement.playbackRate = originalPlaybackRate || 1;
-  }
-
-  arrowRightTimer && clearTimeout(arrowRightTimer);
-  arrowRightTimer = undefined;
-  inForward = false;
-  arrowRightPanelElement?.remove();
-  arrowRightPanelElement = null;
-};
 
 export const defaultShortcuts: Shortcut[] = [
   {
@@ -135,53 +75,8 @@ export const defaultShortcuts: Shortcut[] = [
     root: 'document',
     callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
-      const { videoElement, containerElement } = extraData;
-      if (inForward) {
-        clearTimeout(arrowRightTimer);
-        arrowRightTimer = setTimeout(() => {
-          revertPlaybackRate(videoElement);
-        }, 300);
-        return;
-      }
-
-      // TODO: Fix this, when keyup event is not triggered, it occurs a bug
-      arrowRightTimer = setTimeout(() => {
-        originalPlaybackRate = videoElement?.playbackRate;
-        if (videoElement) videoElement.playbackRate = 3;
-        arrowRightTimer = undefined;
-        inForward = true;
-        arrowRightPanelElement = showPanel(
-          containerElement,
-          {
-            width: '5.5rem',
-            height: '1.5rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.65)',
-            color: 'white',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: '5px',
-            fontSize: '1.2rem',
-            padding: '0.4rem',
-            top: '15%',
-            transform: 'translate(-50%, 0)',
-          },
-          (e) => {
-            e.textContent = '快进 3x';
-          },
-        );
-      }, 300);
-    },
-  },
-  {
-    key: 'ArrowRight',
-    type: 'keyup',
-    root: 'document',
-    callback: (extraData, _setExtraData, e) => {
-      e?.preventDefault();
       const { videoElement } = extraData;
-
-      revertPlaybackRate(videoElement);
+      if (videoElement) videoElement.currentTime += 5;
     },
   },
   {
@@ -197,13 +92,19 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'ArrowUp',
     type: 'keydown',
     root: 'video',
-    callback: (extraData, _setExtraData, e) => {
+    callback: (extraData, setExtraData, e) => {
       e?.preventDefault();
-      const { videoElement, containerElement } = extraData;
+      const { videoElement } = extraData;
+
+      if (!extraData.overlay?.has('volumeChange')) {
+        setExtraData((e) => {
+          e.overlay?.set('volumeChange', <VolumeChangeInfo videoElement={videoElement} />);
+          return { ...e };
+        });
+      }
 
       if (videoElement) {
         videoElement.volume = Math.min(1, videoElement.volume + 0.1);
-        showVolumeChangePanel(containerElement, videoElement);
       }
     },
   },
@@ -211,13 +112,20 @@ export const defaultShortcuts: Shortcut[] = [
     key: 'ArrowDown',
     type: 'keydown',
     root: 'video',
-    callback: (extraData, _setExtraData, e) => {
+    callback: (extraData, setExtraData, e) => {
       e?.preventDefault();
-      const { videoElement, containerElement } = extraData;
+      const { videoElement } = extraData;
+
+      if (!extraData.overlay?.has('volumeChange')) {
+        extraData.overlay?.set('volumeChange', <VolumeChangeInfo videoElement={videoElement} />);
+        setExtraData((e) => {
+          e.overlay?.set('volumeChange', <VolumeChangeInfo videoElement={videoElement} />);
+          return { ...e };
+        });
+      }
 
       if (videoElement) {
         videoElement.volume = Math.max(0, videoElement.volume - 0.1);
-        showVolumeChangePanel(containerElement, videoElement);
       }
     },
   },
@@ -270,7 +178,7 @@ export const defaultShortcuts: Shortcut[] = [
 ];
 
 export const useShortcut = (
-  shortcuts: Shortcut[],
+  shortcuts?: Shortcut[],
   videoElement?: HTMLVideoElement | null,
   containerElement?: HTMLDivElement | null,
   controllerElement?: HTMLDivElement | null,
@@ -279,14 +187,14 @@ export const useShortcut = (
     Map<string, (e: Event | React.PointerEvent | React.MouseEvent | React.KeyboardEvent | React.TouchEvent) => void>
   >(new Map());
 
-  const [extraData, setExtraData] = useStore<any>('mika-video-extra-data');
+  const [extraData, setExtraData] = useStore<VideoPlayerExtraData>('mika-video-extra-data');
 
   useEffect(() => {
     const shortcutMap = new Map<string, Map<string, Map<string | number, Shortcut>>>();
     const uninstallList: (() => void)[] = [];
     videoEventMapRef.current.clear();
 
-    shortcuts.forEach((shortcut) => {
+    shortcuts?.forEach((shortcut) => {
       if (!shortcutMap.has(shortcut.root || 'document')) shortcutMap.set(shortcut.root || 'document', new Map());
 
       const shortcutList = shortcutMap.get(shortcut.root || 'document')!;
@@ -357,55 +265,55 @@ export const useShortcut = (
     };
   }, [containerElement, controllerElement]);
 
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
+  const onPointerDown = (e: React.PointerEvent) => {
     const pointerdown = videoEventMapRef.current.get('pointerdown');
     pointerdown && pointerdown(e);
-  }, []);
+  };
 
-  const onPointerUp = useCallback((e: React.PointerEvent) => {
+  const onPointerUp = (e: React.PointerEvent) => {
     const pointerup = videoEventMapRef.current.get('pointerup');
     pointerup && pointerup(e);
-  }, []);
+  };
 
-  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const onKeyDown = (e: React.KeyboardEvent) => {
     const keydown = videoEventMapRef.current.get('keydown');
     keydown && keydown(e);
-  }, []);
+  };
 
-  const onKeyUp = useCallback((e: React.KeyboardEvent) => {
+  const onKeyUp = (e: React.KeyboardEvent) => {
     const keyup = videoEventMapRef.current.get('keyup');
     keyup && keyup(e);
-  }, []);
+  };
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
+  const onMouseDown = (e: React.MouseEvent) => {
     const mousedown = videoEventMapRef.current.get('mousedown');
     mousedown && mousedown(e);
-  }, []);
+  };
 
-  const onMouseUp = useCallback((e: React.MouseEvent) => {
+  const onMouseUp = (e: React.MouseEvent) => {
     const mouseup = videoEventMapRef.current.get('mouseup');
     mouseup && mouseup(e);
-  }, []);
+  };
 
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
+  const onTouchStart = (e: React.TouchEvent) => {
     const touchstart = videoEventMapRef.current.get('touchstart');
     touchstart && touchstart(e);
-  }, []);
+  };
 
-  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+  const onTouchEnd = (e: React.TouchEvent) => {
     const touchend = videoEventMapRef.current.get('touchend');
     touchend && touchend(e);
-  }, []);
+  };
 
-  const onTouchCancel = useCallback((e: React.TouchEvent) => {
+  const onTouchCancel = (e: React.TouchEvent) => {
     const touchcancel = videoEventMapRef.current.get('touchcancel');
     touchcancel && touchcancel(e);
-  }, []);
+  };
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
+  const onTouchMove = (e: React.TouchEvent) => {
     const touchmove = videoEventMapRef.current.get('touchmove');
     touchmove && touchmove(e);
-  }, []);
+  };
 
   return {
     onPointerDown,

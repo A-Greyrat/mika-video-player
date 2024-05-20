@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import './FuncButton.less';
-import { useStopPropagation } from '../../Shortcut/Shortcut.ts';
+import { useStopPropagation } from '../../Shortcut/Shortcut.tsx';
 
 const FuncButton = memo(
   (props: {

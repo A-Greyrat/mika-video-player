@@ -17,6 +17,8 @@ export class DanmakuScheduler {
 
   delayLock = false;
 
+  isDestroyed = false;
+
   private handleTimeUpdate = () => {
     if (this.video.paused || this.video.seeking) return;
     const { currentTime } = this.video;
@@ -73,6 +75,7 @@ export class DanmakuScheduler {
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
 
     danmaku.sort((a, b) => a.begin - b.begin);
+    this.isDestroyed = false;
   }
 
   public destroy() {
@@ -81,9 +84,16 @@ export class DanmakuScheduler {
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
 
     this.danmakuManager.destroy();
+    this.isDestroyed = true;
   }
 
   public addDanmaku(danmaku: DanmakuAttr[]) {
+    if (this.danmaku.length === 0) {
+      danmaku.sort((a, b) => a.begin - b.begin);
+      this.danmaku = danmaku;
+      return;
+    }
+
     const nowItem = this.danmaku[this.currentIndex];
     this.danmaku = this.danmaku.concat(danmaku);
     this.danmaku.sort((a, b) => a.begin - b.begin);

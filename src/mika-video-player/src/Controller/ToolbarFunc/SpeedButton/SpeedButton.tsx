@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Dropdown } from '../../../Component';
-import { useStopPropagation } from '../../Shortcut/Shortcut.ts';
+import { useStopPropagation } from '../../Shortcut/Shortcut.tsx';
 import { useStore } from 'mika-store';
 
 import './SpeedButton.less';

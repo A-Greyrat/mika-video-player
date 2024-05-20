@@ -2,14 +2,15 @@ import './App.css';
 import React, { useEffect } from 'react';
 
 import VideoPlayer, { DanmakuAttr, VideoSrc } from './mika-video-player/src';
+import TripleSpeedForward from "./mika-video-player/src/Plugin/TripleSpeedForward";
 
 let sess_data = '';
 const default_bv = 'BV1qm421s7MR';
-const getUrl = (bv: string) => `https://b.erisu.moe/api/playurl/dash?bvid=${bv}&SESSDATA=${sess_data}`;
+const getUrl = (bv: string) => `https://b.erisu.moe/api/playurl/flv?bvid=${bv}&SESSDATA=${sess_data}`;
 
 const App: React.FC = () => {
   const [danmakus, setDanmakus] = React.useState<DanmakuAttr[]>([]);
-  const [srcs, setSrcs] = React.useState<VideoSrc>();
+  const [srcs, setSrcs] = React.useState<VideoSrc | string>();
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -18,24 +19,47 @@ const App: React.FC = () => {
 
     const c = getUrl(bv || default_bv);
 
+    // fetch(c)
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     let { video } = data.data.dash;
+    //     video = video.filter((v: { codecs: string }) => v.codecs.includes('av01'));
+    //
+    //     const s: VideoSrc = {
+    //       srcs: [],
+    //       default: 0,
+    //     };
+    //
+    //     // id: 16, 32, 64, 80 (1080p, 720p, 480p, 360p)
+    //     const m: { [key: number]: string } = {
+    //       80: '1080P FHD',
+    //       64: '720P HD',
+    //       32: '480P SD',
+    //       16: '360P',
+    //     };
+    //
+    //     const _getBaseUrl = (baseUrl: string) => {
+    //       let proxy_url = 'https://fast.abdecd.xyz/proxy?pReferer=https://www.bilibili.com';
+    //       const host = baseUrl.split('/')[2];
+    //       proxy_url += `&pHost=${host}&pUrl=${encodeURIComponent(baseUrl)}`;
+    //       return proxy_url;
+    //     };
+    //
+    //     for (const v of video) {
+    //       s.srcs.push({
+    //         url: _getBaseUrl(v.baseUrl),
+    //         type: m[v.id],
+    //       });
+    //     }
+    //
+    //     setSrcs(s);
+    //   });
+
     fetch(c)
       .then((res) => res.json())
       .then((data) => {
-        let { video } = data.data.dash;
-        video = video.filter((v: { codecs: string }) => v.codecs.includes('av01'));
+        const src = data.data.durl[0].url;
 
-        const s: VideoSrc = {
-          srcs: [],
-          default: 0,
-        };
-
-        // id: 16, 32, 64, 80 (1080p, 720p, 480p, 360p)
-        const m: { [key: number]: string } = {
-          80: '1080P FHD',
-          64: '720P HD',
-          32: '480P SD',
-          16: '360P',
-        };
 
         const _getBaseUrl = (baseUrl: string) => {
           let proxy_url = 'https://fast.abdecd.xyz/proxy?pReferer=https://www.bilibili.com';
@@ -44,15 +68,9 @@ const App: React.FC = () => {
           return proxy_url;
         };
 
-        for (const v of video) {
-          s.srcs.push({
-            url: _getBaseUrl(v.baseUrl),
-            type: m[v.id],
-          });
-        }
-
-        setSrcs(s);
+        setSrcs(_getBaseUrl(src));
       });
+
 
     fetch(`https://b.erisu.moe/api/danmaku?bvid=${bv || default_bv}&SESSDATA=${sess_data}`)
       .then((res) => res.json())
@@ -86,13 +104,15 @@ const App: React.FC = () => {
     >
       <VideoPlayer
         style={{
-          width: '80%',
-          height: '80%',
+          width: '100%',
           background: '#000',
         }}
         controls
         loop
         danmaku={danmakus}
+        plugins={[
+          TripleSpeedForward
+        ]}
         src={srcs}
       ></VideoPlayer>
     </div>
