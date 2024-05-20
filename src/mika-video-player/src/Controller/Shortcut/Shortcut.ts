@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { isMobile } from '../../Utils';
 import { useStore } from 'mika-store';
+import { showPanel } from '../../Hooks';
 
 export type ShortcutCallback = (
   extraData?: any,
@@ -28,6 +29,67 @@ export type Shortcut = {
 
 let showControllerTimer: number | undefined;
 let doubleClickTimer: number | undefined;
+
+let volumePanelElement: HTMLDivElement | null = null;
+let volumePanelTimer: number | undefined;
+
+let arrowRightTimer: number | undefined;
+let inForward: boolean = false;
+let originalPlaybackRate: number | undefined;
+let arrowRightPanelElement: HTMLDivElement | null = null;
+
+const showVolumeChangePanel = (containerElement: HTMLDivElement, videoElement: HTMLVideoElement) => {
+  if (volumePanelTimer) {
+    clearTimeout(volumePanelTimer);
+
+    volumePanelTimer = setTimeout(() => {
+      volumePanelElement?.remove();
+      volumePanelTimer = undefined;
+    }, 1500);
+
+    volumePanelElement!.textContent = '音量 ' + Math.round(videoElement.volume * 100).toString() + '%';
+    return;
+  }
+
+  volumePanelElement?.remove();
+  volumePanelElement = showPanel(
+    containerElement,
+    {
+      width: '120px',
+      height: '30px',
+      backgroundColor: 'rgba(0, 0, 0, 0.65)',
+      color: 'white',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: '5px',
+      lineHeight: '1',
+      fontSize: '1.2rem',
+      padding: '0.4rem',
+    },
+    (e) => {
+      e.textContent = '音量 ' + Math.round(videoElement.volume * 100).toString() + '%';
+    },
+  );
+
+  volumePanelTimer = setTimeout(() => {
+    volumePanelElement?.remove();
+    volumePanelTimer = undefined;
+  }, 1500);
+};
+
+const revertPlaybackRate = (videoElement: HTMLVideoElement) => {
+  if (videoElement) {
+    !inForward && (videoElement.currentTime += 5);
+    videoElement.playbackRate = originalPlaybackRate || 1;
+  }
+
+  arrowRightTimer && clearTimeout(arrowRightTimer);
+  arrowRightTimer = undefined;
+  inForward = false;
+  arrowRightPanelElement?.remove();
+  arrowRightPanelElement = null;
+};
 
 export const defaultShortcuts: Shortcut[] = [
   {
@@ -73,8 +135,53 @@ export const defaultShortcuts: Shortcut[] = [
     root: 'document',
     callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
+      const { videoElement, containerElement } = extraData;
+      if (inForward) {
+        clearTimeout(arrowRightTimer);
+        arrowRightTimer = setTimeout(() => {
+          revertPlaybackRate(videoElement);
+        }, 300);
+        return;
+      }
+
+      // TODO: Fix this, when keyup event is not triggered, it occurs a bug
+      arrowRightTimer = setTimeout(() => {
+        originalPlaybackRate = videoElement?.playbackRate;
+        if (videoElement) videoElement.playbackRate = 3;
+        arrowRightTimer = undefined;
+        inForward = true;
+        arrowRightPanelElement = showPanel(
+          containerElement,
+          {
+            width: '5.5rem',
+            height: '1.5rem',
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            color: 'white',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '5px',
+            fontSize: '1.2rem',
+            padding: '0.4rem',
+            top: '15%',
+            transform: 'translate(-50%, 0)',
+          },
+          (e) => {
+            e.textContent = '快进 3x';
+          },
+        );
+      }, 300);
+    },
+  },
+  {
+    key: 'ArrowRight',
+    type: 'keyup',
+    root: 'document',
+    callback: (extraData, _setExtraData, e) => {
+      e?.preventDefault();
       const { videoElement } = extraData;
-      if (videoElement) videoElement.currentTime += 5;
+
+      revertPlaybackRate(videoElement);
     },
   },
   {
@@ -92,8 +199,12 @@ export const defaultShortcuts: Shortcut[] = [
     root: 'video',
     callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
-      const { videoElement } = extraData;
-      if (videoElement) videoElement.volume = Math.min(1, videoElement.volume + 0.1);
+      const { videoElement, containerElement } = extraData;
+
+      if (videoElement) {
+        videoElement.volume = Math.min(1, videoElement.volume + 0.1);
+        showVolumeChangePanel(containerElement, videoElement);
+      }
     },
   },
   {
@@ -102,8 +213,12 @@ export const defaultShortcuts: Shortcut[] = [
     root: 'video',
     callback: (extraData, _setExtraData, e) => {
       e?.preventDefault();
-      const { videoElement } = extraData;
-      if (videoElement) videoElement.volume = Math.max(0, videoElement.volume - 0.1);
+      const { videoElement, containerElement } = extraData;
+
+      if (videoElement) {
+        videoElement.volume = Math.max(0, videoElement.volume - 0.1);
+        showVolumeChangePanel(containerElement, videoElement);
+      }
     },
   },
   {

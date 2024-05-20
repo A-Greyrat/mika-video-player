@@ -39,6 +39,7 @@ const Controller = memo(
           onMouseMove={handleMouseMove()}
           onMouseLeave={hideController}
           onMouseEnter={showController}
+          tabIndex={0}
         >
           <ToolBar />
         </div>

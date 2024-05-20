@@ -76,19 +76,13 @@ const VideoPlayer = memo(
 
     return (
       <div
-        className='mika-video-player-wrapper'
-        tabIndex={0}
-        style={{ width: width || 'auto', height: height || 'auto', ...style }}
+        style={{ width: width || 'fit-content', height: height || 'fit-content', ...style }}
         ref={containerRef}
       >
         {/* 该Div用于处理快捷键 */}
         <div
+          className='mika-video-player-wrapper'
           {...handleShortcut}
-          style={{
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-          }}
         >
           <video ref={videoRef} {...rest}>
             {children}
