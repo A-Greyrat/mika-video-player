@@ -20,13 +20,13 @@ const revertPlaybackRate = (
   arrowRightTimer = undefined;
   inForward = false;
 
-  setExtraData((e) => ({
-    ...e,
-    extra: {
-      ...(e.extra || {}),
-      showForwardInfo: false,
-    },
-  }));
+  setExtraData((e) => {
+    if (e.overlay?.has('forwardInfo')) {
+      e.overlay?.delete('forwardInfo');
+    }
+
+    return { ...e };
+  });
 };
 
 const forwardShortcuts: Shortcut[] = [
@@ -38,13 +38,6 @@ const forwardShortcuts: Shortcut[] = [
       e?.preventDefault();
       const { videoElement, containerElement } = extraData;
       if (!videoElement || !containerElement) return;
-
-      if (!extraData.overlay?.has('forwardInfo')) {
-        setExtraData((e) => {
-          e.overlay?.set('forwardInfo', <ForwardInfo />);
-          return { ...e };
-        });
-      }
 
       if (inForward) {
         clearTimeout(arrowRightTimer);
@@ -59,13 +52,13 @@ const forwardShortcuts: Shortcut[] = [
         if (videoElement) videoElement.playbackRate = 3;
         arrowRightTimer = undefined;
         inForward = true;
-        setExtraData((e) => ({
-          ...e,
-          extra: {
-            ...(e.extra || {}),
-            showForwardInfo: true,
-          },
-        }));
+        setExtraData((e) => {
+          if (!e.overlay?.has('forwardInfo')) {
+            e.overlay?.set('forwardInfo', <ForwardInfo />);
+          }
+
+          return { ...e };
+        });
       }, 300);
     },
   },
@@ -82,12 +75,9 @@ const forwardShortcuts: Shortcut[] = [
   },
 ];
 
-let oldRightShortcuts: Shortcut[] = [];
-
 const TripleSpeedForward: VideoPlayerPlugin = {
   install(_extraData: VideoPlayerExtraData, setExtraData: React.Dispatch<React.SetStateAction<VideoPlayerExtraData>>) {
     setExtraData((e) => {
-      oldRightShortcuts.push(...(e.shortcut?.filter((s) => s.key === 'ArrowRight') || []));
       const newShortcuts = e.shortcut?.filter((s) => s.key !== 'ArrowRight') || [];
       newShortcuts.push(...forwardShortcuts);
 

@@ -6,3 +6,4 @@ export { default as FuncButton } from './FuncButton/FuncButton';
 export { default as SpeedButton } from './SpeedButton/SpeedButton';
 export { default as QualityButton } from './QualityButton/QualityButton';
 export { default as SettingButton } from './SettingButton/SettingButton';
+export { default as DanmakuInput } from './DanmakuInput/DanmakuInput';

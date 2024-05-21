@@ -2,10 +2,10 @@ import { memo, useEffect, useState } from 'react';
 
 import './Loading.less';
 import { useStore } from 'mika-store';
-import {VideoPlayerExtraData} from "../../VideoPlayerType.ts";
+import { VideoPlayerExtraData, VideoSrc } from '../../VideoPlayerType.ts';
 
 const Loading = memo(() => {
-  const [{ videoElement }] = useStore<VideoPlayerExtraData>('mika-video-extra-data');
+  const [{ videoElement, src }] = useStore<VideoPlayerExtraData>('mika-video-extra-data');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,7 +38,13 @@ const Loading = memo(() => {
     };
   }, [videoElement]);
 
-  if (!loading) return null;
+  if (
+    !loading ||
+    !src ||
+    !('srcs' in (src as VideoSrc) && (src as VideoSrc)?.srcs) ||
+    !('srcs' in (src as VideoSrc) && (src as VideoSrc)?.srcs?.length)
+  )
+    return null;
 
   return (
     <div className='mika-video-player-loading'>

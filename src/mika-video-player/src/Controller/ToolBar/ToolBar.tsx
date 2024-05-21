@@ -12,12 +12,13 @@ import {
 import { useStopPropagation } from '../Shortcut/Shortcut.tsx';
 import { useStore } from 'mika-store';
 import { VideoPlayerExtraData } from '../../VideoPlayerType.ts';
+import DanmakuInput from '../ToolbarFunc/DanmakuInput/DanmakuInput.tsx';
 
 import './ToolBar.less';
 
 export const DefaultToolbarArea = {
   left: [PlayButton, ToolbarTimer],
-  middle: [],
+  middle: [DanmakuInput],
   right: [SettingButton, QualityButton, SpeedButton, VolumeButton, FullScreenButton],
 };
 

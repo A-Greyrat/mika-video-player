@@ -27,6 +27,9 @@ const VideoPlayer = memo(
       autoPlayNext = 'none',
       autoPlayNextSrc,
       enableDanmaku = true,
+      danmakuOptions,
+      onSendDanmaku,
+      onChangeDanmakuOptions,
       videoRatio,
       extra,
       plugins = [],
@@ -39,20 +42,23 @@ const VideoPlayer = memo(
     const canPluginRegistered = useRef(false);
     useImperativeHandle(ref, () => videoRef.current!);
     const [extraData, setExtraData] = useStore<VideoPlayerExtraData>('mika-video-extra-data', {
-      danmaku: danmaku,
-      controls: controls,
-      enableDanmaku: enableDanmaku,
-      toolbar: toolbar,
-      children: children,
-      extra: extra,
-      shortcut: shortcut,
-      src: src,
+      danmaku,
+      controls,
+      enableDanmaku,
+      toolbar,
+      children,
+      extra,
+      shortcut,
+      src,
+      danmakuOptions,
+      onSendDanmaku,
+      onChangeDanmakuOptions,
       controllerElement: undefined,
       containerElement: undefined,
       videoElement: undefined,
-      autoPlayNext: autoPlayNext,
-      autoPlayNextSrc: autoPlayNextSrc,
-      videoRatio: videoRatio,
+      autoPlayNext,
+      autoPlayNextSrc,
+      videoRatio,
       overlay: new Map<string, React.ReactNode>(),
       danmakuScheduler: undefined,
     });
@@ -65,27 +71,8 @@ const VideoPlayer = memo(
     );
 
     const loadVideo = useCallback(() => {
-      let url;
-      if (typeof src === 'string') {
-        url = src;
-      } else if (src) {
-        url = src.srcs[src.default ?? 0]?.url;
-        if (typeof url === 'function') {
-          url = url();
-        }
-      }
-
-      if (url === undefined) {
-        return;
-      }
-
-      if (typeof url === 'string') {
-        if (loader && videoRef.current) {
-          loader(videoRef.current);
-        } else if (src) {
-          defaultLoader(videoRef.current!, url);
-        }
-      }
+      const loaderFunc = loader || defaultLoader;
+      src && loaderFunc(videoRef.current!, src);
     }, [loader, src, videoRef]);
 
     useEffect(() => {
@@ -97,27 +84,32 @@ const VideoPlayer = memo(
         canPluginRegistered.current = true;
         return {
           ...e,
-          danmaku: danmaku,
-          controls: controls,
-          enableDanmaku: enableDanmaku,
-          toolbar: toolbar,
-          children: children,
-          shortcut: shortcut,
-          extra: extra,
-          src: src,
-          autoPlayNext: autoPlayNext,
-          autoPlayNextSrc: autoPlayNextSrc,
-          videoRatio: videoRatio,
+          danmaku,
+          controls,
+          enableDanmaku,
+          danmakuOptions,
+          onChangeDanmakuOptions,
+          toolbar,
+          children,
+          shortcut,
+          extra,
+          src,
+          autoPlayNext,
+          autoPlayNextSrc,
+          videoRatio,
+          onSendDanmaku,
           controllerElement: controllerRef.current,
           containerElement: containerRef.current,
           videoElement: videoRef.current,
-          danmakuScheduler: undefined,
         };
       });
     }, [
       danmaku,
       controls,
       enableDanmaku,
+      danmakuOptions,
+      onChangeDanmakuOptions,
+      onSendDanmaku,
       toolbar,
       shortcut,
       children,
@@ -210,7 +202,7 @@ const VideoPlayer = memo(
           >
             {children}
           </video>
-          {(extraData?.enableDanmaku ?? enableDanmaku) && <Danmaku />}
+          <Danmaku />
           {(extraData?.controls ?? controls) && <Controller ref={controllerRef} />}
         </div>
 

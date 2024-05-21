@@ -2,7 +2,7 @@ import { Interval } from '../Alloc/DanmakuAlloc.ts';
 import { DanmakuAttr, DanmakuExtraData, IDanmakuRenderer } from './index.ts';
 
 export class ReverseDanmakuRenderer implements IDanmakuRenderer {
-  private getVelocity(width: number, speed = 1): number {
+  private getVelocity(width: number, speed: number): number {
     return (40 * Math.log10(width) + 100) * speed;
   }
 
@@ -31,10 +31,10 @@ export class ReverseDanmakuRenderer implements IDanmakuRenderer {
 
     const comparer = (i: Interval, danmaku: DanmakuAttr) => {
       const delta = i.start + i.duration - danmaku.begin;
-      const delayDistance = this.getVelocity(danmakuWidth) * delay;
+      const delayDistance = this.getVelocity(danmakuWidth, danmakuSpeed) * delay;
       return (
-        delta * this.getVelocity(i.width) + delayDistance <= containerWidth && // 前弹幕以及完全进入屏幕
-        delta * this.getVelocity(danmakuWidth) + delayDistance <= containerWidth
+        delta * this.getVelocity(i.width, danmakuSpeed) + delayDistance <= containerWidth && // 前弹幕以及完全进入屏幕
+        delta * this.getVelocity(danmakuWidth, danmakuSpeed) + delayDistance <= containerWidth
       ); // 在当前弹幕消失前，新弹幕不会追上前弹幕
     };
 

@@ -119,6 +119,8 @@ export class DanmakuAlloc {
     track.width = width;
   };
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   private debugCheck = () => {
     // 检查上一个轨道的右端点是否等于下一个轨道的左端点
     for (let i = 0; i < this.trackList.length; i++) {
@@ -216,7 +218,7 @@ export class DanmakuAlloc {
       // 如果开启多轨道列表模式，且当前轨道已满，则尝试下一个轨道列表
       const right = list.length > 0 ? list[list.length - 1].right : 0;
       if (right + height > this.containerHeight) {
-        if (this.enableMultiTrack) {
+        if (this.enableMultiTrack && this.containerHeight) {
           return _getAvailableTrack(danmaku, duration, trackListIndex + 1, comparer);
         }
         return -1;
@@ -233,7 +235,7 @@ export class DanmakuAlloc {
       return right;
     };
 
-    this.debugCheck();
+    // this.debugCheck();
     return _getAvailableTrack(danmaku, duration, 0, comparer || this.isFree.bind(this));
   }
 

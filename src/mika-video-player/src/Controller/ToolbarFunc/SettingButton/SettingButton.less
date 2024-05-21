@@ -16,9 +16,106 @@
   }
 }
 
-.mika-video-player-toolbar-function-setting-panel-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 10px;
+.mika-video-player-setting-panel-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  max-width: 800px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  z-index: 3000;
+  overflow: hidden;
+
+  > p {
+    color: white;
+    font-size: 1.2rem;
+    margin: 0;
+    padding: 10px;
+    border-bottom: 1px solid white;
+    font-weight: bold;
+  }
+
+  > .mika-video-player-setting-panel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid white;
+    flex: 1 1 100%;
+
+    > p {
+      color: white;
+      font-size: 1rem;
+      font-weight: 300;
+      margin: 0;
+    }
+
+    > .mika-video-player-setting-panel-item-value {
+      display: flex;
+      align-items: center;
+
+      > input {
+        margin-right: 10px;
+      }
+    }
+
+    > input[type='checkbox'] {
+      display: none;
+    }
+
+    > select {
+      background-color: transparent;
+      color: white;
+      border: 1px solid white;
+      border-radius: 4px;
+      padding: 5px;
+      font-size: 1rem;
+      width: 80px;
+
+      > option {
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+      }
+
+      > option:checked {
+        background-color: white;
+        color: black;
+      }
+
+      &:focus,
+      &:focus-visible {
+        outline: none;
+      }
+    }
+
+    > .mika-video-player-setting-panel-checkmark {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid white;
+      border-radius: 50%;
+      position: relative;
+
+      > .mika-video-player-setting-panel-checkmark-inner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        background-color: white;
+        border-radius: 50%;
+      }
+    }
+
+    > input[type='checkbox']:checked + .mika-video-player-setting-panel-checkmark .mika-video-player-setting-panel-checkmark-inner {
+      display: block;
+    }
+  }
 }

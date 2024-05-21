@@ -1,0 +1,58 @@
+@import '../../../Theme';
+
+.mika-video-player-danmaku-input {
+  --mika-video-player-danmaku-input-display: flex;
+
+  display: var(--mika-video-player-danmaku-input-display);
+  align-items: center;
+  height: 32px;
+  padding-left: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  margin: 0 10px;
+
+  transition: background-color 0.3s;
+  background-color: rgba(255, 255, 255, 0.25);
+  flex: 1 1 auto;
+
+  &:focus-within {
+    background-color: rgba(255, 255, 255, 0.35);
+  }
+
+  > input {
+    flex: 1 1 auto;
+    padding: 10px 0;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 14px;
+    color: #fff;
+
+    &::placeholder {
+      color: #ccc;
+    }
+  }
+
+  > button {
+    white-space: nowrap;
+    padding: 0 15px;
+    height: 100%;
+    line-height: 32px;
+    border: none;
+    outline: none;
+    background-color: var(--mika-video-player-emphasis-color);
+    color: #fff;
+    font-size: 14px;
+    border-radius: 0 10px 10px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: var(--mika-video-player-primary-color);
+    }
+
+    &:focus {
+      background-color: var(--mika-video-player-emphasis-color);
+    }
+  }
+}

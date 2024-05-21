@@ -87,6 +87,17 @@ export class DanmakuScheduler {
     this.isDestroyed = true;
   }
 
+  public addDanmakuAtNow(danmaku: DanmakuAttr[]) {
+    const { currentTime } = this.video;
+    const delay = 0.1;
+    danmaku.forEach((item) => {
+      item.begin = currentTime + delay;
+    });
+    this.addDanmaku(danmaku);
+
+    return currentTime + delay;
+  }
+
   public addDanmaku(danmaku: DanmakuAttr[]) {
     if (this.danmaku.length === 0) {
       danmaku.sort((a, b) => a.begin - b.begin);

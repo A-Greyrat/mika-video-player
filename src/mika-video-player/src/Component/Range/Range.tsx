@@ -107,7 +107,7 @@ const Range = memo(
               height: thumbSize,
               left: orient === 'horizontal' ? `calc(${(value / max) * 100}% - ${thumbSize / 2}px)` : '50%',
               bottom: orient === 'vertical' ? `calc(${(value / max) * 100}% - ${thumbSize / 2}px)` : undefined,
-
+              top: orient === 'horizontal' ? '50%' : undefined,
               transform: orient === 'horizontal' ? 'translateY(-50%)' : 'translateX(-50%)',
             } as React.CSSProperties
           }

@@ -7,7 +7,8 @@ import { VideoPlayerExtraData } from '../VideoPlayerType.ts';
 
 const Danmaku = memo(
   forwardRef((_props: NonNullable<unknown>, ref: Ref<HTMLDivElement>) => {
-    const [{ videoElement, danmaku }, setExtra] = useStore<VideoPlayerExtraData>('mika-video-extra-data');
+    const [{ videoElement, danmaku, enableDanmaku }, setExtra] =
+      useStore<VideoPlayerExtraData>('mika-video-extra-data');
 
     const containerRef = useRef<HTMLDivElement>(null);
     const danmakuScheduler = useRef<DanmakuScheduler | null>(null);
@@ -17,9 +18,9 @@ const Danmaku = memo(
       if (!videoElement || !containerRef.current) return;
       danmakuScheduler.current = new DanmakuScheduler(videoElement, containerRef.current, []);
 
-      const danmakuSchedulerInstance = danmakuScheduler.current;
       setExtra((e) => {
-        return { ...e, danmakuScheduler: danmakuSchedulerInstance };
+        e.danmakuScheduler = danmakuScheduler.current || undefined;
+        return { ...e };
       });
     }, [videoElement, containerRef.current]);
 
@@ -30,7 +31,15 @@ const Danmaku = memo(
       danmakuScheduler.current?.addDanmaku(danmaku);
     }, [danmaku]);
 
-    return <div className='mika-video-player-danmaku-container' ref={containerRef} />;
+    return (
+      <div
+        className='mika-video-player-danmaku-container'
+        style={{
+          display: enableDanmaku ? 'block' : 'none',
+        }}
+        ref={containerRef}
+      />
+    );
   }),
 );
 

@@ -34,6 +34,8 @@ export class DanmakuManager {
 
   private displayAreaRate: 0.25 | 0.5 | 0.75 | 1 = 0.5;
 
+  private enableMultiTrack = false;
+
   private fontSizeScale = 1;
 
   private fontSizeSyncWithWindow = false;
@@ -41,7 +43,7 @@ export class DanmakuManager {
   private danmakuSpeed = 1;
 
   private danmakuOption: DanmakuOption = {
-    opacity: '0.8',
+    opacity: '80%',
     fontFamily: 'Arial, Helvetica, sans-serif',
     fontWeight: 'bold',
     textShadow: '1px 0 1px black, 0 1px 1px black, 0 -1px 1px black, -1px 0 1px black',
@@ -69,6 +71,7 @@ export class DanmakuManager {
       this.alloc[mode] = new DanmakuAlloc(
         mode === 1 ? this.containerHeight * this.displayAreaRate : this.containerHeight,
       );
+      this.alloc[mode].EnableMultiTrack = this.enableMultiTrack;
     }
   }
 
@@ -164,8 +167,56 @@ export class DanmakuManager {
     });
   }
 
+  public getDanmakuOption() {
+    return this.danmakuOption;
+  }
+
+  public setFontSizeScale(scale: number) {
+    this.fontSizeScale = scale;
+  }
+
+  public getFontSizeScale() {
+    return this.fontSizeScale;
+  }
+
+  public setFontSizeSyncWithWindow(sync: boolean) {
+    this.fontSizeSyncWithWindow = sync;
+  }
+
+  public getFontSizeSyncWithWindow() {
+    return this.fontSizeSyncWithWindow;
+  }
+
+  public setDanmakuSpeed(speed: number) {
+    this.danmakuSpeed = speed;
+  }
+
+  public getDanmakuSpeed() {
+    return this.danmakuSpeed;
+  }
+
+  public setDisplayAreaRate(rate: 0.25 | 0.5 | 0.75 | 1) {
+    this.displayAreaRate = rate;
+    this.alloc[1].ContainerHeight = this.containerHeight * this.displayAreaRate;
+  }
+
+  public getDisplayAreaRate() {
+    return this.displayAreaRate;
+  }
+
   public getCurrentDanmakuCount() {
     return this.currentDanmaku.size;
+  }
+
+  public getEnableMultiTrack() {
+    return this.enableMultiTrack;
+  }
+
+  public setEnableMultiTrack(enable: boolean) {
+    this.enableMultiTrack = enable;
+    this.alloc.forEach((scheduler) => {
+      scheduler.EnableMultiTrack = enable;
+    });
   }
 
   private createDanmakuElement(danmaku: DanmakuAttr, delay: number) {
