@@ -9,8 +9,6 @@ export interface DanmakuOption {
   textShadow: string;
 }
 
-const { devicePixelRatio } = window;
-
 export class DanmakuManager {
   private container?: HTMLDivElement;
 
@@ -252,7 +250,7 @@ export class DanmakuManager {
     let { fontSizeScale } = this;
     if (this.fontSizeSyncWithWindow) {
       // 1080p 为基准，缩放倍率[0.75, 1.5]
-      fontSizeScale = Math.max(0.75, Math.min(1.5, (this.containerHeight / 1080) * devicePixelRatio));
+      fontSizeScale = Math.max(0.75, Math.min(1.5, (this.containerHeight / 1080) * window.devicePixelRatio));
     }
     return fontSize * fontSizeScale;
   }
