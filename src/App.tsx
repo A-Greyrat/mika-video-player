@@ -1,8 +1,7 @@
 import './App.css';
 import React, { useEffect } from 'react';
 
-import VideoPlayer, { DanmakuAttr, VideoSrc } from './mika-video-player/src';
-import TripleSpeedForward from './mika-video-player/src/Plugin/TripleSpeedForward';
+import VideoPlayer, { DanmakuAttr, VideoSrc, TripleSpeedForward } from './mika-video-player/src';
 
 let sess_data = '';
 const default_bv = 'BV1qm421s7MR';

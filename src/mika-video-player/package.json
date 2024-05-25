@@ -1,6 +1,6 @@
 {
   "name": "mika-video-player",
-  "version": "1.2.0",
+  "version": "1.2.4",
   "description": "high performance danmaku video player",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

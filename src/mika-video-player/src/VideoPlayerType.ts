@@ -49,6 +49,7 @@ export interface VideoPlayerProps extends Omit<React.VideoHTMLAttributes<HTMLVid
   // 弹幕配置变更时触发，可用于持久化配置
   onChangeDanmakuOptions?: (options: VideoPlayerProps['danmakuOptions']) => void;
 
+  // TODO: make it async
   // 发送弹幕时触发，返回false则不发送
   onSendDanmaku?: (danmaku: DanmakuAttr) => boolean;
 

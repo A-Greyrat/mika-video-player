@@ -28,6 +28,8 @@ export interface DanmakuAttr {
   // extra
   style?: Partial<CSSStyleDeclaration>;
   render?: (element: HTMLElement) => void;
+  // 无视弹幕分配器强制分配轨道
+  ignoreAllocCheck?: boolean;
 }
 
 export interface DanmakuExtraData {

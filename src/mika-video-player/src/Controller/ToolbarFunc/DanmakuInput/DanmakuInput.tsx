@@ -9,7 +9,7 @@ const DanmakuInput = memo(() => {
     useStore<VideoPlayerExtraData>('mika-video-extra-data');
   const containerRef = React.useRef<HTMLDivElement>(null);
   const resizeObserver = React.useRef<ResizeObserver | null>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [value, setValue] = React.useState('');
 
   useEffect(() => {
     if (containerRef.current && containerElement) {
@@ -29,21 +29,24 @@ const DanmakuInput = memo(() => {
   return (
     <div className='mika-video-player-danmaku-input' ref={containerRef}>
       <input
-        ref={inputRef}
+        value={value}
         type='text'
         placeholder='输入弹幕'
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(e.currentTarget.value);
+        }}
         onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
           if (e.key === 'Enter') {
-            e.preventDefault();
             const currentTime = videoElement?.currentTime || 0;
-            // 延迟0.1秒发送弹幕，防止弹幕被发送后Scheduler的指针超过当前时间
-            const delay: number = 0.1;
+            // 延迟0.5秒发送弹幕，防止弹幕被发送后Scheduler的指针超过当前时间
+            const delay: number = 0.5;
             const danmaku = {
               begin: currentTime + delay,
               mode: 1,
               size: 25,
               color: '#fff',
-              text: e.currentTarget.value,
+              text: value,
+              ignoreAllocCheck: true,
               style: {
                 border: '1px solid black',
               },
@@ -51,8 +54,9 @@ const DanmakuInput = memo(() => {
 
             if (!onSendDanmaku || onSendDanmaku(danmaku)) {
               danmakuScheduler?.addDanmaku([danmaku]);
-              e.currentTarget.value = '';
             }
+
+            setValue('');
           }
         }}
       />
@@ -63,8 +67,9 @@ const DanmakuInput = memo(() => {
             begin: currentTime,
             mode: 1,
             size: 25,
+            ignoreAllocCheck: true,
             color: '#fff',
-            text: inputRef.current?.value || '',
+            text: value,
             style: {
               border: '1px solid black',
             },
@@ -72,8 +77,9 @@ const DanmakuInput = memo(() => {
 
           if (!onSendDanmaku || onSendDanmaku(danmaku)) {
             danmakuScheduler?.addDanmaku([danmaku]);
-            inputRef.current!.value = '';
           }
+
+          setValue('');
         }}
       >
         发送

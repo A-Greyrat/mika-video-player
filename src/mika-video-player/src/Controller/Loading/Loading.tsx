@@ -38,13 +38,9 @@ const Loading = memo(() => {
     };
   }, [videoElement]);
 
-  if (
-    !loading ||
-    !src ||
-    !('srcs' in (src as VideoSrc) && (src as VideoSrc)?.srcs) ||
-    !('srcs' in (src as VideoSrc) && (src as VideoSrc)?.srcs?.length)
-  )
+  if (!loading || !src || !(src as VideoSrc).srcs?.[(src as VideoSrc)?.default ?? 0]?.url) {
     return null;
+  }
 
   return (
     <div className='mika-video-player-loading'>

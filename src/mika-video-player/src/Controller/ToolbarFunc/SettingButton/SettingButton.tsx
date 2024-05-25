@@ -63,7 +63,21 @@ const SettingPanel = memo(() => {
 
   return (
     <div className='mika-video-player-setting-panel-wrapper'>
-      <p>设置</p>
+      <div className='mika-video-player-setting-panel-title'>
+        <p>设置</p>
+        <div
+          className='mika-video-player-setting-panel-close'
+          onClick={() => {
+            setExtraData((e) => {
+              const overlay = e?.overlay;
+              overlay?.delete('setting');
+              return { ...e, overlay };
+            });
+          }}
+        >
+          x
+        </div>
+      </div>
       <div className='mika-video-player-setting-panel-item'>
         <p>弹幕开关</p>
         <input type='checkbox' checked={enableDanmaku} onChange={() => {}} />

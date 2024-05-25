@@ -1,20 +1,13 @@
 import { VideoSrc } from '../VideoPlayerType.ts';
 
 const Loader = (video: HTMLVideoElement, src: VideoSrc | string) => {
-  if (
-    !video ||
-    !src ||
-    video.src ||
-    !('srcs' in (src as VideoSrc) && (src as VideoSrc).srcs) ||
-    !('srcs' in (src as VideoSrc) && (src as VideoSrc).srcs.length)
-  )
-    return;
+  if (!video || video.src || !src) return;
 
   let url;
   if (typeof src === 'string') {
     url = src;
   } else {
-    url = src.srcs[src.default ?? 0]?.url;
+    url = src?.srcs?.[src.default ?? 0]?.url;
     if (typeof url === 'function') {
       url = url();
     }

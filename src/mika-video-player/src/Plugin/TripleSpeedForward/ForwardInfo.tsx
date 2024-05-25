@@ -3,20 +3,21 @@ import { memo } from 'react';
 const ForwardInfo = memo(() => (
   <div
     style={{
-      width: '5.5rem',
-      height: '1.5rem',
+      width: '80px',
+      height: '20px',
       backgroundColor: 'rgba(0, 0, 0, 0.65)',
       color: 'white',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: '5px',
-      fontSize: '1.2rem',
-      padding: '0.4rem',
+      fontSize: '17px',
+      padding: '6px',
       position: 'absolute',
-      top: '15%',
+      fontWeight: '300',
+      top: '0',
       left: '50%',
-      transform: 'translate(-50%, 0)',
+      transform: 'translate(-50%, 20px)',
     }}
   >
     快进 3x

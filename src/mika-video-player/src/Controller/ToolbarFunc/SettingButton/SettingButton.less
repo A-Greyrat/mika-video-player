@@ -24,20 +24,65 @@
   display: flex;
   flex-direction: column;
   width: 400px;
-  max-width: 800px;
+  max-width: 90%;
+  max-height: 90%;
   background-color: rgba(0, 0, 0, 0.8);
   border-radius: 0.5rem;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
   z-index: 3000;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 
-  > p {
-    color: white;
-    font-size: 1.2rem;
-    margin: 0;
-    padding: 10px;
+  // 滚动条样式
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+  }
+
+  > .mika-video-player-setting-panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
     border-bottom: 1px solid white;
-    font-weight: bold;
+    > p {
+      color: white;
+      font-size: 1.2rem;
+      margin: 0;
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    > .mika-video-player-setting-panel-close {
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-right: 10px;
+      user-select: none;
+    }
+
+    > .mika-video-player-setting-panel-close:hover {
+      color: #f0dafd;
+    }
+
+    > .mika-video-player-setting-panel-close:active {
+      color: #f0dafd;
+    }
+
+    > .mika-video-player-setting-panel-close:focus {
+      outline: none;
+    }
+
+    > .mika-video-player-setting-panel-close:focus-visible {
+      outline: none;
+    }
+
+    > .mika-video-player-setting-panel-close:active {
+      transform: scale(0.9);
+    }
   }
 
   > .mika-video-player-setting-panel-item {
@@ -114,7 +159,9 @@
       }
     }
 
-    > input[type='checkbox']:checked + .mika-video-player-setting-panel-checkmark .mika-video-player-setting-panel-checkmark-inner {
+    > input[type='checkbox']:checked
+      + .mika-video-player-setting-panel-checkmark
+      .mika-video-player-setting-panel-checkmark-inner {
       display: block;
     }
   }
